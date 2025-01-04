@@ -2,8 +2,6 @@ import { useState } from "react";
 import PenIcon from "../icons/pen";
 import { FiSearch } from "react-icons/fi";
 import { useRouter } from "next/router";
-import { FaPen } from "react-icons/fa";
-import { GoPencil } from "react-icons/go";
 
 export default function Search() {
   const [isFocused, setIsFocused] = useState(false);

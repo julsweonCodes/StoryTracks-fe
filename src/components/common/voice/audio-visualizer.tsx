@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { getAudioStream } from "./get-audio-stream";
 
-export default function AudioVisualizer() {
+interface Props {
+  isRecording: boolean;
+}
+
+export default function AudioVisualizer({ isRecording }: Props) {
   const [volumeLevel, setVolumeLevel] = useState(0);
 
   useEffect(() => {
+    if (!isRecording) return;
     let animationFrameId: number;
 
     const fetchAudioData = async () => {
@@ -12,6 +17,7 @@ export default function AudioVisualizer() {
 
       const updateVolume = () => {
         const volume = getVolumeLevel();
+        console.log("volume", volume);
         setVolumeLevel(volume);
         animationFrameId = requestAnimationFrame(updateVolume);
       };

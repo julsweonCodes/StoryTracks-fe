@@ -1,4 +1,3 @@
-import { useState } from "react";
 import MapIcon from "../icons/map";
 
 interface Props {

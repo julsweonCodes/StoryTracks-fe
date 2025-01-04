@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  GoogleMap,
-  Marker,
-  OverlayView,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import CustomMarker from "./custom-marker";
 
 const containerStyle = {

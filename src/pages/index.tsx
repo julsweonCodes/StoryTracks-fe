@@ -3,7 +3,7 @@ import Drawer from "@/components/common/drawer";
 import Header from "@/components/common/header";
 import Search from "@/components/common/search";
 import Map from "@/components/map";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);

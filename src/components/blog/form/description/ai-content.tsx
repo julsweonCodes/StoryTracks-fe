@@ -1,5 +1,4 @@
 import AiContentCard from "@/components/common/ai-content-card";
-import { useState } from "react";
 
 interface Props {
   data: { content: string }[];

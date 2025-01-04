@@ -1,8 +1,6 @@
 import { useFormContext } from "@/context/form-context";
 import { useEffect, useState } from "react";
-import exifr, { gps } from "exifr";
-import dayjs from "dayjs";
-import BlogHeader from "@/components/common/blog-header";
+import { gps } from "exifr";
 import { RiLightbulbFlashLine } from "react-icons/ri";
 import { IoClose } from "react-icons/io5";
 import UtilBar from "@/components/common/util-bar";

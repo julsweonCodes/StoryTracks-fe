@@ -24,14 +24,14 @@ export default function VoiceRecorder() {
   };
 
   return (
-    <div className="flex items-center rounded-lg bg-black p-4 text-white">
+    <div className="flex w-full items-center rounded-lg bg-black p-4 text-white">
       <button
         className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-600"
         onClick={isRecording ? stopRecording : startRecording}
       >
         {isRecording ? "X" : "▶️"}
       </button>
-      <AudioVisualizer />
+      <AudioVisualizer isRecording={isRecording} />
       <span className="ml-4">{time}s</span>
     </div>
   );
