@@ -1,6 +1,7 @@
 export const getAudioStream = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const AudioContext =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.AudioContext || (window as any).webkitAudioContext;
   const audioContext = new AudioContext();
   const analyser = audioContext.createAnalyser();

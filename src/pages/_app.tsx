@@ -1,5 +1,4 @@
 import Layout from "@/components/layout";
-import Map from "@/components/map";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 

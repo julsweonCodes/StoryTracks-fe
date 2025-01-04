@@ -1,9 +1,8 @@
 import UtilBar from "@/components/common/util-bar";
-import { useFormContext } from "@/context/form-context";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function Preview() {
-  const { setActiveComponentKey } = useFormContext();
   const [isDefaultLocation, setIsDefaultLocation] = useState<number>(0);
   const mockData = {
     title: "Notes from the Road: Everyday Travel Tales",
@@ -24,10 +23,11 @@ export default function Preview() {
           <div className="flex flex-col gap-3">
             {mockData.image.map((src, index) => (
               <div
+                key={index}
                 className={`relative ${index === isDefaultLocation ? "border-key-primary border-2" : ""}`}
                 onClick={() => setIsDefaultLocation(index)}
               >
-                <img
+                <Image
                   src={src}
                   alt="preview"
                   className="aspect-square w-full object-cover"

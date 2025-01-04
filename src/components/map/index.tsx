@@ -34,22 +34,23 @@ export default function Map() {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  // const [map, setMap] = useState<google.maps.Map | null>(null);
   const [center, setCenter] = useState(defaultCenter); // 중심 좌표
   const [userMarker, setUserMarker] =
     useState<google.maps.LatLngLiteral | null>(null); // 사용자 위치 마커
-  const [zoom, setZoom] = useState(15); // 줌 레벨
+  const [zoom] = useState(15); // 줌 레벨
 
   const onLoad = useCallback(function callback(map: google.maps.Map) {
+    void map;
     // This is just an example of getting and using the map instance!!! don't just blindly copy!
     // const bounds = new window.google.maps.LatLngBounds(center);
     // map.fitBounds(bounds);
-
-    setMap(map);
+    // setMap(map);
   }, []);
 
   const onUnmount = useCallback(function callback(map: google.maps.Map) {
-    setMap(null);
+    void map;
+    // setMap(null);
   }, []);
 
   //   const handleZoomIn = () => {

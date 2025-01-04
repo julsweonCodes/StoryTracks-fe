@@ -30,7 +30,7 @@ export default function AudioVisualizer({ isRecording }: Props) {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [isRecording]);
 
   return (
     <div className="flex items-center gap-2">

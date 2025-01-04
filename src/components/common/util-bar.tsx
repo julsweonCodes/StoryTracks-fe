@@ -9,11 +9,15 @@ export default function UtilBar() {
     <div className="fixed bottom-0 left-0 flex h-[48px] w-full items-center justify-between bg-[#F5F5F5] px-4">
       <div className="flex h-full flex-1 items-center gap-5">
         {[
-          <MagicIcon size={25} />,
-          <CameraIcon />,
-          <TextCircleIcon />,
-          <ParagraphSpacingIcon />,
-          <FiMoreHorizontal className="text-black-primary" size={22} />,
+          <MagicIcon key="magic" size={25} />,
+          <CameraIcon key="camera" />,
+          <TextCircleIcon key="text-circle" />,
+          <ParagraphSpacingIcon key="paragraph-spacing" />,
+          <FiMoreHorizontal
+            key="more-horizontal"
+            className="text-black-primary"
+            size={22}
+          />,
         ].map((icon, index) => (
           <div
             key={index}

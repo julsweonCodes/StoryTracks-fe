@@ -18,16 +18,16 @@ export default function Textarea({ value, setValue }: Props) {
     <div className="relative aspect-square overflow-hidden rounded-lg bg-[#262626]">
       {!value && !isFocused && (
         <div
-          className="text-black-tertiary absolute left-0 top-0 flex flex-col gap-2 p-4"
+          className="absolute left-0 top-0 flex flex-col gap-2 p-4 text-black-tertiary"
           onClick={handleFocus}
         >
           <p className="text-[15px] tracking-tight">
-            Tell us a little story about this image! We'll handle the rest to
-            generate the perfect blog content.
+            {`Tell us a little story about this image! We'll handle the rest to
+            generate the perfect blog content.`}
             <br />
             <br />
-            For example: 'A serene beach at sunset, with golden skies and waves
-            gently lapping at the shore.'
+            {`For example: 'A serene beach at sunset, with golden skies and waves
+            gently lapping at the shore.'`}
           </p>
         </div>
       )}

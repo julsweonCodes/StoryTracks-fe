@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { FiMoreVertical } from "react-icons/fi";
 
 export default function Detail() {
@@ -13,10 +14,10 @@ export default function Detail() {
   };
 
   return (
-    <div className="divide-black-tertiary flex flex-col divide-y overflow-y-auto p-4">
+    <div className="flex flex-col divide-y divide-black-tertiary overflow-y-auto p-4">
       <div className="flex flex-col gap-4 pb-4">
         <div>
-          <span className="text-black-tertiary text-[13px] tracking-tight">
+          <span className="text-[13px] tracking-tight text-black-tertiary">
             Travel
           </span>
         </div>
@@ -26,7 +27,7 @@ export default function Detail() {
             <span className="text-[13px] tracking-tight text-[#E6E6E6]">
               John Doe
             </span>
-            <span className="text-black-tertiary text-[12px] tracking-tight">
+            <span className="text-[12px] tracking-tight text-black-tertiary">
               2024.12.28. 13:08
             </span>
           </div>
@@ -38,7 +39,8 @@ export default function Detail() {
       <div className="flex flex-col gap-5 pt-4">
         <div className="flex flex-col gap-3">
           {mockData.image.map((src, index) => (
-            <img
+            <Image
+              key={index}
               src={src}
               alt="preview"
               className="aspect-square w-full object-cover"

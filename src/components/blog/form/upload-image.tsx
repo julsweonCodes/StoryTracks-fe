@@ -1,24 +1,23 @@
 import { useFormContext } from "@/context/form-context";
-import { useEffect, useState } from "react";
-import { gps } from "exifr";
 import { RiLightbulbFlashLine } from "react-icons/ri";
 import { IoClose } from "react-icons/io5";
 import UtilBar from "@/components/common/util-bar";
 import MagicIcon from "@/components/icons/magic";
 
-interface Image {
-  name: string;
-  url: string;
-  isValid: boolean;
-  gpsLatitude: typeof gps;
-  createDate: string;
-}
+// interface Image {
+//   name: string;
+//   url: string;
+//   isValid: boolean;
+//   gpsLatitude: typeof gps;
+//   createDate: string;
+// }
 
 export default function UploadImage() {
   const { setActiveComponentKey, setStatusInfo } = useFormContext();
-  const [images, setImages] = useState<Image[]>([]);
+  // const [images, setImages] = useState<Image[]>([]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    void e;
     // setLoadingText({
     //   title: "Verifying Images",
     //   description: "Checking if the images contain eligible metadata.",
@@ -88,10 +87,6 @@ export default function UploadImage() {
       setActiveComponentKey("description");
     }, 5000);
   };
-
-  useEffect(() => {
-    console.log("images: ", images);
-  }, [images]);
 
   return (
     <>
