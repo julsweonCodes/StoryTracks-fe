@@ -1,10 +1,14 @@
 import { useState } from "react";
 import PenIcon from "../icons/pen";
 import { FiSearch } from "react-icons/fi";
+import { useRouter } from "next/router";
+import { FaPen } from "react-icons/fa";
+import { GoPencil } from "react-icons/go";
 
 export default function Search() {
   const [isFocused, setIsFocused] = useState(false);
   const [value, setValue] = useState("");
+  const router = useRouter();
 
   return (
     <div className="bg-black-primary z-20 flex h-[68px] items-center justify-between gap-2 px-[14px] py-[10px]">
@@ -24,7 +28,10 @@ export default function Search() {
           value={value}
         />
       </div>
-      <button className="bg-black-secondary flex aspect-square w-[44px] items-center justify-center rounded-lg text-white">
+      <button
+        className="bg-key-primary flex aspect-square w-[44px] items-center justify-center rounded-lg text-white"
+        onClick={() => router.push("/blog/new")}
+      >
         <PenIcon />
       </button>
     </div>

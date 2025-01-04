@@ -1,4 +1,4 @@
-import Form from "@/components/blog/form/upload-image";
+import Form from "@/components/blog/form";
 import { FormProvider } from "@/context/form-context";
 
 export default function New() {

@@ -1,10 +1,22 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useState,
+} from "react";
 
 export type FormComponentKey = "upload-image" | "description" | "preview";
 
 interface Image {
   id: string;
   url: string;
+}
+
+export interface StatusInfo {
+  type?: "loading" | "success";
+  title?: string;
+  description?: string;
 }
 
 interface FormContextType {
@@ -15,8 +27,8 @@ interface FormContextType {
   updateDescription: (id: string, description: string) => void;
   activeComponentKey: FormComponentKey;
   setActiveComponentKey: (key: FormComponentKey) => void;
-  isLoading: boolean;
-  setIsLoading: (isLoading: boolean) => void;
+  statusInfo: StatusInfo;
+  setStatusInfo: Dispatch<SetStateAction<StatusInfo>>;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -28,7 +40,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const [activeComponentKey, setActiveComponentKey] =
     useState<FormComponentKey>("upload-image");
-  const [isLoading, setIsLoading] = useState(false);
+  const [statusInfo, setStatusInfo] = useState<StatusInfo>({ type: undefined });
 
   const addImage = (image: Image) => {
     setImages((prev) => [...prev, image]);
@@ -57,8 +69,8 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         updateDescription,
         activeComponentKey,
         setActiveComponentKey,
-        isLoading,
-        setIsLoading,
+        statusInfo,
+        setStatusInfo,
       }}
     >
       {children}
