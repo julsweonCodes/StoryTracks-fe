@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 
-const TOTAL_BARS = 29; // 표시할 총 막대 수
-const HISTORY_SIZE = 29; // 저장할 데이터 히스토리 크기
-const UPDATE_INTERVAL = 50; // 업데이트 간격 (밀리초)
+const TOTAL_BARS = 29;
+const HISTORY_SIZE = 29;
+const UPDATE_INTERVAL = 50;
 
 interface Props {
   isRecording: boolean;
@@ -69,6 +69,7 @@ const AudioVisualizer = ({ isRecording: recordingAction, onClose }: Props) => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const AudioContext =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.AudioContext || (window as any).webkitAudioContext;
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
@@ -128,7 +129,7 @@ const AudioVisualizer = ({ isRecording: recordingAction, onClose }: Props) => {
       setIsRecording(false);
       setVisualData(new Array(TOTAL_BARS).fill(0));
       dataHistoryRef.current = [];
-      onClose && onClose();
+      if (onClose) onClose();
     }
   };
 
