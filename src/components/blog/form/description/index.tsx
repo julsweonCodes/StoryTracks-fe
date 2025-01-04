@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Thumbnail from "@/components/common/thumbnail";
 import Textarea from "@/components/common/textarea";
 import Loading from "@/components/common/loading";
@@ -13,6 +13,7 @@ import "swiper/css";
 import "swiper/css/free-mode";
 
 import { FreeMode } from "swiper/modules";
+import VoiceRecorder from "@/components/common/voice/voice-recorder";
 
 export default function DescriptionForm() {
   const {
@@ -22,8 +23,10 @@ export default function DescriptionForm() {
     setAiContent,
     aiContent,
   } = useFormContext();
+  const recorderRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
 
   const mockData = [
     {
@@ -39,6 +42,15 @@ export default function DescriptionForm() {
         "Electric sheep are rare, real animals that people own as status symbols. Owning one is seen as a sign of empathy and a connection to the natural world. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     },
   ];
+
+  const scrollToRecorder = () => {
+    if (recorderRef.current) {
+      recorderRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  };
 
   const handleSelect = (index: number) => {
     if (selected === index) {
@@ -60,6 +72,12 @@ export default function DescriptionForm() {
   const handleSubmit = () => {
     setActiveComponentKey("preview");
   };
+
+  useEffect(() => {
+    if (isRecording) {
+      scrollToRecorder();
+    }
+  }, [isRecording]);
 
   const isAiContent = aiContent.length > 0;
 
@@ -101,10 +119,19 @@ export default function DescriptionForm() {
         ) : (
           <div className="relative flex flex-col gap-2 px-4">
             <Textarea value={description} setValue={updateDescription} />
-            <div className="flex justify-end gap-1">
-              <MicrophoneIcon />
-              <span className="text-[13px]">Speech to Text</span>
-            </div>
+            {isRecording ? (
+              <div ref={recorderRef}>
+                <VoiceRecorder onClose={() => setIsRecording(false)} />
+              </div>
+            ) : (
+              <div
+                className="flex justify-end gap-1"
+                onClick={() => setIsRecording(true)}
+              >
+                <MicrophoneIcon />
+                <span className="text-[13px]">Speech to Text</span>
+              </div>
+            )}
           </div>
         )}
       </div>

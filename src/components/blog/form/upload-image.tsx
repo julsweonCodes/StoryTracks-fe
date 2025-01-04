@@ -93,12 +93,12 @@ export default function UploadImage() {
       <div className="relative mb-[48px] flex h-full flex-col gap-5 p-5">
         <input
           type="text"
-          className="bg-black-primary text-white-primary h-[36px] w-full border-b border-[#7A7A7A] text-[24px] placeholder:text-[24px] placeholder:text-[#7A7A7A]"
+          className="h-[36px] w-full border-b border-[#7A7A7A] bg-black-primary text-[24px] text-white-primary placeholder:text-[24px] placeholder:text-[#7A7A7A]"
           placeholder="Title"
         />
         <div className="flex w-full flex-col gap-3 rounded-lg bg-[#262626] p-3">
           <div className="flex items-start justify-between">
-            <div className="bg-black-secondary flex h-[40px] w-[40px] items-center justify-center rounded-lg">
+            <div className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-black-secondary">
               <RiLightbulbFlashLine className="text-key-primary" size={20} />
             </div>
             <button>
@@ -107,15 +107,15 @@ export default function UploadImage() {
           </div>
           <div>
             <h4 className="text-[15px] font-medium">Try our new AI feature!</h4>
-            <p className="text-black-tertiary text-[12px] tracking-tight">
+            <p className="text-[12px] tracking-tight text-black-tertiary">
               Select a photo to upload with a brief description. The new AI
               feature makes blog posting easier and more convenient!
             </p>
           </div>
-          <div className="bg-key-primary flex h-[48px] w-full items-center justify-center rounded-lg text-[13px]">
+          <div className="flex h-[48px] w-full items-center justify-center rounded-lg bg-key-primary text-[13px]">
             <label
               htmlFor="file-upload"
-              className="text-black-primary flex items-center justify-center gap-2"
+              className="flex items-center justify-center gap-2 text-black-primary"
             >
               <MagicIcon />
               Generate Content with AI

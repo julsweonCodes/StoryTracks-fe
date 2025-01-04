@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 import AudioVisualizer from "./audio-visualizer";
+import { IoClose } from "react-icons/io5";
+import { IoMdCheckmark } from "react-icons/io";
 
-export default function VoiceRecorder() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [time, setTime] = useState(0);
+interface Props {
+  onClose?: () => void;
+}
+
+export default function VoiceRecorder({ onClose }: Props) {
+  const [isRecording, setIsRecording] = useState(true);
+  const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
     if (isRecording) {
-      interval = setInterval(() => setTime((prev) => prev + 1), 1000);
+      interval = setInterval(() => setSeconds((prev) => prev + 1), 1000);
     }
 
     return () => clearInterval(interval);
@@ -23,16 +29,31 @@ export default function VoiceRecorder() {
     setIsRecording(false);
   };
 
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  const formatTime = (time: number, isMinutes: boolean = false) => {
+    if (isMinutes) return time.toString();
+    return time.toString().padStart(2, "0");
+  };
+
   return (
-    <div className="flex w-full items-center rounded-lg bg-black p-4 text-white">
+    <div className="text-white flex h-[52px] w-full items-center rounded-lg bg-[#262626] p-4">
       <button
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-600"
-        onClick={isRecording ? stopRecording : startRecording}
+        onClick={stopRecording}
+        className="mr-4 h-[32px] w-[32px] rounded-full bg-[#444444] p-2 transition-colors"
       >
-        {isRecording ? "X" : "▶️"}
+        <IoClose />
       </button>
-      <AudioVisualizer isRecording={isRecording} />
-      <span className="ml-4">{time}s</span>
+      <AudioVisualizer isRecording={isRecording} onClose={onClose} />
+      <span className="ml-4 text-[13px] tracking-tight">
+        {formatTime(minutes, true)}:{formatTime(remainingSeconds)}
+      </span>
+      <div
+        className="ml-4 flex h-[32px] w-[32px] items-center justify-center rounded-full bg-key-primary text-black-primary"
+        onClick={startRecording}
+      >
+        <IoMdCheckmark size={15} />
+      </div>
     </div>
   );
 }
