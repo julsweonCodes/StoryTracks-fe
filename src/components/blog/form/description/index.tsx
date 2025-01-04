@@ -1,18 +1,18 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-
-import "swiper/css";
-import "swiper/css/free-mode";
-
-import { FreeMode } from "swiper/modules";
-import { useRef, useState } from "react";
-import Microphone from "@/components/icons/microphone";
-import Magic from "@/components/icons/magic";
+import { useState } from "react";
 import Thumbnail from "@/components/common/thumbnail";
 import Textarea from "@/components/common/textarea";
 import Loading from "@/components/common/loading";
 import AiContent from "./ai-content";
 import { FaCheck } from "react-icons/fa";
 import { useFormContext } from "@/context/form-context";
+import MicrophoneIcon from "@/components/icons/microphone";
+import MagicIcon from "@/components/icons/magic";
+
+import "swiper/css";
+import "swiper/css/free-mode";
+
+import { FreeMode } from "swiper/modules";
 
 export default function DescriptionForm() {
   const { setActiveComponentKey } = useFormContext();
@@ -90,7 +90,7 @@ export default function DescriptionForm() {
           <div className="relative flex flex-col gap-2 px-4">
             <Textarea value={value} setValue={setValue} />
             <div className="flex justify-end gap-1">
-              <Microphone />
+              <MicrophoneIcon />
               <span className="text-[13px]">Speech to Text</span>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function DescriptionForm() {
                 </div>
               ) : (
                 <>
-                  <Magic color="#ffffff" />
+                  <MagicIcon color="#ffffff" />
                   Regenerate Content
                 </>
               )}
@@ -135,7 +135,7 @@ export default function DescriptionForm() {
               </div>
             ) : (
               <>
-                <Magic />
+                <MagicIcon />
                 Generate Content with AI
               </>
             )}

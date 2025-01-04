@@ -1,7 +1,10 @@
+import UtilBar from "@/components/common/util-bar";
 import { useFormContext } from "@/context/form-context";
+import { useState } from "react";
 
 export default function Preview() {
   const { setActiveComponentKey } = useFormContext();
+  const [isDefaultLocation, setIsDefaultLocation] = useState<number>(0);
   const mockData = {
     title: "Notes from the Road: Everyday Travel Tales",
     description:
@@ -14,24 +17,37 @@ export default function Preview() {
   };
 
   return (
-    <div className="divide-black-secondary flex h-full w-full flex-col gap-5 divide-y overflow-y-auto p-5">
-      <h1 className="text-[24px]">{mockData.title}</h1>
-      <div className="flex flex-col gap-5 pt-5">
-        <div className="flex flex-col gap-3">
-          {mockData.image.map((src, index) => (
-            <img
-              src={src}
-              alt="preview"
-              className="aspect-square w-full object-cover"
-            />
-          ))}
-        </div>
-        <div>
-          <p className="text-[16px] leading-6 tracking-tight">
-            {mockData.description}
-          </p>
+    <>
+      <div className="divide-black-secondary relative mb-[48px] flex h-full w-full flex-col gap-5 divide-y overflow-y-auto p-5">
+        <h1 className="text-[24px]">{mockData.title}</h1>
+        <div className="flex flex-col gap-5 pt-5">
+          <div className="flex flex-col gap-3">
+            {mockData.image.map((src, index) => (
+              <div
+                className={`relative ${index === isDefaultLocation ? "border-key-primary border-2" : ""}`}
+                onClick={() => setIsDefaultLocation(index)}
+              >
+                <img
+                  src={src}
+                  alt="preview"
+                  className="aspect-square w-full object-cover"
+                />
+                {index === isDefaultLocation && (
+                  <div className="bg-key-primary text-black-primary absolute left-2 top-2 rounded-md px-2 py-1 text-[12px] tracking-tight text-white">
+                    Set as Default Location
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div>
+            <p className="text-[16px] leading-6 tracking-tight">
+              {mockData.description}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+      <UtilBar />
+    </>
   );
 }
