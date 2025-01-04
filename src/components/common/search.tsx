@@ -7,7 +7,7 @@ export default function Search() {
   const [value, setValue] = useState("");
 
   return (
-    <div className="bg-black-primary flex h-[68px] items-center justify-between gap-2 px-[14px] py-[10px]">
+    <div className="bg-black-primary z-20 flex h-[68px] items-center justify-between gap-2 px-[14px] py-[10px]">
       <div className="relative h-[44px] flex-1">
         {!value && !isFocused && (
           <div className="text-black-tertiary pointer-events-none absolute left-5 top-1/2 flex -translate-y-1/2 items-center gap-3">

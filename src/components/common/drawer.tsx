@@ -3,11 +3,11 @@ import { createPortal } from "react-dom";
 
 interface Props {
   isOpen: boolean;
-  onClose: () => void;
+  button?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export default function Drawer({ isOpen, onClose, children }: Props) {
+export default function Drawer({ isOpen, button, children }: Props) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -16,35 +16,15 @@ export default function Drawer({ isOpen, onClose, children }: Props) {
 
   if (!isMounted) return null;
 
-  return createPortal(
+  return (
     <div
-      className={`fixed inset-0 z-50 transition-all duration-300 ${
-        isOpen
-          ? "pointer-events-auto opacity-100"
-          : "pointer-events-none opacity-0"
-      }`}
+      className="bg-black-primary absolute bottom-0 h-full w-full rounded-t-3xl transition-transform"
+      style={{
+        transform: `translateY(${isOpen ? "0" : "calc(100% - 63px)"})`,
+      }}
     >
-      <div
-        className={`absolute inset-0 bg-black bg-opacity-50 transition-opacity ${
-          isOpen ? "opacity-50" : "opacity-0"
-        }`}
-        onClick={onClose}
-      ></div>
-
-      <div
-        className={`bg-white-primary absolute bottom-0 left-0 max-h-[80%] w-full bg-white shadow-lg transition-transform ${
-          isOpen ? "translate-y-0" : "translate-y-full"
-        }`}
-      >
-        <button
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-800"
-          onClick={onClose}
-        >
-          Close
-        </button>
-        <div className="p-4">{children}</div>
-      </div>
-    </div>,
-    document.body,
+      {button}
+      {children}
+    </div>
   );
 }
