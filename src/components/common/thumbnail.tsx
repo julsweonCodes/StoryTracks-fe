@@ -6,7 +6,7 @@ interface Props {
 
 export default function Thumbnail({ src }: Props) {
   return (
-    <div className="aspect-square h-full overflow-hidden rounded-lg bg-yellow-300">
+    <div className="aspect-square h-full overflow-hidden rounded-lg">
       <Image
         src={src}
         alt="thumbnail"
