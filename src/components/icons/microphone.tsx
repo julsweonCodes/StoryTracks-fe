@@ -2,7 +2,7 @@ interface Props {
   size?: string | number;
 }
 
-export default function Microphone({ size = 20 }: Props) {
+export default function MicrophoneIcon({ size = 20 }: Props) {
   return (
     <svg
       width={size}
