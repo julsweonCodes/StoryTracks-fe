@@ -50,7 +50,7 @@ export default function VoiceRecorder({ onClose }: Props) {
       </span>
       <div
         className="ml-4 flex h-[32px] w-[32px] items-center justify-center rounded-full bg-key-primary text-black-primary"
-        onClick={startRecording}
+        onClick={stopRecording}
       >
         <IoMdCheckmark size={15} />
       </div>

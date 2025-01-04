@@ -1,6 +1,8 @@
 import Layout from "@/components/layout";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 if (
   process.env.NODE_ENV === "development" &&
@@ -10,9 +12,13 @@ if (
 }
 
 export default function App({ Component, pageProps }: AppProps) {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
+    <QueryClientProvider client={queryClient}>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </QueryClientProvider>
   );
 }
