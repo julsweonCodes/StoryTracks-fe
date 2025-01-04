@@ -78,9 +78,15 @@ export default function DescriptionForm() {
               modules={[FreeMode]}
               style={{ width: "100%", height: "100%" }}
             >
-              {Array.from({ length: 5 }).map((_, index) => (
+              {[
+                "/image1.jpeg",
+                "/image2.jpeg",
+                "/image3.jpeg",
+                "/image1.jpeg",
+                "/image2.jpeg",
+              ].map((src, index) => (
                 <SwiperSlide key={index} className="aspect-square h-full">
-                  <Thumbnail />
+                  <Thumbnail src={src} />
                 </SwiperSlide>
               ))}
             </Swiper>
