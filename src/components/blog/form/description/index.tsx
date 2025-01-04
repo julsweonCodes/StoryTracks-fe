@@ -13,11 +13,18 @@ import "swiper/css";
 import "swiper/css/free-mode";
 
 import { FreeMode } from "swiper/modules";
+import VoiceRecorder from "@/components/common/voice/voice-recorder";
+import { useRouter } from "next/router";
 
 export default function DescriptionForm() {
-  const { setActiveComponentKey } = useFormContext();
-  const [value, setValue] = useState("");
-  const [aiDataMock, setAiDataMock] = useState<{} | undefined>(undefined);
+  const {
+    setActiveComponentKey,
+    description,
+    updateDescription,
+    setAiContent,
+    aiContent,
+  } = useFormContext();
+  // const [aiDataMock, setAiDataMock] = useState<{} | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -48,7 +55,7 @@ export default function DescriptionForm() {
     setIsLoading(true);
     setSelected(null);
     setTimeout(() => {
-      setAiDataMock(mockData);
+      setAiContent(mockData);
       setIsLoading(false);
     }, 2000);
   };
@@ -80,15 +87,15 @@ export default function DescriptionForm() {
             </Swiper>
           </div>
         </div>
-        {aiDataMock ? (
+        {aiContent.length > 0 ? (
           <AiContent
-            data={aiDataMock as any[]}
+            data={aiContent}
             selected={selected}
             onSelect={handleSelect}
           />
         ) : (
           <div className="relative flex flex-col gap-2 px-4">
-            <Textarea value={value} setValue={setValue} />
+            <Textarea value={description} setValue={updateDescription} />
             <div className="flex justify-end gap-1">
               <MicrophoneIcon />
               <span className="text-[13px]">Speech to Text</span>
@@ -97,7 +104,7 @@ export default function DescriptionForm() {
         )}
       </div>
       <div className="bg-black-primary flex w-full p-4">
-        {aiDataMock ? (
+        {aiContent.length > 0 ? (
           <div className="flex w-full flex-col gap-2">
             <button
               className="text-white-primary flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626]"
@@ -125,7 +132,7 @@ export default function DescriptionForm() {
           </div>
         ) : (
           <button
-            className={`text-black-secondary flex h-[48px] w-full items-center justify-center gap-1 rounded-lg ${value.length > 0 && !isLoading ? "bg-key-primary" : "bg-[#5B578A]"}`}
+            className={`text-black-secondary flex h-[48px] w-full items-center justify-center gap-1 rounded-lg ${description.length > 0 && !isLoading ? "bg-key-primary" : "bg-[#5B578A]"}`}
             disabled={isLoading}
             onClick={handleAiSubmit}
           >

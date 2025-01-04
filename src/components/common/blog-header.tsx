@@ -4,8 +4,12 @@ import { IoIosArrowDown } from "react-icons/io";
 import { RxKeyboard } from "react-icons/rx";
 
 export default function BlogHeader() {
-  const { activeComponentKey } = useFormContext();
+  const { activeComponentKey, setActiveComponentKey } = useFormContext();
   const router = useRouter();
+
+  const handleCancel = () => {
+    setActiveComponentKey("description");
+  };
 
   const handlePost = () => {
     router.push("/blog/1");
@@ -14,7 +18,9 @@ export default function BlogHeader() {
   return (
     <div className="bg-black-primary text-white-primary flex h-[36px] items-center justify-between border-b border-[#7A7A7A] p-5">
       {activeComponentKey === "preview" ? (
-        <div className="text-[14px] tracking-tight">Cancel</div>
+        <div className="text-[14px] tracking-tight" onClick={handleCancel}>
+          Cancel
+        </div>
       ) : (
         <RxKeyboard />
       )}

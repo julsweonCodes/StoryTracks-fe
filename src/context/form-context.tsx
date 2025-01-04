@@ -21,26 +21,27 @@ export interface StatusInfo {
 
 interface FormContextType {
   images: Image[];
-  descriptions: { [id: string]: string };
+  description: string;
   addImage: (image: Image) => void;
   removeImage: (id: string) => void;
-  updateDescription: (id: string, description: string) => void;
+  updateDescription: (description: string) => void;
   activeComponentKey: FormComponentKey;
   setActiveComponentKey: (key: FormComponentKey) => void;
   statusInfo: StatusInfo;
   setStatusInfo: Dispatch<SetStateAction<StatusInfo>>;
+  aiContent: { content: string }[];
+  setAiContent: Dispatch<SetStateAction<{ content: string }[]>>;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   const [images, setImages] = useState<Image[]>([]);
-  const [descriptions, setDescriptions] = useState<{ [id: string]: string }>(
-    {},
-  );
+  const [description, setDescription] = useState<string>("");
   const [activeComponentKey, setActiveComponentKey] =
     useState<FormComponentKey>("upload-image");
   const [statusInfo, setStatusInfo] = useState<StatusInfo>({ type: undefined });
+  const [aiContent, setAiContent] = useState<{ content: string }[]>([]);
 
   const addImage = (image: Image) => {
     setImages((prev) => [...prev, image]);
@@ -48,22 +49,17 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
 
   const removeImage = (id: string) => {
     setImages((prev) => prev.filter((image) => image.id !== id));
-    setDescriptions((prev) => {
-      const newDescriptions = { ...prev };
-      delete newDescriptions[id];
-      return newDescriptions;
-    });
   };
 
-  const updateDescription = (id: string, description: string) => {
-    setDescriptions((prev) => ({ ...prev, [id]: description }));
+  const updateDescription = (description: string) => {
+    setDescription(description);
   };
 
   return (
     <FormContext.Provider
       value={{
         images,
-        descriptions,
+        description,
         addImage,
         removeImage,
         updateDescription,
@@ -71,6 +67,8 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setActiveComponentKey,
         statusInfo,
         setStatusInfo,
+        aiContent,
+        setAiContent,
       }}
     >
       {children}
