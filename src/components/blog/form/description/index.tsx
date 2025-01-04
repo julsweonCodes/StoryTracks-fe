@@ -64,6 +64,8 @@ export default function DescriptionForm() {
     setActiveComponentKey("preview");
   };
 
+  const isAiContent = aiContent.length > 0;
+
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div className="bg-black-primary relative flex w-full flex-1 flex-col gap-4 overflow-y-auto pb-4">
@@ -87,7 +89,7 @@ export default function DescriptionForm() {
             </Swiper>
           </div>
         </div>
-        {aiContent.length > 0 ? (
+        {isAiContent ? (
           <AiContent
             data={aiContent}
             selected={selected}
@@ -104,7 +106,7 @@ export default function DescriptionForm() {
         )}
       </div>
       <div className="bg-black-primary flex w-full p-4">
-        {aiContent.length > 0 ? (
+        {isAiContent ? (
           <div className="flex w-full flex-col gap-2">
             <button
               className="text-white-primary flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626]"
