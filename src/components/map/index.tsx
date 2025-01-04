@@ -13,8 +13,8 @@ const containerStyle = {
 };
 
 const defaultCenter = {
-  lat: -3.745,
-  lng: -38.523,
+  lat: 37.579617,
+  lng: 126.977041,
 };
 
 const mapStyles = [
@@ -26,11 +26,11 @@ const mapStyles = [
     featureType: "transit", // 대중교통 관련 요소 제거
     stylers: [{ visibility: "off" }],
   },
-  {
-    featureType: "road", // 도로명 제거
-    elementType: "labels",
-    stylers: [{ visibility: "off" }],
-  },
+  //   {
+  //     featureType: "road", // 도로명 제거
+  //     elementType: "labels",
+  //     stylers: [{ visibility: "off" }],
+  //   },
 ];
 
 export default function Map() {
@@ -57,13 +57,13 @@ export default function Map() {
     setMap(null);
   }, []);
 
-  const handleZoomIn = () => {
-    setZoom(zoom + 1);
-  };
+  //   const handleZoomIn = () => {
+  //     setZoom(zoom + 1);
+  //   };
 
-  const handleZoomOut = () => {
-    setZoom(zoom - 1);
-  };
+  //   const handleZoomOut = () => {
+  //     setZoom(zoom - 1);
+  //   };
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -92,11 +92,10 @@ export default function Map() {
       onUnmount={onUnmount}
       options={{
         disableDefaultUI: true, // 부가적인 UI 비활성화
-        zoomControl: false, // 줌 컨트롤만 활성화
         styles: mapStyles,
       }}
     >
-      <div className="absolute left-4 top-4 flex flex-col gap-5">
+      {/* <div className="absolute left-4 top-4 flex flex-col gap-5">
         <button
           onClick={handleZoomIn}
           className="rounded-md border border-gray-300 bg-white px-4 py-2"
@@ -109,8 +108,8 @@ export default function Map() {
         >
           Zoom Out
         </button>
-      </div>
-      <CustomMarker center={center} />
+      </div> */}
+      <CustomMarker center={userMarker} />
     </GoogleMap>
   ) : (
     <></>
