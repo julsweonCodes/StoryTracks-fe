@@ -13,8 +13,6 @@ import "swiper/css";
 import "swiper/css/free-mode";
 
 import { FreeMode } from "swiper/modules";
-import VoiceRecorder from "@/components/common/voice/voice-recorder";
-import { useRouter } from "next/router";
 
 export default function DescriptionForm() {
   const {
@@ -24,7 +22,6 @@ export default function DescriptionForm() {
     setAiContent,
     aiContent,
   } = useFormContext();
-  // const [aiDataMock, setAiDataMock] = useState<{} | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -68,7 +65,7 @@ export default function DescriptionForm() {
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
-      <div className="bg-black-primary relative flex w-full flex-1 flex-col gap-4 overflow-y-auto pb-4">
+      <div className="relative flex w-full flex-1 flex-col gap-4 overflow-y-auto bg-black-primary pb-4">
         <div className="mx-4 flex flex-col gap-2 rounded-lg bg-[#262626] px-4 py-4 pb-4 pt-2">
           <h2 className="text-[14px]">
             <strong className="font-bold">5</strong>&nbsp; images selected
@@ -105,11 +102,11 @@ export default function DescriptionForm() {
           </div>
         )}
       </div>
-      <div className="bg-black-primary flex w-full p-4">
+      <div className="flex w-full bg-black-primary p-4">
         {isAiContent ? (
           <div className="flex w-full flex-col gap-2">
             <button
-              className="text-white-primary flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626]"
+              className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626] text-white-primary"
               disabled={isLoading}
               onClick={handleAiSubmit}
             >
@@ -125,7 +122,7 @@ export default function DescriptionForm() {
               )}
             </button>
             <button
-              className={`text-black-secondary flex h-[48px] w-full items-center justify-center gap-2 rounded-lg ${selected !== null ? "bg-key-primary" : "bg-[#5B578A]"}`}
+              className={`flex h-[48px] w-full items-center justify-center gap-2 rounded-lg text-black-secondary ${selected !== null ? "bg-key-primary" : "bg-[#5B578A]"}`}
               onClick={handleSubmit}
             >
               <FaCheck size={10} />
@@ -134,7 +131,7 @@ export default function DescriptionForm() {
           </div>
         ) : (
           <button
-            className={`text-black-secondary flex h-[48px] w-full items-center justify-center gap-1 rounded-lg ${description.length > 0 && !isLoading ? "bg-key-primary" : "bg-[#5B578A]"}`}
+            className={`flex h-[48px] w-full items-center justify-center gap-1 rounded-lg text-black-secondary ${description.length > 0 && !isLoading ? "bg-key-primary" : "bg-[#5B578A]"}`}
             disabled={isLoading}
             onClick={handleAiSubmit}
           >
