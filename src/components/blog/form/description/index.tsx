@@ -11,36 +11,50 @@ import Thumbnail from "@/components/common/thumbnail";
 import Textarea from "@/components/common/textarea";
 import Loading from "@/components/common/loading";
 import AiContent from "./ai-content";
+import { FaCheck } from "react-icons/fa";
+import { useFormContext } from "@/context/form-context";
 
 export default function DescriptionForm() {
+  const { setActiveComponentKey } = useFormContext();
   const [value, setValue] = useState("");
   const [aiDataMock, setAiDataMock] = useState<{} | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const [selected, setSelected] = useState<number | null>(null);
 
   const mockData = [
     {
-      title: `Content Option ${1}`,
-      description:
+      content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     },
     {
-      title: `Content Option ${2}`,
-      description:
+      content:
         "The title refers to the  empathy test used to distinguish between humans and androids. The test involves administering a fictional scenario and evaluating the subject's emotional response. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     },
     {
-      title: `Content Option ${3}`,
-      description:
+      content:
         "Electric sheep are rare, real animals that people own as status symbols. Owning one is seen as a sign of empathy and a connection to the natural world. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     },
   ];
 
-  const handleSubmit = () => {
+  const handleSelect = (index: number) => {
+    if (selected === index) {
+      setSelected(null);
+    } else {
+      setSelected(index);
+    }
+  };
+
+  const handleAiSubmit = () => {
     setIsLoading(true);
+    setSelected(null);
     setTimeout(() => {
       setAiDataMock(mockData);
       setIsLoading(false);
     }, 2000);
+  };
+
+  const handleSubmit = () => {
+    setActiveComponentKey("preview");
   };
 
   return (
@@ -67,7 +81,11 @@ export default function DescriptionForm() {
           </div>
         </div>
         {aiDataMock ? (
-          <AiContent />
+          <AiContent
+            data={aiDataMock as any[]}
+            selected={selected}
+            onSelect={handleSelect}
+          />
         ) : (
           <div className="relative flex flex-col gap-2 px-4">
             <Textarea value={value} setValue={setValue} />
@@ -79,22 +97,50 @@ export default function DescriptionForm() {
         )}
       </div>
       <div className="bg-black-primary flex w-full p-4">
-        <button
-          className={`text-black-secondary flex h-[48px] w-full items-center justify-center gap-1 rounded-lg ${value.length > 0 && !isLoading ? "bg-key-primary" : "bg-[#5B578A]"}`}
-          disabled={isLoading}
-          onClick={handleSubmit}
-        >
-          {isLoading ? (
-            <div>
-              <Loading type="loading" />
-            </div>
-          ) : (
-            <>
-              <Magic />
-              Generate Content with AI
-            </>
-          )}
-        </button>
+        {aiDataMock ? (
+          <div className="flex w-full flex-col gap-2">
+            <button
+              className="text-white-primary flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626]"
+              disabled={isLoading}
+              onClick={handleAiSubmit}
+            >
+              {isLoading ? (
+                <div>
+                  <Loading type="loading" />
+                </div>
+              ) : (
+                <>
+                  <Magic color="#ffffff" />
+                  Regenerate Content
+                </>
+              )}
+            </button>
+            <button
+              className={`text-black-secondary flex h-[48px] w-full items-center justify-center gap-2 rounded-lg ${selected !== null ? "bg-key-primary" : "bg-[#5B578A]"}`}
+              onClick={handleSubmit}
+            >
+              <FaCheck size={10} />
+              Use this Content
+            </button>
+          </div>
+        ) : (
+          <button
+            className={`text-black-secondary flex h-[48px] w-full items-center justify-center gap-1 rounded-lg ${value.length > 0 && !isLoading ? "bg-key-primary" : "bg-[#5B578A]"}`}
+            disabled={isLoading}
+            onClick={handleAiSubmit}
+          >
+            {isLoading ? (
+              <div>
+                <Loading type="loading" />
+              </div>
+            ) : (
+              <>
+                <Magic />
+                Generate Content with AI
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

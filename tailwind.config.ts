@@ -18,7 +18,7 @@ export default {
           primary: "#ffffff",
         },
         key: {
-          primary: "#B4B2FF",
+          primary: "#A099FF",
         },
       },
     },

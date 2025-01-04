@@ -94,45 +94,43 @@ export default function UploadImage() {
   }, [images]);
 
   return (
-    <div>
-      <div className="flex flex-col gap-5 p-5">
-        <input
-          type="text"
-          className="bg-black-primary text-white-primary h-[36px] w-full border-b border-[#7A7A7A] text-[24px] placeholder:text-[24px] placeholder:text-[#7A7A7A]"
-          placeholder="Title"
-        />
-        <div className="flex w-full flex-col gap-3 rounded-lg bg-[#262626] p-3">
-          <div className="flex items-start justify-between">
-            <div className="bg-black-secondary flex h-[40px] w-[40px] items-center justify-center rounded-lg">
-              <RiLightbulbFlashLine className="text-key-primary" size={20} />
-            </div>
-            <button>
-              <IoClose size={20} />
-            </button>
+    <div className="flex flex-col gap-5 p-5">
+      <input
+        type="text"
+        className="bg-black-primary text-white-primary h-[36px] w-full border-b border-[#7A7A7A] text-[24px] placeholder:text-[24px] placeholder:text-[#7A7A7A]"
+        placeholder="Title"
+      />
+      <div className="flex w-full flex-col gap-3 rounded-lg bg-[#262626] p-3">
+        <div className="flex items-start justify-between">
+          <div className="bg-black-secondary flex h-[40px] w-[40px] items-center justify-center rounded-lg">
+            <RiLightbulbFlashLine className="text-key-primary" size={20} />
           </div>
-          <div>
-            <h4 className="text-[15px] font-medium">Try our new AI feature!</h4>
-            <p className="text-black-tertiary text-[12px] tracking-tight">
-              Select a photo to upload with a brief description. The new AI
-              feature makes blog posting easier and more convenient!
-            </p>
-          </div>
-          <div className="flex h-[34px] w-full items-center justify-center rounded-lg bg-[#5B578A] text-[13px]">
-            <label
-              htmlFor="file-upload"
-              className="flex items-center justify-center"
-            >
-              Create Post with AI
-            </label>
-            <input
-              id="file-upload"
-              type="file"
-              multiple
-              accept="image/*, .heic"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
+          <button>
+            <IoClose size={20} />
+          </button>
+        </div>
+        <div>
+          <h4 className="text-[15px] font-medium">Try our new AI feature!</h4>
+          <p className="text-black-tertiary text-[12px] tracking-tight">
+            Select a photo to upload with a brief description. The new AI
+            feature makes blog posting easier and more convenient!
+          </p>
+        </div>
+        <div className="flex h-[34px] w-full items-center justify-center rounded-lg bg-[#5B578A] text-[13px]">
+          <label
+            htmlFor="file-upload"
+            className="flex items-center justify-center"
+          >
+            Create Post with AI
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            multiple
+            accept="image/*, .heic"
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
       </div>
     </div>
