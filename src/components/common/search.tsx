@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PenIcon from "../icons/pen";
 import { FiSearch } from "react-icons/fi";
 import { useRouter } from "next/router";
 
 export default function Search() {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태 관리
+
+  useEffect(() => {
+    // localStorage에서 로그인 여부 확인
+    const loggedInStatus = localStorage.getItem("isLoggedIn");
+    setIsLoggedIn(loggedInStatus === "true");
+  }, []);
+
   const [isFocused, setIsFocused] = useState(false);
   const [value, setValue] = useState("");
   const router = useRouter();
@@ -26,12 +35,21 @@ export default function Search() {
           value={value}
         />
       </div>
-      <button
-        className="text-white flex h-full w-[94px] items-center justify-center gap-2 rounded-xl bg-key-primary text-black-primary"
-        onClick={() => router.push("/blog/new")}
-      >
-        <PenIcon /> Post
-      </button>
+      {isLoggedIn ? (
+        <button
+          className="text-white flex h-full w-[94px] items-center justify-center gap-2 rounded-xl bg-key-primary text-black-primary"
+          onClick={() => router.push("/blog/new")}
+        >
+          <PenIcon /> Post
+        </button>
+      ) : (
+        <button
+          className="text-white flex h-full w-[94px] items-center justify-center gap-2 rounded-xl bg-key-primary text-black-primary"
+          onClick={() => router.push("/login")}
+        >
+          <PenIcon /> Post
+        </button>
+      )}
     </div>
   );
 }
