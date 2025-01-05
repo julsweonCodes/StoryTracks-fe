@@ -12,8 +12,9 @@ export default function Preview() {
   };
 
   return (
-    <>
-      <div className="relative mb-[48px] flex h-full w-full flex-col gap-5 divide-y divide-black-secondary overflow-y-auto p-5">
+    <div className="relative flex h-full flex-col overflow-hidden">
+      <UtilBar />
+      <div className="relative flex w-full flex-1 flex-col gap-5 divide-y divide-black-secondary overflow-y-auto p-5">
         <h1 className="text-[24px]">{mockData.title}</h1>
         <div className="flex flex-col gap-5 pt-5">
           <div className="flex flex-col gap-3">
@@ -45,7 +46,6 @@ export default function Preview() {
           </div>
         </div>
       </div>
-      <UtilBar />
-    </>
+    </div>
   );
 }

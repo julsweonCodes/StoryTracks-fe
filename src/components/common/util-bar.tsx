@@ -4,18 +4,31 @@ import MagicIcon from "../icons/magic";
 import ParagraphSpacingIcon from "../icons/paragraph-spacing";
 import TextCircleIcon from "../icons/text-circle";
 
-export default function UtilBar() {
+interface Props {
+  // position?: "top" | "bottom";
+  colorType?: "dark" | "light";
+}
+
+export default function UtilBar({
+  // position = "bottom",
+  colorType = "dark",
+}: Props) {
+  const color = colorType === "dark" ? "#262626" : "#ffffff";
+  const textColor = colorType === "dark" ? "#ffffff" : "#262626";
+
   return (
-    <div className="fixed bottom-0 left-0 flex h-[48px] w-full items-center justify-between bg-[#F5F5F5] px-4">
+    <div
+      className={`z-10 flex h-[48px] w-full items-center justify-between px-4 bg-[${color}]`}
+    >
       <div className="flex h-full flex-1 items-center gap-5">
         {[
-          <MagicIcon key="magic" size={25} />,
-          <CameraIcon key="camera" />,
-          <TextCircleIcon key="text-circle" />,
-          <ParagraphSpacingIcon key="paragraph-spacing" />,
+          <MagicIcon key="magic" size={25} color={textColor} />,
+          <CameraIcon key="camera" color={textColor} />,
+          <TextCircleIcon key="text-circle" color={textColor} />,
+          <ParagraphSpacingIcon key="paragraph-spacing" color={textColor} />,
           <FiMoreHorizontal
             key="more-horizontal"
-            className="text-black-primary"
+            className={`text-[${textColor}]`}
             size={22}
           />,
         ].map((icon, index) => (
@@ -27,7 +40,9 @@ export default function UtilBar() {
           </div>
         ))}
       </div>
-      <div className="flex gap-2 divide-x text-[14px] text-[#7F7F7F]">
+      <div
+        className={`flex gap-2 divide-x divide-black-secondary text-[14px] text-[#7F7F7F]`}
+      >
         <div>Save Draft</div>
         <div className="pl-1">12</div>
       </div>

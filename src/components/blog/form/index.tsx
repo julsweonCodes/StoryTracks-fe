@@ -28,7 +28,7 @@ export default function Form() {
 
   if (statusInfo?.type) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-5 bg-black p-8 text-center">
+      <div className="bg-black flex h-screen flex-col items-center justify-center gap-5 p-8 text-center">
         <Loading
           type={statusInfo?.type}
           title={statusInfo?.title}

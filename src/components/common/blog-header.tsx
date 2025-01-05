@@ -16,7 +16,9 @@ export default function BlogHeader() {
   };
 
   return (
-    <div className="bg-black-primary text-white-primary flex h-[36px] items-center justify-between border-b border-[#7A7A7A] p-5">
+    <div
+      className={`flex h-[36px] items-center justify-between bg-black-primary p-5 text-white-primary`}
+    >
       {activeComponentKey === "preview" ? (
         <div className="text-[14px] tracking-tight" onClick={handleCancel}>
           Cancel
