@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw";
 
 export const getPostsDetail = http.get(
   `${BASE_URL}/posts/:post_id`,
-  ({ request }) => {
+  () => {
     return HttpResponse.json({
       success: true,
       code: "000",

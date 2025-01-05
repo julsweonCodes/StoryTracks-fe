@@ -1,4 +1,4 @@
-import usePostsListQuery from "@/hooks/queries/use-posts-list-query";
+//import usePostsListQuery from "@/hooks/queries/use-posts-list-query";
 import Card from "@/components/common/card";
 import Drawer from "@/components/common/drawer";
 import Header from "@/components/common/header";
@@ -9,7 +9,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
-  const { data } = usePostsListQuery();
+  //const { data } = usePostsListQuery();
 
   const handleChange = () => {
     setIsOpen(!isOpen);

@@ -1,17 +1,24 @@
 import { useRouter } from "next/router";
 
-export default function Login() {
+interface LoginProps {
+  style?: React.CSSProperties; // style Prop 추가
+}
+
+export default function Login({ style }: LoginProps) {
   const router = useRouter();
 
   return (
-    <div className="z-20 flex h-[48px] items-center justify-between gap-2 border-t border-t-black-secondary bg-black-primary px-[14px] py-[10px]">
-      <button
-        className="text-white flex h-[10px] w-[94px] items-center justify-center gap-2 rounded-xl bg-transparent"
-        style={{ color: "white" }}
-        onClick={() => router.push("/login")}
+      <div
+        className="z-20 flex h-[48px] items-center justify-between gap-2 border-t border-t-black-secondary bg-black-primary px-[14px] py-[10px]"
+        style={style}
       >
-        Log In
-      </button>
-    </div>
-  );
+        <button
+          className="text-white flex h-[10px] w-[94px] items-center justify-center gap-2 rounded-xl bg-transparent"
+          style={{ color: "white" }}
+          onClick={() => router.push("/login")}
+        >
+          Log In
+        </button>
+      </div>
+    );
 }

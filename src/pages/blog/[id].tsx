@@ -1,5 +1,5 @@
 import SEOHeader from "@/components/common/seo-header";
-import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
+//import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -16,7 +16,7 @@ export default function Detail() {
   // 파라미터에서 아이디 축출
   const router = useRouter();
   const { id } = router.query;
-  const { data } = usePostsDetailQuery(id as string);
+  //const { data } = usePostsDetailQuery(id as string);
 
   useEffect(() => {
     console.log("id: ", id);
