@@ -8,6 +8,10 @@ import { useState } from "react";
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleChange = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="flex h-full w-full flex-col">
       <div className="z-20">
@@ -22,20 +26,44 @@ export default function Home() {
           isOpen={isOpen}
           button={
             <div
-              onClick={() => setIsOpen(!isOpen)}
-              className="bg-black-primary flex h-[63px] cursor-pointer flex-col items-center justify-between rounded rounded-t-3xl px-4 py-2 text-white"
+              onClick={handleChange}
+              className="text-white flex h-[62px] cursor-pointer flex-col items-center justify-between rounded rounded-t-3xl bg-black-primary px-4 py-2"
             >
-              <div className="bg-white-primary h-[4px] w-[40px] rounded-full" />
-              <span className="text-white-primary">204 Blog Posts</span>
+              <div className="h-[4px] w-[40px] rounded-full bg-white-primary" />
+              <span className="text-[14px] text-white-primary">
+                Over 1,000 posts in Vancouver
+              </span>
             </div>
           }
         >
-          <div className="bg-black-primary h-full max-h-screen overflow-y-auto p-[18px]">
-            <Card />
-            <Card />
-            <Card />
-            <Card />
-          </div>
+          {[
+            {
+              id: 1,
+              title: "Blog post title goes here",
+              des: "Lorem ipsum dolor sit amet consectetur. Ornare nullam tincidunt diam id nisi feugiat vivamus in. Nunc congue gravida cursus amet posuerenunc in sagittis a.",
+              src: "/image1.jpeg",
+            },
+            {
+              id: 1,
+              title: "Blog post title goes here",
+              des: "Lorem ipsum dolor sit amet consectetur. Ornare nullam tincidunt diam id nisi feugiat vivamus in. Nunc congue gravida cursus amet posuerenunc in sagittis a.",
+              src: "/image1.jpeg",
+            },
+            {
+              id: 1,
+              title: "Blog post title goes here",
+              des: "Lorem ipsum dolor sit amet consectetur. Ornare nullam tincidunt diam id nisi feugiat vivamus in. Nunc congue gravida cursus amet posuerenunc in sagittis a.",
+              src: "/image1.jpeg",
+            },
+          ].map((post, index) => (
+            <Card
+              key={index}
+              id={post.id}
+              title={post.title}
+              description={post.des}
+              src={post.src}
+            />
+          ))}
         </Drawer>
       </div>
     </div>

@@ -9,17 +9,17 @@ export default function Search() {
   const router = useRouter();
 
   return (
-    <div className="bg-black-primary z-20 flex h-[68px] items-center justify-between gap-2 px-[14px] py-[10px]">
+    <div className="z-20 flex h-[69px] items-center justify-between gap-2 border-t border-t-black-secondary bg-black-primary px-[14px] py-[10px]">
       <div className="relative h-[44px] flex-1">
         {!value && !isFocused && (
-          <div className="text-black-tertiary pointer-events-none absolute left-5 top-1/2 flex -translate-y-1/2 items-center gap-3">
+          <div className="pointer-events-none absolute left-5 top-1/2 flex -translate-y-1/2 items-center gap-3 text-black-tertiary">
             <FiSearch className="text-white-primary" />
             <span>Start your search</span>
           </div>
         )}
         <input
           type="text"
-          className="bg-black-secondary text-white-primary h-full w-full rounded-lg px-5"
+          className="h-full w-full rounded-lg bg-black-secondary px-5 text-white-primary"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onChange={(e) => setValue(e.target.value)}
@@ -27,10 +27,10 @@ export default function Search() {
         />
       </div>
       <button
-        className="bg-key-primary flex aspect-square w-[44px] items-center justify-center rounded-lg text-white"
+        className="text-white flex h-full w-[94px] items-center justify-center gap-2 rounded-xl bg-key-primary text-black-primary"
         onClick={() => router.push("/blog/new")}
       >
-        <PenIcon />
+        <PenIcon /> Post
       </button>
     </div>
   );

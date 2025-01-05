@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
   isOpen: boolean;
@@ -17,13 +17,15 @@ export default function Drawer({ isOpen, button, children }: Props) {
 
   return (
     <div
-      className="bg-black-primary absolute bottom-0 h-full w-full rounded-t-3xl transition-transform"
+      className="absolute bottom-0 h-full w-full rounded-t-3xl bg-black-primary transition-transform"
       style={{
-        transform: `translateY(${isOpen ? "0" : "calc(100% - 63px)"})`,
+        transform: `translateY(${isOpen ? `0` : "calc(100% - 63px)"})`,
       }}
     >
       {button}
-      {children}
+      <div className="flex h-full max-h-screen flex-col gap-8 overflow-y-auto bg-black-primary p-[18px] pb-20">
+        {children}
+      </div>
     </div>
   );
 }
