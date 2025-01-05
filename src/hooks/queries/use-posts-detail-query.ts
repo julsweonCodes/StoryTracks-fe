@@ -23,13 +23,12 @@ interface BlogDetail {
   blogImgList: Image[];
 }
 
-const useBlgoDetailQuery = (id?: string) => {
+const usePostsDetailQuery = (id?: string) => {
   return useQuery<BlogDetail>({
     queryKey: ["blog-detail", id],
-    queryFn: () =>
-      fetch(`${BASE_URL}/blog/list?post_id=${id}`).then((res) => res.json()),
+    queryFn: () => fetch(`${BASE_URL}/posts/${id}`).then((res) => res.json()),
     enabled: !!id,
   });
 };
 
-export default useBlgoDetailQuery;
+export default usePostsDetailQuery;

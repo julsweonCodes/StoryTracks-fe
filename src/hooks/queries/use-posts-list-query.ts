@@ -17,11 +17,11 @@ interface Blog {
   };
 }
 
-const useBlgoListQuery = () => {
+const usePostsListQuery = () => {
   return useQuery<Blog[]>({
     queryKey: ["blog-list"],
-    queryFn: () => fetch(`${BASE_URL}/blog/list`).then((res) => res.json()),
+    queryFn: () => fetch(`${BASE_URL}/posts/list`).then((res) => res.json()),
   });
 };
 
-export default useBlgoListQuery;
+export default usePostsListQuery;

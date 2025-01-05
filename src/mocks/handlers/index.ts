@@ -1,4 +1,5 @@
 import { RequestHandler } from "msw";
-import { getBlogList } from "./get-blog-list";
+import { getPostsList } from "./get-posts-list";
+import { getPostsDetail } from "./get-posts-detail";
 
-export const handlers: RequestHandler[] = [getBlogList];
+export const handlers: RequestHandler[] = [getPostsList, getPostsDetail];
