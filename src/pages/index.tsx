@@ -2,6 +2,7 @@ import Card from "@/components/common/card";
 import Drawer from "@/components/common/drawer";
 import Header from "@/components/common/header";
 import Search from "@/components/common/search";
+import SEOHeader from "@/components/common/seo-header";
 import Map from "@/components/map";
 import { useState } from "react";
 
@@ -14,6 +15,10 @@ export default function Home() {
 
   return (
     <div className="flex h-full w-full flex-col">
+      <SEOHeader
+        title="Story Track - Discover and Share Your Stories"
+        description="Welcome to Story Track, the ultimate platform for discovering, sharing, and keeping track of your stories. Join now to explore endless possibilities."
+      />
       <div className="z-20">
         <Header />
         <Search />

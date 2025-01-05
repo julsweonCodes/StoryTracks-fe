@@ -1,3 +1,4 @@
+import SEOHeader from "@/components/common/seo-header";
 import Image from "next/image";
 import { FiMoreVertical } from "react-icons/fi";
 
@@ -11,6 +12,10 @@ export default function Detail() {
 
   return (
     <div className="flex flex-col divide-y divide-black-tertiary overflow-y-auto p-4">
+      <SEOHeader
+        title={`Explore Stories on Story Track - ${mockData.title}`}
+        description={`Dive into ${mockData.title} and discover the story behind it. Read more inspiring blogs on Story Track, your platform for storytelling.`}
+      />
       <div className="flex flex-col gap-4 pb-4">
         <div>
           <span className="text-[13px] tracking-tight text-black-tertiary">
