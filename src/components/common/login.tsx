@@ -1,11 +1,6 @@
-import { useState } from "react";
-import PenIcon from "../icons/pen";
-import { FiSearch } from "react-icons/fi";
 import { useRouter } from "next/router";
 
 export default function Login() {
-  const [isFocused, setIsFocused] = useState(false);
-  const [value, setValue] = useState("");
   const router = useRouter();
 
   return (
