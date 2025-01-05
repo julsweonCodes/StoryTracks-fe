@@ -121,10 +121,7 @@ export default function DescriptionForm() {
             <Textarea value={description} setValue={updateDescription} />
             {isRecording ? (
               <div ref={recorderRef}>
-                <VoiceRecorder
-                  onClose={() => setIsRecording(false)}
-                  setValue={updateDescription}
-                />
+                <VoiceRecorder onClose={() => setIsRecording(false)} />
               </div>
             ) : (
               <div

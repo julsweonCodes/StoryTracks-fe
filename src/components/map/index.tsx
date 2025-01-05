@@ -41,31 +41,13 @@ export default function Map() {
   const [userMarker, setUserMarker] =
     useState<google.maps.LatLngLiteral | null>(null); // 사용자 위치 마커
   const [zoom] = useState(15); // 줌 레벨
-  const [isDragging, setIsDragging] = useState(false);
-  const lastValidPosition = useRef(defaultCenter);
-
-  const handleDragStart = useCallback(() => {
-    setIsDragging(true);
-  }, []);
-
-  const handleDragEnd = useCallback(() => {
-    if (mapRef.current) {
-      const center = mapRef.current.getCenter();
-      if (center) {
-        lastValidPosition.current = {
-          lat: center.lat(),
-          lng: center.lng(),
-        };
-      }
-    }
-    setTimeout(() => setIsDragging(false), 0);
-  }, []);
 
   const onLoad = useCallback(function callback(map: google.maps.Map) {
     mapRef.current = map;
   }, []);
 
   const onUnmount = useCallback(function callback(map: google.maps.Map) {
+    void map;
     mapRef.current = null;
   }, []);
 

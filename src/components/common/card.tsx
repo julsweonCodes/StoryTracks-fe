@@ -31,14 +31,8 @@ export default function Card({ id, title, description, src }: Props) {
         />
       </div>
       <div>
-        <h3 className="text-[14px] font-medium text-white-primary">
-          Blog post title goes here
-        </h3>
-        <p className="line-clamp-2 text-[14px] text-[#717375]">
-          Lorem ipsum dolor sit amet consectetur. Ornare nullam tincidunt diam
-          id nisi feugiat vivamus in. Nunc congue gravida cursus amet posuere
-          nunc in sagittis a.
-        </p>
+        <h3 className="text-[14px] font-medium text-white-primary">{title}</h3>
+        <p className="line-clamp-2 text-[14px] text-[#717375]">{description}</p>
       </div>
     </div>
   );
