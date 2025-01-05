@@ -13,7 +13,7 @@ import exifr from "exifr";
 //   createDate: string;
 // }
 
-export default function UploadImage() {
+export default function Write() {
   const { setActiveComponentKey, setStatusInfo } = useFormContext();
   // const [images, setImages] = useState<Image[]>([]);
 
@@ -109,15 +109,15 @@ export default function UploadImage() {
         </div>
         <div className="flex w-full flex-col gap-3 rounded-lg bg-gradient-to-br from-green-300 via-blue-300 to-pink-300 p-3 shadow-lg">
           <div className="flex items-start justify-between">
-            <div className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-black-primary">
+            <div className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626]">
               <RiLightbulbFlashLine className="text-green-300" size={20} />
             </div>
             <button>
-              <IoClose size={20} className="text-black-primary" />
+              <IoClose size={20} className="text-[#262626]" />
             </button>
           </div>
           <div>
-            <h4 className="text-[15px] font-medium text-black-primary">
+            <h4 className="text-[15px] font-medium font-semibold text-black-primary">
               Try our new AI feature!
             </h4>
             <p className="text-[12px] tracking-tight text-black-primary">
@@ -125,7 +125,7 @@ export default function UploadImage() {
               feature makes blog posting easier and more convenient!
             </p>
           </div>
-          <div className="flex h-[48px] w-full items-center justify-center rounded-lg bg-black-primary text-[13px]">
+          <div className="flex h-[48px] w-full items-center justify-center rounded-lg bg-[#262626] text-[13px]">
             <label
               htmlFor="file-upload"
               className="flex items-center justify-center gap-2 text-white-primary"

@@ -1,22 +1,25 @@
 import Loading from "@/components/common/loading";
 import { useFormContext } from "@/context/form-context";
-import UploadImage from "./upload-image";
 import Preview from "./preview";
 import BlogHeader from "@/components/common/blog-header";
 import DescriptionHeader from "@/components/common/description-header";
 import Description from "./description";
+import Generator from "./generator";
+import Write from "./write";
 
 export default function Form() {
   const { activeComponentKey, statusInfo } = useFormContext();
 
   const components = {
-    "upload-image": UploadImage,
+    write: Write,
+    generator: Generator,
     description: Description,
     preview: Preview,
   };
 
   const headers = {
-    "upload-image": BlogHeader,
+    write: BlogHeader,
+    generator: DescriptionHeader,
     description: DescriptionHeader,
     preview: BlogHeader,
   };

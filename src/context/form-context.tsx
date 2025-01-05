@@ -6,7 +6,11 @@ import {
   useState,
 } from "react";
 
-export type FormComponentKey = "upload-image" | "description" | "preview";
+export type FormComponentKey =
+  | "write"
+  | "generator"
+  | "description"
+  | "preview";
 
 interface Image {
   id: string;
@@ -39,7 +43,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   const [images, setImages] = useState<Image[]>([]);
   const [description, setDescription] = useState<string>("");
   const [activeComponentKey, setActiveComponentKey] =
-    useState<FormComponentKey>("upload-image");
+    useState<FormComponentKey>("write");
   const [statusInfo, setStatusInfo] = useState<StatusInfo>({ type: undefined });
   const [aiContent, setAiContent] = useState<{ content: string }[]>([]);
 
