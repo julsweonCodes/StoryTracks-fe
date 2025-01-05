@@ -1,13 +1,15 @@
+import useBlgoListQuery from "@/hooks/queries/use-blog-list-query";
 import Card from "@/components/common/card";
 import Drawer from "@/components/common/drawer";
 import Header from "@/components/common/header";
 import Search from "@/components/common/search";
 import SEOHeader from "@/components/common/seo-header";
 import Map from "@/components/map";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
+  const { data } = useBlgoListQuery();
 
   const handleChange = () => {
     setIsOpen(!isOpen);

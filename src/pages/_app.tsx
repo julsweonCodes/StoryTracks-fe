@@ -1,8 +1,11 @@
 import Layout from "@/components/layout";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import {
+  QueryClient,
+  QueryClientConfig,
+  QueryClientProvider,
+} from "react-query";
 
 if (
   process.env.NODE_ENV === "development" &&
@@ -11,9 +14,17 @@ if (
   require("../mocks");
 }
 
-export default function App({ Component, pageProps }: AppProps) {
-  const [queryClient] = useState(() => new QueryClient());
+const queryClientConfig: QueryClientConfig = {
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+};
 
+const queryClient = new QueryClient(queryClientConfig);
+
+export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <Layout>
