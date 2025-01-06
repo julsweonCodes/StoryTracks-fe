@@ -6,19 +6,17 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // 에러 메시지 상태
+  const [error, setError] = useState("");
 
   const handleBack = () => {
     window.history.back();
   };
 
   const handleLogin = () => {
-    // 예제 로직: 로컬 스토리지를 이용한 간단한 로그인
-    if (email !== "john@storytracks.com" && password !== "1234") {
-      // 로컬 스토리지에 로그인 상태 저장
+    if (email === "john@storytracks.com" && password === "1234") {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userEmail", email);
-      router.push("/"); // 홈으로 이동
+      router.push("/");
     } else {
       setError("Invalid email or password.");
     }
@@ -40,8 +38,8 @@ export default function LoginPage() {
       <div
         className="relative mx-4 mb-2 mt-3 flex items-center justify-center"
         style={{
-          position: "absolute", // 상단에 고정
-          top: 0, // 화면 상단에 위치
+          position: "absolute",
+          top: 0,
           left: 0,
           right: 0,
         }}
@@ -53,17 +51,15 @@ export default function LoginPage() {
           <FaChevronLeft />
         </div>
       </div>
-
-      {/* 나머지 내용 */}
       <div
         className="w-[90%] max-w-[400px]"
-        style={{ marginTop: "200px" }} // 상단 여백 추가
+        style={{ marginTop: "200px" }}
       >
       <div
         className="relative mx-4 mb-2 mt-3 flex items-center justify-center"
         style={{
-          position: "absolute", // 상단에 고정
-          top: 120, // 화면 상단에 위치
+          position: "absolute",
+          top: 120,
           left: 0,
           right: 0,
         }}
