@@ -2,9 +2,8 @@ import Loading from "@/components/common/loading";
 import { useFormContext } from "@/context/form-context";
 import Preview from "./preview";
 import BlogHeader from "@/components/common/blog-header";
-import DescriptionHeader from "@/components/common/description-header";
-import Description from "./description";
-import Generator from "./generator";
+import GeneratorHeader from "@/components/common/generator-header";
+import Generator from "./generaltor";
 import Write from "./write";
 
 export default function Form() {
@@ -13,14 +12,12 @@ export default function Form() {
   const components = {
     write: Write,
     generator: Generator,
-    description: Description,
     preview: Preview,
   };
 
   const headers = {
     write: BlogHeader,
-    generator: DescriptionHeader,
-    description: DescriptionHeader,
+    generator: GeneratorHeader,
     preview: BlogHeader,
   };
 
@@ -29,22 +26,20 @@ export default function Form() {
   const Header =
     headers[activeComponentKey] || (() => <div>Invalid header key</div>);
 
-  if (statusInfo?.type) {
-    return (
-      <div className="bg-black flex h-screen flex-col items-center justify-center gap-5 p-8 text-center">
-        <Loading
-          type={statusInfo?.type}
-          title={statusInfo?.title}
-          description={statusInfo?.description}
-        />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="relative flex h-full w-full flex-col">
       <Header />
       <ActiveComponent />
+      {statusInfo?.type && (
+        <div className="absolute left-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center gap-4 bg-black-primary p-10 text-center">
+          <Loading
+            type={statusInfo?.type}
+            title={statusInfo?.title}
+            description={statusInfo?.description}
+            color="#A099FF"
+          />
+        </div>
+      )}
     </div>
   );
 }

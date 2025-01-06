@@ -1,31 +1,69 @@
 import { useFormContext } from "@/context/form-context";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { RxKeyboard } from "react-icons/rx";
+import Loading from "./loading";
+import useBlogPostMutation, {
+  ImageSaveInfo,
+} from "@/hooks/mutations/use-blog-post-mutation";
 
 export default function BlogHeader() {
-  const { activeComponentKey, setActiveComponentKey } = useFormContext();
+  const {
+    activeComponentKey,
+    setActiveComponentKey,
+    description,
+    images,
+    aiContent,
+    aiContentIndex,
+  } = useFormContext();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const { mutate } = useBlogPostMutation({
+    onSuccess: (data) => {
+      setIsLoading(false);
+      router.push(`/blog/${data.data}?new=true`);
+    },
+    onError: () => {
+      setIsLoading(false);
+    },
+  });
 
   const handleCancel = () => {
-    setActiveComponentKey("description");
+    setActiveComponentKey("generator");
   };
 
   const handlePost = () => {
-    router.push("/blog/1");
+    setIsLoading(true);
+
+    if (images && aiContentIndex !== undefined) {
+      console.log("aiContentIndex", aiContentIndex);
+      const imgSaveList: ImageSaveInfo[] = images.map((image) => ({
+        fileName: image.fileName,
+        geoLat: image.lat.toString(),
+        geoLong: image.lon.toString(),
+        imgDtm: image.createDate,
+        thumbYn: image.active ? "Y" : "N",
+      }));
+      const aiContentResult = aiContent[aiContentIndex];
+      const aiGenText = aiContentResult.content;
+      const title = aiContentResult.title;
+
+      mutate({ ogText: description, aiGenText, title, imgSaveList });
+    }
   };
 
   return (
     <div
       className={`flex h-[36px] items-center justify-between bg-black-primary p-5 text-white-primary`}
     >
-      {activeComponentKey === "preview" ? (
+      {/* {activeComponentKey === "preview" ? (
         <div className="text-[14px] tracking-tight" onClick={handleCancel}>
           Cancel
         </div>
-      ) : (
-        <RxKeyboard />
-      )}
+      ) : ( */}
+      <RxKeyboard onClick={handleCancel} />
+      {/* )} */}
       <div className="flex items-center gap-2">
         <h1 className="text-md">Travel</h1>
         <IoIosArrowDown />
@@ -35,7 +73,7 @@ export default function BlogHeader() {
         disabled={activeComponentKey !== "preview"}
         onClick={handlePost}
       >
-        Post
+        {isLoading ? <Loading type="loading" color="#ffffff" /> : "Post"}
       </button>
     </div>
   );

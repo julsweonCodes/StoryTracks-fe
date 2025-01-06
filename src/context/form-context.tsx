@@ -6,50 +6,55 @@ import {
   useState,
 } from "react";
 
-export type FormComponentKey =
-  | "write"
-  | "generator"
-  | "description"
-  | "preview";
+export type FormComponentKey = "write" | "generator" | "preview";
 
-interface Image {
-  id: string;
-  url: string;
+export interface ImageInfo {
+  id?: string;
+  lat: number;
+  lon: number;
+  createDate: string;
+  previewUrl: string;
+  fileName: string;
+  active: boolean;
 }
 
 export interface StatusInfo {
-  type?: "loading" | "success";
+  type?: "loading" | "success" | "error";
   title?: string;
   description?: string;
 }
 
+export interface AiContentInfo {
+  title: string;
+  content: string;
+}
+
 interface FormContextType {
-  images: Image[];
-  description: string;
-  addImage: (image: Image) => void;
+  images: ImageInfo[];
+  setImages: Dispatch<SetStateAction<ImageInfo[]>>;
   removeImage: (id: string) => void;
+  description: string;
   updateDescription: (description: string) => void;
   activeComponentKey: FormComponentKey;
   setActiveComponentKey: (key: FormComponentKey) => void;
   statusInfo: StatusInfo;
   setStatusInfo: Dispatch<SetStateAction<StatusInfo>>;
-  aiContent: { content: string }[];
-  setAiContent: Dispatch<SetStateAction<{ content: string }[]>>;
+  aiContent: AiContentInfo[];
+  setAiContent: Dispatch<SetStateAction<AiContentInfo[]>>;
+  aiContentIndex?: number;
+  setAiContentIndex: Dispatch<SetStateAction<number | undefined>>;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const FormProvider = ({ children }: { children: React.ReactNode }) => {
-  const [images, setImages] = useState<Image[]>([]);
+  const [images, setImages] = useState<ImageInfo[]>([]);
   const [description, setDescription] = useState<string>("");
   const [activeComponentKey, setActiveComponentKey] =
     useState<FormComponentKey>("write");
   const [statusInfo, setStatusInfo] = useState<StatusInfo>({ type: undefined });
-  const [aiContent, setAiContent] = useState<{ content: string }[]>([]);
-
-  const addImage = (image: Image) => {
-    setImages((prev) => [...prev, image]);
-  };
+  const [aiContent, setAiContent] = useState<AiContentInfo[]>([]);
+  const [aiContentIndex, setAiContentIndex] = useState<number>();
 
   const removeImage = (id: string) => {
     setImages((prev) => prev.filter((image) => image.id !== id));
@@ -64,7 +69,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         images,
         description,
-        addImage,
+        setImages,
         removeImage,
         updateDescription,
         activeComponentKey,
@@ -73,6 +78,8 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setStatusInfo,
         aiContent,
         setAiContent,
+        aiContentIndex,
+        setAiContentIndex,
       }}
     >
       {children}

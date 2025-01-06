@@ -1,19 +1,35 @@
-//import usePostsListQuery from "@/hooks/queries/use-posts-list-query";
+import {
+  usePostsListQuery,
+  mapToLatLng,
+  processBlogs,
+  ProcessedBlog,
+} from "@/hooks/queries/use-posts-list-query";
 import Card from "@/components/common/card";
 import Drawer from "@/components/common/drawer";
 import Header from "@/components/common/header";
 import Search from "@/components/common/search";
 import SEOHeader from "@/components/common/seo-header";
 import Map from "@/components/map";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const formatNumber = (num?: number): string => {
+  return num?.toLocaleString() || "0";
+};
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
-  //const { data } = usePostsListQuery();
+  const { data } = usePostsListQuery();
+  const [processedData, setProcessedData] = useState<ProcessedBlog[]>([]);
 
   const handleChange = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    if (data?.data) {
+      processBlogs(data.data).then(setProcessedData);
+    }
+  }, [data]);
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -27,7 +43,7 @@ export default function Home() {
       </div>
       <div className="relative flex h-full w-full flex-col">
         <div className="h-full w-full flex-1 overflow-hidden">
-          <Map />
+          <Map markers={mapToLatLng(data?.data)} />
         </div>
         <Drawer
           isOpen={isOpen}
@@ -38,34 +54,15 @@ export default function Home() {
             >
               <div className="h-[4px] w-[40px] rounded-full bg-white-primary" />
               <span className="text-[14px] text-white-primary">
-                Over 1,000 posts in Vancouver
+                Over {formatNumber(data?.data.length)} posts in Vancouver
               </span>
             </div>
           }
         >
-          {[
-            {
-              id: 1,
-              title: "Blog post title goes here",
-              des: "Lorem ipsum dolor sit amet consectetur. Ornare nullam tincidunt diam id nisi feugiat vivamus in. Nunc congue gravida cursus amet posuerenunc in sagittis a.",
-              src: "/image1.jpeg",
-            },
-            {
-              id: 1,
-              title: "Blog post title goes here",
-              des: "Lorem ipsum dolor sit amet consectetur. Ornare nullam tincidunt diam id nisi feugiat vivamus in. Nunc congue gravida cursus amet posuerenunc in sagittis a.",
-              src: "/image1.jpeg",
-            },
-            {
-              id: 1,
-              title: "Blog post title goes here",
-              des: "Lorem ipsum dolor sit amet consectetur. Ornare nullam tincidunt diam id nisi feugiat vivamus in. Nunc congue gravida cursus amet posuerenunc in sagittis a.",
-              src: "/image1.jpeg",
-            },
-          ].map((post, index) => (
+          {processedData?.map((post, index) => (
             <Card
               key={index}
-              id={post.id}
+              id={post.postId}
               title={post.title}
               description={post.des}
               src={post.src}

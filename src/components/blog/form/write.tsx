@@ -3,7 +3,6 @@ import { RiLightbulbFlashLine } from "react-icons/ri";
 import { IoClose } from "react-icons/io5";
 import UtilBar from "@/components/common/util-bar";
 import MagicIcon from "@/components/icons/magic";
-import exifr from "exifr";
 
 // interface Image {
 //   name: string;
@@ -14,86 +13,11 @@ import exifr from "exifr";
 // }
 
 export default function Write() {
-  const { setActiveComponentKey, setStatusInfo } = useFormContext();
+  const { setActiveComponentKey } = useFormContext();
   // const [images, setImages] = useState<Image[]>([]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    void e;
-    // setLoadingText({
-    //   title: "Verifying Images",
-    //   description: "Checking if the images contain eligible metadata.",
-    // });
-    setStatusInfo({
-      type: "loading",
-      title: "Verifying Images",
-      description: "Checking if the images contain eligible metadata.",
-    });
-    const files = e.target.files;
-    if (!files) return;
-
-    for (const file of files) {
-      const metadata = await exifr.parse(file);
-
-      console.log("metadata", metadata);
-      // const isValid = metadata?.GPSLatitude && metadata?.CreateDate;
-    }
-
-    // const imageData: Image[] = [];
-
-    // for (const file of files) {
-    //   const metadata = await exifr.parse(file);
-    //   const isValid = metadata?.GPSLatitude && metadata?.CreateDate;
-
-    //   const formData = new FormData();
-    //   formData.append("file", files[0]); // "file" 키 이름 사용
-
-    //   try {
-    //     const response = await fetch("/api/upload", {
-    //       method: "POST",
-    //       body: formData,
-    //     });
-
-    //     if (response.ok) {
-    //       const { url } = await response.json();
-    //       console.log("Uploaded file URL:", url);
-    //       imageData.push({
-    //         name: file.name,
-    //         url: url,
-    //         isValid,
-    //         gpsLatitude: metadata?.GPSLatitude,
-    //         createDate: dayjs(metadata?.CreateDate).format(
-    //           "YYYY-MM-DD HH:mm:ss",
-    //         ),
-    //       });
-    // setStatusInfo({
-    //   type: "success",
-    //   title: "Successfully Verified",
-    //   description:
-    //     "3 images have been successfully verified and meet all the requirements.",
-    // });
-    //     } else {
-    //       console.error("Failed to upload file");
-    //     }
-    //   } catch (error) {
-    //     console.error("Error uploading file:", error);
-    //   }
-    // }
-
-    // setImages((prev) => (prev ? [...prev, ...imageData] : imageData));
-
-    setTimeout(() => {
-      setStatusInfo({
-        type: "success",
-        title: "Successfully Verified",
-        description:
-          "3 images have been successfully verified and meet all the requirements.",
-      });
-    }, 3000);
-
-    setTimeout(() => {
-      setStatusInfo({ type: undefined });
-      setActiveComponentKey("description");
-    }, 5000);
+  const handleMoveToGenerator = () => {
+    setActiveComponentKey("generator");
   };
 
   return (
@@ -117,7 +41,7 @@ export default function Write() {
             </button>
           </div>
           <div>
-            <h4 className="text-[15px] font-medium font-semibold text-black-primary">
+            <h4 className="text-[15px] font-semibold text-black-primary">
               Try our new AI feature!
             </h4>
             <p className="text-[12px] tracking-tight text-black-primary">
@@ -125,23 +49,21 @@ export default function Write() {
               feature makes blog posting easier and more convenient!
             </p>
           </div>
-          <div className="flex h-[48px] w-full items-center justify-center rounded-lg bg-[#262626] text-[13px]">
-            <label
-              htmlFor="file-upload"
-              className="flex items-center justify-center gap-2 text-white-primary"
-            >
-              <MagicIcon color="#ffffff" />
-              Generate Content with AI
-            </label>
-            <input
+          <button
+            className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626] text-[13px] text-white-primary"
+            onClick={handleMoveToGenerator}
+          >
+            <MagicIcon color="#ffffff" />
+            Generate Content with AI
+            {/* <input
               id="file-upload"
               type="file"
               multiple
               accept="image/*, .heic"
               className="hidden"
               onChange={handleFileChange}
-            />
-          </div>
+            /> */}
+          </button>
         </div>
       </div>
     </>

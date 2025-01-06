@@ -1,15 +1,30 @@
 import { StatusInfo } from "@/context/form-context";
 import { FaCheck } from "react-icons/fa";
 
-export default function Loading({ type, title, description }: StatusInfo) {
+interface Props extends StatusInfo {
+  color?: string;
+}
+
+export default function Loading({
+  type,
+  title,
+  description,
+  color = "#B4B2FF",
+}: Props) {
   return (
     <>
       {type === "loading" ? (
         <div className="relative h-[24px] w-[24px]">
-          <div className="border-key-primary absolute left-0 top-0 h-full w-full animate-spin rounded-full border-2 border-t-transparent"></div>
+          <div
+            className="absolute left-0 top-0 h-full w-full animate-spin rounded-full border-2 border-key-primary border-t-transparent"
+            style={{ borderColor: color, borderLeftColor: "transparent" }}
+          />
         </div>
       ) : (
-        <div className="border-key-primary text-key-primary rounded-full border p-1">
+        <div
+          className={`rounded-full border p-1`}
+          style={{ borderColor: color, color }}
+        >
           <FaCheck size={12} />
         </div>
       )}

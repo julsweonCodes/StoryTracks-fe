@@ -46,3 +46,7 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+.swiper-scrollbar .swiper-scrollbar-horizontal {
+  top: 10px;
+}

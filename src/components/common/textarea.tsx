@@ -15,10 +15,10 @@ export default function Textarea({ value, setValue }: Props) {
   };
 
   return (
-    <div className="relative aspect-square overflow-hidden rounded-lg bg-[#262626]">
+    <div className="relative aspect-[7/5] overflow-hidden rounded-lg bg-[#262626]">
       {!value && !isFocused && (
         <div
-          className="absolute left-0 top-0 flex flex-col gap-2 p-4 text-black-tertiary"
+          className="absolute left-0 top-0 flex flex-col gap-2 p-4 text-[#7A7A7A]"
           onClick={handleFocus}
         >
           <p className="text-[15px] tracking-tight">
@@ -35,7 +35,7 @@ export default function Textarea({ value, setValue }: Props) {
         ref={textareaRef}
         name="description"
         id="description"
-        className="aspect-square w-full rounded-lg bg-[#262626] p-5"
+        className="h-full w-full rounded-lg bg-[#262626] p-5"
         onFocus={handleFocus}
         onBlur={() => setIsFocused(false)}
         onChange={(e) => setValue(e.target.value)}
