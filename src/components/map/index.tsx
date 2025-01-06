@@ -195,7 +195,7 @@ export default function Map({ markers = [] }: Props) {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        setCenter(userLocation);
+        // setCenter(userLocation);
       });
     }
 
