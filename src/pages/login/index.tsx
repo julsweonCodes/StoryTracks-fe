@@ -14,7 +14,7 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     // 예제 로직: 로컬 스토리지를 이용한 간단한 로그인
-    if (email !== "" && password !== "") {
+    if (email !== "john@storytracks.com" && password !== "1234") {
       // 로컬 스토리지에 로그인 상태 저장
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userEmail", email);
