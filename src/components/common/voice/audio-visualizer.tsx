@@ -213,7 +213,7 @@ const AudioVisualizer = ({ isRecording: recordingAction, onClose }: Props) => {
     } else {
       stopRecording();
     }
-  }, [recordingAction, startRecording, stopRecording]);
+  }, [recordingAction]);
 
   return (
     <div className="flex h-[32px] w-full flex-1 items-center justify-between">

@@ -47,15 +47,15 @@ export default function DescriptionForm() {
       setAiContent([
         {
           title: "",
-          content: data.data.genRes1,
+          content: data.genRes1,
         },
         {
           title: "",
-          content: data.data.genRes2,
+          content: data.genRes2,
         },
         {
           title: "",
-          content: data.data.genRes3,
+          content: data.genRes3,
         },
       ]);
     },

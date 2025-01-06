@@ -30,9 +30,9 @@ export default function Detail() {
   }, [router.isReady, isNew]);
 
   useEffect(() => {
-    if (data?.data)
+    if (data)
       (async () => {
-        const htmlContent = await markdownToHtml(data.data.aiGenText);
+        const htmlContent = await markdownToHtml(data.aiGenText);
 
         setHtmlContent(htmlContent);
       })();
@@ -43,11 +43,11 @@ export default function Detail() {
       <div className="z-20">
         <Header />
       </div>
-      {data?.data && (
+      {data && (
         <div className="flex flex-col divide-y divide-black-tertiary overflow-y-auto p-4">
           <SEOHeader
-            title={`Explore Stories on Story Track - ${data?.data.title}`}
-            description={`Dive into ${data?.data.title} and discover the story behind it. Read more inspiring blogs on Story Track, your platform for storytelling.`}
+            title={`Explore Stories on Story Track - ${data.title}`}
+            description={`Dive into ${data.title} and discover the story behind it. Read more inspiring blogs on Story Track, your platform for storytelling.`}
           />
           <div className="flex flex-col gap-4 pb-4">
             <div>
@@ -55,7 +55,7 @@ export default function Detail() {
                 Travel
               </span>
             </div>
-            <h1 className="text-[32px] font-medium">{data?.data.title}</h1>
+            <h1 className="text-[32px] font-medium">{data.title}</h1>
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-[13px] tracking-tight text-[#E6E6E6]">
@@ -72,7 +72,7 @@ export default function Detail() {
           </div>
           <div className="flex flex-col gap-5 pt-4">
             <div className="flex flex-col gap-3">
-              {data?.data.blogImgList.map((img, index) => (
+              {data.blogImgList.map((img, index) => (
                 <Image
                   key={index}
                   src={img.imgPath}

@@ -24,7 +24,7 @@ interface BlogDetail {
 }
 
 const usePostsDetailQuery = (id?: string) => {
-  return useQuery<DefaultResponse<BlogDetail>>({
+  return useQuery<BlogDetail>({
     queryKey: ["blog-detail", id],
     queryFn: () => fetch(`${BASE_URL}/posts/${id}`).then((res) => res.json()),
     enabled: !!id,

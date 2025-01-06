@@ -125,11 +125,8 @@ const markersMock = [
 ];
 
 export const getPostsList = http.get(`${BASE_URL}/posts/list`, () => {
-  return HttpResponse.json({
-    success: true,
-    code: "000",
-    message: "String",
-    data: markersMock.map((v, index) => ({
+  return HttpResponse.json(
+    markersMock.map((v, index) => ({
       postId: Math.floor(Math.random() * 100),
       title: `[${index}]` + "블로그 제목",
       ogText:
@@ -149,5 +146,5 @@ export const getPostsList = http.get(`${BASE_URL}/posts/list`, () => {
         thumbGeoLat: v.lat.toString(),
       },
     })),
-  });
+  );
 });

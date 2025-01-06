@@ -21,11 +21,7 @@ interface BlogPost {
 }
 
 const useBlogPostMutation = (
-  options: UseMutationOptions<
-    DefaultResponse<BlogPostResponse>,
-    Error,
-    unknown
-  >,
+  options: UseMutationOptions<BlogPostResponse, Error, unknown>,
 ) => {
   return useMutation({
     mutationKey: "blogPost",

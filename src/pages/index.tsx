@@ -26,8 +26,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (data?.data) {
-      processBlogs(data.data).then(setProcessedData);
+    if (data) {
+      processBlogs(data).then(setProcessedData);
     }
   }, [data]);
 
@@ -43,7 +43,7 @@ export default function Home() {
       </div>
       <div className="relative flex h-full w-full flex-col">
         <div className="h-full w-full flex-1 overflow-hidden">
-          <Map markers={mapToLatLng(data?.data)} />
+          <Map markers={mapToLatLng(data)} />
         </div>
         <Drawer
           isOpen={isOpen}
@@ -54,7 +54,7 @@ export default function Home() {
             >
               <div className="h-[4px] w-[40px] rounded-full bg-white-primary" />
               <span className="text-[14px] text-white-primary">
-                Over {formatNumber(data?.data.length)} posts in Vancouver
+                Over {formatNumber(data?.length || 0)} posts in Vancouver
               </span>
             </div>
           }

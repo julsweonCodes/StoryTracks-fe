@@ -20,11 +20,7 @@ interface GenerateMutation {
 }
 
 const useGenerateMutation = (
-  options: UseMutationOptions<
-    DefaultResponse<GenerateResponse>,
-    Error,
-    unknown
-  >,
+  options: UseMutationOptions<GenerateResponse, Error, unknown>,
 ) => {
   return useMutation({
     mutationKey: "generate",

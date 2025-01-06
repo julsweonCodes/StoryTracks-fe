@@ -8,9 +8,6 @@ export const postBlogSave = http.post(
 
     console.log("post request", newPost);
 
-    return HttpResponse.json(
-      { success: true, code: "000", message: "String", data: 1 },
-      { status: 201 },
-    );
+    return HttpResponse.json(1, { status: 201 });
   },
 );

@@ -36,7 +36,7 @@ export default function Header() {
               className="text-white"
               style={{ color: "white" }}
             /> */}
-            <Avatar className="h-[24px] w-[24px] md:h-24 md:w-24" {...config} />
+            <Avatar className="h-[24px] w-[24px]" {...config} />
             <span style={{ color: "white" }}>John</span>
           </div>
         ) : (

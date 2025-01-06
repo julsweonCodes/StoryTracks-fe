@@ -22,7 +22,7 @@ export default function BlogHeader() {
   const { mutate } = useBlogPostMutation({
     onSuccess: (data) => {
       setIsLoading(false);
-      router.push(`/blog/${data.data}?new=true`);
+      router.push(`/blog/${data}?new=true`);
     },
     onError: () => {
       setIsLoading(false);
