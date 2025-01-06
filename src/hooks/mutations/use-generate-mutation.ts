@@ -15,7 +15,7 @@ export interface GenerateImageInfo {
 }
 
 interface GenerateMutation {
-  imgInfoList: GenerateImageInfo[];
+  imgInfo: GenerateImageInfo;
   ogText: string;
 }
 

@@ -1,11 +1,29 @@
-import { useRef, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 
 interface Props {
   value: string;
   setValue: (value: string) => void;
+  placeholder?: ReactNode;
 }
 
-export default function Textarea({ value, setValue }: Props) {
+const DefaultPlaceholder = () => {
+  return (
+    <p className="text-[15px] tracking-tight">
+      {`Tell us a little story about this image! We'll handle the rest to
+            generate the perfect blog content.`}
+      <br />
+      <br />
+      {`For example: 'A serene beach at sunset, with golden skies and waves
+            gently lapping at the shore.'`}
+    </p>
+  );
+};
+
+export default function Textarea({
+  value,
+  setValue,
+  placeholder = <DefaultPlaceholder />,
+}: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -21,14 +39,7 @@ export default function Textarea({ value, setValue }: Props) {
           className="absolute left-0 top-0 flex flex-col gap-2 p-4 text-[#7A7A7A]"
           onClick={handleFocus}
         >
-          <p className="text-[15px] tracking-tight">
-            {`Tell us a little story about this image! We'll handle the rest to
-            generate the perfect blog content.`}
-            <br />
-            <br />
-            {`For example: 'A serene beach at sunset, with golden skies and waves
-            gently lapping at the shore.'`}
-          </p>
+          {placeholder}
         </div>
       )}
       <textarea

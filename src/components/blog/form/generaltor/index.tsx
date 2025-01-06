@@ -79,13 +79,17 @@ export default function DescriptionForm() {
 
   const handleAiSubmit = () => {
     setIsLoading(true);
-    const imgInfoList: GenerateImageInfo[] = images.map((image) => ({
-      geoLat: image.lat.toString(),
-      geoLong: image.lon.toString(),
-      imgDtm: image.createDate,
-    }));
+    const earliestDate = Math.min(
+      ...images.map((image) => new Date(image.createDate).getTime()),
+    );
 
-    mutate({ ogText: description, imgInfoList });
+    const imgInfo: GenerateImageInfo = {
+      geoLat: images[0].lat.toString(),
+      geoLong: images[0].lon.toString(),
+      imgDtm: new Date(earliestDate).toISOString(), // ISO 형식으로 변환
+    };
+
+    mutate({ ogText: description, imgInfo });
   };
 
   const handleSubmit = () => {
