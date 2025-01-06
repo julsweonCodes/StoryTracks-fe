@@ -13,13 +13,13 @@ export default function LoginPage() {
   };
 
   const handleLogin = () => {
-    if (email === "john@storytracks.com" && password === "1234") {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userEmail", email);
-      router.push("/");
-    } else {
-      setError("Invalid email or password.");
-    }
+    // if (email === "admin" && password === "1234") {
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userEmail", email);
+    router.push("/");
+    // } else {
+    //   setError("Invalid email or password.");
+    // }
   };
 
   const handleForgotPassword = () => {
