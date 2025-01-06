@@ -22,7 +22,7 @@ export default function Toggle({ text }: Props) {
       >
         <span
           className={`inline-block h-[18px] w-[18px] transform rounded-full bg-[#333333] transition-transform ${
-            isToggled ? "bg-white translate-x-5" : "translate-x-1"
+            isToggled ? "bg-white translate-x-3" : "translate-x-1"
           }`}
         />
       </button>
