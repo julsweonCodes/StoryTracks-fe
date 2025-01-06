@@ -142,16 +142,34 @@ export default function Map({ markers = [] }: Props) {
   }, []);
 
   const moveToCurrentLocation = () => {
-    if (mapRef.current) {
-      mapRef.current.setZoom(zoom);
-      navigator.geolocation.getCurrentPosition((position) => {
+    if (!navigator.geolocation) {
+      console.error("Geolocation is not supported by this browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
         const userLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        mapRef.current?.panTo(userLocation);
-      });
-    }
+
+        if (mapRef.current) {
+          mapRef.current.panTo(userLocation); // 지도 시각적 중심 이동
+          mapRef.current.setZoom(15); // 줌 레벨 변경 (옵션)
+        }
+
+        setCenter(userLocation); // 상태 업데이트
+      },
+      (error) => {
+        console.error("Error getting current location:", error);
+      },
+      {
+        enableHighAccuracy: true, // 더 정확한 위치 정보 요청
+        timeout: 5000, // 요청 제한 시간 설정
+        maximumAge: 0, // 캐시된 위치 정보 사용하지 않음
+      },
+    );
   };
 
   useEffect(() => {
@@ -173,10 +191,11 @@ export default function Map({ markers = [] }: Props) {
       );
 
       watchId = navigator.geolocation.watchPosition((position) => {
-        // const userLocation = {
-        //   lat: position.coords.latitude,
-        //   lng: position.coords.longitude,
-        // };
+        const userLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setCenter(userLocation);
       });
     }
 

@@ -5,6 +5,7 @@ import BlogHeader from "@/components/common/blog-header";
 import GeneratorHeader from "@/components/common/generator-header";
 import Generator from "./generaltor";
 import Write from "./write";
+import Setting from "./setting";
 
 export default function Form() {
   const { activeComponentKey, statusInfo } = useFormContext();
@@ -13,12 +14,14 @@ export default function Form() {
     write: Write,
     generator: Generator,
     preview: Preview,
+    setting: Setting,
   };
 
   const headers = {
-    write: BlogHeader,
+    write: GeneratorHeader,
     generator: GeneratorHeader,
     preview: BlogHeader,
+    setting: GeneratorHeader,
   };
 
   const ActiveComponent =

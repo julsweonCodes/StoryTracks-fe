@@ -3,7 +3,7 @@ import Textarea from "@/components/common/textarea";
 import Loading from "@/components/common/loading";
 import AiContent from "./ai-content";
 import { FaCheck } from "react-icons/fa";
-import { useFormContext } from "@/context/form-context";
+import { AiContentInfo, useFormContext } from "@/context/form-context";
 import MicrophoneIcon from "@/components/icons/microphone";
 import MagicIcon from "@/components/icons/magic";
 import VoiceRecorder from "@/components/common/voice/voice-recorder";
@@ -44,7 +44,20 @@ export default function DescriptionForm() {
   const { mutate } = useGenerateMutation({
     onSuccess: (data) => {
       setIsLoading(false);
-      setAiContent(transformToAiContentInfo(data?.data));
+      setAiContent([
+        {
+          title: "",
+          content: data.data.genRes1,
+        },
+        {
+          title: "",
+          content: data.data.genRes2,
+        },
+        {
+          title: "",
+          content: data.data.genRes3,
+        },
+      ]);
     },
     onError: () => {
       setIsLoading(false);
@@ -112,16 +125,23 @@ export default function DescriptionForm() {
             </div>
           </div>
         )}
-        <div className="mx-4 flex flex-col gap-2">
-          <StepTitle number={1} title={`Select Images (${images.length})`} />
-          <UploadImage />
-        </div>
+        {!isAiContent && (
+          <div className="mx-4 flex flex-col gap-2">
+            <StepTitle number={1} title={`Select Images (${images.length})`} />
+            <UploadImage />
+          </div>
+        )}
         {isAiContent ? (
-          <AiContent
-            data={aiContent}
-            selected={aiContentIndex}
-            onSelect={handleSelect}
-          />
+          <div className="mt-4 flex flex-col gap-2">
+            <div className="px-4">
+              <StepTitle number={3} title="Select Your Preferred Content" />
+            </div>
+            <AiContent
+              data={aiContent}
+              selected={aiContentIndex}
+              onSelect={handleSelect}
+            />
+          </div>
         ) : (
           <div className="relative flex flex-col gap-2 px-4 pb-4">
             <StepTitle number={2} title="Add Image Descriptions" />

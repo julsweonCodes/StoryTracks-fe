@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 
-export type FormComponentKey = "write" | "generator" | "preview";
+export type FormComponentKey = "write" | "generator" | "preview" | "setting";
 
 export interface ImageInfo {
   id?: string;

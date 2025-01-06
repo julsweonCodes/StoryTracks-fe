@@ -11,10 +11,20 @@ interface ContentData {
 }
 
 export default function Preview() {
-  const { aiContent, images, aiContentIndex, setImages } = useFormContext();
+  const { aiContent, images, aiContentIndex, setImages, setAiContent } =
+    useFormContext();
   const [selectIndex, setSelectIndex] = useState<number>(0);
   const [contentData, setContentData] = useState<ContentData>();
   const [htmlContent, setHtmlContent] = useState<string>();
+
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setAiContent((prev) =>
+      prev.map((item, index) =>
+        index === aiContentIndex ? { ...item, title: value } : item,
+      ),
+    );
+  };
 
   useEffect(() => {
     if (aiContent && images && aiContentIndex !== undefined) {
@@ -37,7 +47,7 @@ export default function Preview() {
         })),
       );
     }
-  }, [selectIndex, images, setImages]);
+  }, [selectIndex]);
 
   useEffect(() => {
     if (contentData)
@@ -53,7 +63,14 @@ export default function Preview() {
       <UtilBar />
       {contentData && (
         <div className="relative flex w-full flex-1 flex-col gap-5 divide-y divide-black-secondary overflow-y-auto p-5">
-          <h1 className="text-[24px]">{contentData.title}</h1>
+          <div className="w-full border-b border-black-secondary pb-3">
+            <input
+              type="text"
+              className="h-[36px] w-full bg-black-primary text-[24px] text-white-primary placeholder:text-[24px] placeholder:text-[#7A7A7A]"
+              placeholder="Title"
+              onChange={handleOnChange}
+            />
+          </div>
           <div className="flex flex-col gap-5 pt-5">
             <div className="flex flex-col gap-3">
               {contentData.images.map((src, index) => (

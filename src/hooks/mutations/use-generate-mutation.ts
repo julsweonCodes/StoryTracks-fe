@@ -3,7 +3,9 @@ import { BASE_URL, DefaultResponse } from "../utils/fetcher";
 import { AiContentInfo } from "@/context/form-context";
 
 interface GenerateResponse {
-  [key: string]: string;
+  genRes1: string;
+  genRes2: string;
+  genRes3: string;
 }
 
 export interface GenerateImageInfo {
@@ -19,7 +21,7 @@ interface GenerateMutation {
 
 const useGenerateMutation = (
   options: UseMutationOptions<
-    DefaultResponse<GenerateResponse[]>,
+    DefaultResponse<GenerateResponse>,
     Error,
     unknown
   >,

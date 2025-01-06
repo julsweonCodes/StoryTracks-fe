@@ -18,11 +18,9 @@ export default function Detail() {
   const [isOpen, setIsOpen] = useState(false);
   const isNew = searchParams.get("new");
   const [htmlContent, setHtmlContent] = useState<string>();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleDone = () => {
     setIsOpen(false);
-    router.push("/blog/1");
   };
 
   useEffect(() => {
@@ -68,16 +66,7 @@ export default function Detail() {
                 </span>
               </div>
               <div className="relative">
-                <FiMoreVertical
-                  size={24}
-                  onClick={() => setIsDropdownOpen(true)}
-                />
-                {/* <Dropdown
-                  isOpen={isDropdownOpen}
-                  onClose={() => setIsDropdownOpen(false)}
-                >
-                  test
-                </Dropdown> */}
+                <FiMoreVertical size={24} />
               </div>
             </div>
           </div>
