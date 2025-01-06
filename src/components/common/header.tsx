@@ -27,7 +27,7 @@ export default function Header() {
             <span style={{ color: "white" }}>John</span>
           </div>
         ) : (
-          <Login style={{ padding: "80px", margin: "0" }} />
+          <Login style={{ padding: "0px", margin: "0" }} />
         )}
       </div>
     </header>
