@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 
 interface LoginProps {
-  style?: React.CSSProperties; // style Prop 추가
+  style?: React.CSSProperties;
 }
 
 export default function Login({ style }: LoginProps) {
