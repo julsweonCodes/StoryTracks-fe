@@ -25,7 +25,7 @@ jobs:
         run: pnpm install
 
       - name: Build the project
-        run: npm run build
+        run: pnpm run build
 
       - name: Install AWS CLI
         run: |
@@ -37,4 +37,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY_ID }}
         run: |
-          aws s3 sync ./build s3://storytracks-fe --delete
+          aws s3 sync .next/server/pages/ s3://storytracks-fe --delete
