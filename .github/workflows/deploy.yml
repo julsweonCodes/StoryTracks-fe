@@ -38,7 +38,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Installing AWS CLI"
-          sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update --quiet
+          sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
           echo "::endgroup::"
 
       - name: Deploy to S3
