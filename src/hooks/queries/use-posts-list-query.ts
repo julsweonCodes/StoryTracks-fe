@@ -26,6 +26,7 @@ interface Blog {
 }
 
 const usePostsListQuery = () => {
+  console.log("usePostsListQuery");
   return useQuery<Blog[]>({
     queryKey: ["blog-list"],
     queryFn: () => fetch(`${BASE_URL}/posts/list`).then((res) => res.json()),

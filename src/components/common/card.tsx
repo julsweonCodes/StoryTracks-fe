@@ -30,7 +30,7 @@ export default function Card({ id, title, description, src }: Props) {
           }}
         />
       </div>
-      <div>
+      <div>???
         <h3 className="text-[14px] font-medium text-white-primary">{title}</h3>
         <p className="line-clamp-2 text-[14px] text-[#717375]">{description}</p>
       </div>

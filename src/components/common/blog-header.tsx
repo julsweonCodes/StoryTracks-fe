@@ -36,6 +36,8 @@ export default function BlogHeader() {
   const handlePost = () => {
     setIsLoading(true);
 
+    console.log("images", images);
+
     if (images && aiContentIndex !== undefined) {
       console.log("aiContentIndex", aiContentIndex);
       const imgSaveList: ImageSaveInfo[] = images.map((image) => ({
@@ -48,8 +50,11 @@ export default function BlogHeader() {
       const aiContentResult = aiContent[aiContentIndex];
       const aiGenText = aiContentResult.content;
       const title = aiContentResult.title;
+      const files = images;
 
-      mutate({ ogText: description, aiGenText, title, imgSaveList });
+      console.log("여기서파일추가?");
+
+      mutate({ ogText: description, aiGenText, title, imgSaveList, files });
     }
   };
 
