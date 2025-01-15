@@ -109,6 +109,7 @@ export default function UploadImage() {
       const invalidFiles: string[] = [];
 
       for (const file of fileArray) {
+          console.log(file);
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
         if (!["jpg", "jpeg", "png"].includes(fileExtension || "")) {
           invalidFiles.push(file.name);
@@ -130,6 +131,7 @@ export default function UploadImage() {
           lat: convertToDecimal(metadata.GPSLatitude, "N"),
           lon: convertToDecimal(metadata.GPSLongitude, "E"),
           previewUrl: previewInfo.url,
+          file: file,
           active: false,
         });
 

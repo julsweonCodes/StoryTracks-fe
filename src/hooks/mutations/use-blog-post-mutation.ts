@@ -29,7 +29,14 @@ const useBlogPostMutation = (
     mutationFn: async (data: BlogPost) => {
       const formData = new FormData();
 
-      /*// 텍스트 필드 추가
+      console.log("오잉",data);
+
+      data.files.forEach((file2, index) => {
+        console.log(`files[${index}]`, file2.file);
+        formData.append(`files`, file2.file);
+      });
+
+      // 텍스트 필드 추가
       formData.append("title", data.title);
       formData.append("ogText", data.ogText);
       formData.append("aiGenText", data.aiGenText);
@@ -41,9 +48,7 @@ const useBlogPostMutation = (
         formData.append(`imgSaveList[${index}].geoLong`, image.geoLong);
         formData.append(`imgSaveList[${index}].imgDtm`, image.imgDtm);
         formData.append(`imgSaveList[${index}].thumbYn`, image.thumbYn);
-      });*/
-
-
+      });
 
       const blogPost = {
         title: data.title,
@@ -52,27 +57,11 @@ const useBlogPostMutation = (
         imgSaveList: data.imgSaveList, // imgSaveList 포함
       };
 
+      const jsonBlob = new Blob([JSON.stringify(blogPost)], { type: "application/json" });
+      formData.append("blogPost", jsonBlob);
+
       // JSON 문자열로 변환하여 FormData에 추가
-      formData.append("blogPost", JSON.stringify(blogPost));
-
-      // 파일 추가
-      if (data.files && data.files.length > 0) {
-        data.files.forEach((file, index) => {
-          formData.append(`files[${index}]`, file);
-        });
-      } else {
-        console.error("No files found in the 'files' array");
-      }
-
-  for (let [key, value] of formData.entries()) {
-      console.log("key", key);
-      console.log("value", value);
-      if (value instanceof File) {
-          console.log(`${key}: ${value.name}, size: ${(value.size / 1024 / 1024).toFixed(2)} MB`);
-      } else {
-          console.log(`${key}: ${value}`);
-      }
-  }
+      //formData.append("blogPost", JSON.stringify(blogPost));
 
       const response = await fetch(`${BASE_URL}/blog/save`, {
         method: "POST",

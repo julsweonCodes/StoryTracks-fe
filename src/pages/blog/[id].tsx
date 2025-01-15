@@ -75,7 +75,7 @@ export default function Detail() {
               {data.blogImgList.map((img, index) => (
                 <Image
                   key={index}
-                  src={img.imgPath}
+                  src={img.fileName}
                   width={350}
                   height={350}
                   alt="image"
