@@ -1,7 +1,10 @@
+import Dropdown from "@/components/common/dropdown";
 import Header from "@/components/common/header";
 import Modal from "@/components/common/modal";
 import SEOHeader from "@/components/common/seo-header";
+import EditIcon from "@/components/icons/edit";
 import Minimalistic from "@/components/icons/minimalistic";
+import TrashIcon from "@/components/icons/trash";
 import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import Image from "next/image";
@@ -18,9 +21,23 @@ export default function Detail() {
   const [isOpen, setIsOpen] = useState(false);
   const isNew = searchParams.get("new");
   const [htmlContent, setHtmlContent] = useState<string>();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleDone = () => {
     setIsOpen(false);
+  };
+
+  const handleDelete = () => {
+    setIsDeleteModalOpen(true);
+    router.push("/");
+  };
+
+  const handleSelect = (option: string) => {
+    if (option === "Edit") {
+      console.log("handleSelect:", option);
+    } else if (option === "Delete") {
+      setIsDeleteModalOpen(true);
+    }
   };
 
   useEffect(() => {
@@ -65,8 +82,26 @@ export default function Detail() {
                   2024.12.28. 13:08
                 </span>
               </div>
-              <div className="relative">
+              {/* <div className="relative" onClick={() => setIsDropDownOpen(true)}>
                 <FiMoreVertical size={24} />
+              </div> */}
+              <div className="relative flex h-full w-5 items-center">
+                <Dropdown onSelect={handleSelect}>
+                  {[
+                    {
+                      icon: <EditIcon />,
+                      text: "Edit",
+                    },
+                    { icon: <TrashIcon />, text: "Delete" },
+                  ].map((item, index) => (
+                    <Dropdown.Option key={index} value={item.text}>
+                      <div className="text=[14px] flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary">
+                        {item.icon}
+                        <span>{item.text}</span>
+                      </div>
+                    </Dropdown.Option>
+                  ))}
+                </Dropdown>
               </div>
             </div>
           </div>
@@ -109,6 +144,36 @@ export default function Detail() {
               >
                 Done
               </button>
+            </div>
+          </Modal>
+          <Modal
+            open={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+          >
+            <div className="flex w-full flex-col items-center justify-between gap-4">
+              <div className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#333333]">
+                <TrashIcon color="#A099FF" />
+              </div>
+              <div className="mb-5 flex flex-col items-center justify-center tracking-tight">
+                <h1 className="leading-5 text-white-primary">Delete post</h1>
+                <p className="text-center text-[14px] text-[#B0B0B0]">
+                  Permanently delete this post? This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex w-full flex-col gap-2">
+                <button
+                  className="h-[45px] w-full rounded-xl bg-key-primary"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </button>
+                <button
+                  className="h-[45px] w-full rounded-xl bg-[#333333] text-white-primary"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </Modal>
         </div>
