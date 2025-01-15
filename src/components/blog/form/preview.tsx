@@ -17,7 +17,9 @@ export default function Preview() {
   const [selectIndex, setSelectIndex] = useState<number>(0);
   const [contentData, setContentData] = useState<ContentData>();
   const [htmlContent, setHtmlContent] = useState<string>();
-  const [value, setValue] = useState<string>("");
+  const [value, setValue] = useState<string>(
+    aiContent[aiContentIndex as number].title,
+  );
 
   // const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   const { value } = e.target;
@@ -68,6 +70,11 @@ export default function Preview() {
       })();
   }, [contentData]);
 
+  useEffect(() => {
+    console.log("iaContent", aiContent);
+    setValue(aiContent[aiContentIndex as number].title);
+  }, [aiContent]);
+
   const autoResize = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     textarea.style.height = "36px"; // 초기 높이 설정
@@ -115,7 +122,7 @@ export default function Preview() {
               ))}
             </div>
             {htmlContent && (
-              <div>
+              <div className="prose">
                 <p
                   className="text-[16px] leading-6 tracking-tight"
                   dangerouslySetInnerHTML={{

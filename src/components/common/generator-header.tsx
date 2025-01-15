@@ -34,7 +34,9 @@ export default function GeneratorHeader() {
   });
 
   const handleCancel = () => {
-    if (aiContent.length > 0) {
+    if (activeComponentKey === "preview") {
+      setActiveComponentKey("generator");
+    } else if (aiContent.length > 0) {
       setAiContent([]);
       setAiContentIndex(undefined);
     } else if (activeComponentKey === "generator") {

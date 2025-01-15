@@ -118,7 +118,7 @@ export default function Detail() {
                 />
               ))}
             </div>
-            <div>
+            <div className="prose">
               <p
                 className="text-[16px] leading-6 tracking-tight"
                 dangerouslySetInnerHTML={{ __html: htmlContent || "" }}
