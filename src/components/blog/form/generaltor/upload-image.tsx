@@ -109,7 +109,7 @@ export default function UploadImage() {
       const invalidFiles: string[] = [];
 
       for (const file of fileArray) {
-          console.log(file);
+        console.log(file);
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
         if (!["jpg", "jpeg", "png"].includes(fileExtension || "")) {
           invalidFiles.push(file.name);
@@ -133,7 +133,6 @@ export default function UploadImage() {
           previewUrl: previewInfo.url,
           file: file,
           active: false,
-          file,
         });
 
         console.log("file", file);
