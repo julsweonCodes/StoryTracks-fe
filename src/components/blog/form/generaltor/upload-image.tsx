@@ -131,6 +131,7 @@ export default function UploadImage() {
           lon: convertToDecimal(metadata.GPSLongitude, "E"),
           previewUrl: previewInfo.url,
           active: false,
+          file,
         });
 
         console.log("file", file);

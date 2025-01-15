@@ -1,5 +1,5 @@
 import { useMutation, UseMutationOptions } from "react-query";
-import { BASE_URL, DefaultResponse } from "../utils/fetcher";
+import { BASE_URL } from "../utils/fetcher";
 
 interface BlogPostResponse {
   postId: string;
@@ -43,8 +43,6 @@ const useBlogPostMutation = (
         formData.append(`imgSaveList[${index}].thumbYn`, image.thumbYn);
       });*/
 
-
-
       const blogPost = {
         title: data.title,
         ogText: data.ogText,
@@ -64,15 +62,17 @@ const useBlogPostMutation = (
         console.error("No files found in the 'files' array");
       }
 
-  for (let [key, value] of formData.entries()) {
-      console.log("key", key);
-      console.log("value", value);
-      if (value instanceof File) {
-          console.log(`${key}: ${value.name}, size: ${(value.size / 1024 / 1024).toFixed(2)} MB`);
-      } else {
+      for (const [key, value] of formData.entries()) {
+        console.log("key", key);
+        console.log("value", value);
+        if (value instanceof File) {
+          console.log(
+            `${key}: ${value.name}, size: ${(value.size / 1024 / 1024).toFixed(2)} MB`,
+          );
+        } else {
           console.log(`${key}: ${value}`);
+        }
       }
-  }
 
       const response = await fetch(`${BASE_URL}/blog/save`, {
         method: "POST",

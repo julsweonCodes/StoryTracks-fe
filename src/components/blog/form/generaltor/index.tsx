@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import Textarea from "@/components/common/textarea";
 import Loading from "@/components/common/loading";
 import AiContent from "./ai-content";
@@ -15,6 +15,7 @@ import {
   transformToAiContentInfo,
   GenerateImageInfo,
 } from "@/hooks/mutations/use-generate-mutation";
+import FileTextIcon from "@/components/icons/file-text";
 
 const StepTitle = ({ number, title }: { number: number; title: string }) => (
   <div className="flex items-center gap-2">
@@ -149,7 +150,12 @@ export default function DescriptionForm() {
         ) : (
           <div className="relative flex flex-col gap-2 px-4 pb-4">
             <StepTitle number={2} title="Add Image Descriptions" />
-            <Textarea value={description} setValue={updateDescription} />
+            <Textarea
+              value={description}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                updateDescription(e.target.value)
+              }
+            />
             {isRecording ? (
               <div ref={recorderRef}>
                 <VoiceRecorder onClose={() => setIsRecording(false)} />
@@ -174,7 +180,7 @@ export default function DescriptionForm() {
               disabled={aiContentIndex === undefined}
               onClick={handleSubmit}
             >
-              <FaCheck size={10} />
+              <FileTextIcon />
               Use this Content
             </button>
             <button

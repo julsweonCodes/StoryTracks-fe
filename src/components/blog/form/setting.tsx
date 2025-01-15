@@ -1,6 +1,6 @@
 import Textarea from "@/components/common/textarea";
 import Toggle from "@/components/common/toggle";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 
 export default function Setting() {
   const [value, setValue] = useState<string>("");
@@ -13,8 +13,10 @@ export default function Setting() {
         <h5 className={titleStyle}>Text Style</h5>
         <Textarea
           value={value}
-          setValue={setValue}
-          placeholder={
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+            setValue(e.target.value)
+          }
+          placeholderContent={
             <p className="leading-5 tracking-tight text-[`1`5px]">
               What would you like Gemini to know about you to provide better
               response?
