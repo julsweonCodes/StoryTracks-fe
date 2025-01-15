@@ -31,9 +31,9 @@ const useBlogPostMutation = (
 
       console.log("오잉",data);
 
-      data.files.forEach((file2, index) => {
-        console.log(`files[${index}]`, file2.file);
-        formData.append(`files`, file2.file);
+      data.files.forEach((file, index) => {
+        console.log(`files[${index}]`, file);
+        formData.append(`files`, file);
       });
 
       // 텍스트 필드 추가

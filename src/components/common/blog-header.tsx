@@ -50,7 +50,11 @@ export default function BlogHeader() {
       const aiContentResult = aiContent[aiContentIndex];
       const aiGenText = aiContentResult.content;
       const title = aiContentResult.title;
-      const files = images;
+
+      // images에서 file 추출
+      const files: File[] = images.map((image) => image.file); // File[]로 변환
+
+      //const files = images;
 
       console.log("여기서파일추가?", files);
 

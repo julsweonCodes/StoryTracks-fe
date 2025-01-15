@@ -10,6 +10,7 @@ interface Image {
   imgDtm: string;
   rgstDtm: string;
   thumbYn: string;
+  fileName: string;
 }
 
 interface BlogDetail {

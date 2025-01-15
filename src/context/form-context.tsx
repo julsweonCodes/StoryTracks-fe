@@ -16,6 +16,7 @@ export interface ImageInfo {
   previewUrl: string;
   fileName: string;
   active: boolean;
+  file: File;
 }
 
 export interface StatusInfo {
