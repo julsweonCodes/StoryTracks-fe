@@ -129,7 +129,7 @@ export default function UploadImage() {
           fileName: file.name,
           createDate: metadata.CreateDate,
           lat: convertToDecimal(metadata.GPSLatitude, "N"),
-          lon: convertToDecimal(metadata.GPSLongitude, "E"),
+          lon: convertToDecimal(metadata.GPSLongitude, "W"), // 북미는 W, 아시아는 E
           previewUrl: previewInfo.url,
           file: file,
           active: false,

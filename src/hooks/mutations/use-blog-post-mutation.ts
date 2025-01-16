@@ -42,7 +42,7 @@ const useBlogPostMutation = (
       data.imgSaveList.forEach((image, index) => {
         formData.append(`imgSaveList[${index}].fileName`, image.fileName);
         formData.append(`imgSaveList[${index}].geoLat`, image.geoLat);
-        formData.append(`imgSaveList[${index}].geoLong`, String(Number(image.geoLong) * -1)); // -1을 곱한이유는 경도의 W에 대응하기위해
+        formData.append(`imgSaveList[${index}].geoLong`, image.geoLong);
         formData.append(`imgSaveList[${index}].imgDtm`, image.imgDtm);
         formData.append(`imgSaveList[${index}].thumbYn`, image.thumbYn);
       });
@@ -56,9 +56,6 @@ const useBlogPostMutation = (
 
       const jsonBlob = new Blob([JSON.stringify(blogPost)], { type: "application/json" });
       formData.append("blogPost", jsonBlob);
-
-      // JSON 문자열로 변환하여 FormData에 추가
-      //formData.append("blogPost", JSON.stringify(blogPost));
 
       const response = await fetch(`${process.env.BASE_URL}/blog/save`, {
         method: "POST",
