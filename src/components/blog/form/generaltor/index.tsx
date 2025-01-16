@@ -155,6 +155,16 @@ export default function DescriptionForm() {
               onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                 updateDescription(e.target.value)
               }
+              placeholderContent={
+                <p className="text-[15px] tracking-tight">
+                  {`Tell us a little story about this image! We'll handle the rest to
+            generate the perfect blog content.`}
+                  <br />
+                  <br />
+                  {`For example: 'A serene beach at sunset, with golden skies and waves
+            gently lapping at the shore.'`}
+                </p>
+              }
             />
             {isRecording ? (
               <div ref={recorderRef}>

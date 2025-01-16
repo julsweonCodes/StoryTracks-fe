@@ -1,10 +1,19 @@
 import Textarea from "@/components/common/textarea";
 import Toggle from "@/components/common/toggle";
+import { useFormContext } from "@/context/form-context";
 import { ChangeEvent, useState } from "react";
 
 export default function Setting() {
+  const { activeComponentKey, setActiveComponentKey } = useFormContext();
   const [value, setValue] = useState<string>("");
   const [active, setActive] = useState<number>();
+  const [resetFlag, setResetFlag] = useState("false");
+
+  const handleApply = () => {
+    if (activeComponentKey === "setting") {
+      setActiveComponentKey("generator");
+    }
+  };
 
   const titleStyle = "text-[14px] text-white-primary tracking-tight leading-5";
   return (
@@ -47,16 +56,26 @@ export default function Setting() {
       </div>
       <div className="flex flex-col gap-3 p-4">
         <h5 className={titleStyle}>Text Style</h5>
-        <div>
+        <div className="rounded-lg bg-[#262626]" key={resetFlag}>
           <Toggle text={"Generate hashtags"} />
           <Toggle text={"Include emoji"} />
         </div>
       </div>
       <div className="fixed bottom-0 left-0 flex w-full gap-5 bg-black-primary p-4 text-[14px]">
-        <button className="h-[46px] flex-1 rounded-lg bg-[#333333] leading-5 tracking-tight text-white-primary">
+        <button
+          className="h-[46px] flex-1 rounded-lg bg-[#333333] leading-5 tracking-tight text-white-primary"
+          onClick={() => {
+            setValue("");
+            setActive(undefined);
+            setResetFlag(resetFlag === "false" ? "true" : "false");
+          }}
+        >
           Reset
         </button>
-        <button className="h-[40px] flex-1 rounded-lg bg-key-primary leading-5 tracking-tight text-white-primary">
+        <button
+          className="h-[40px] flex-1 rounded-lg bg-[#A099FF] leading-5 tracking-tight text-white-primary"
+          onClick={handleApply}
+        >
           Apply
         </button>
       </div>

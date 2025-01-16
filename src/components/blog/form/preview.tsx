@@ -47,6 +47,12 @@ export default function Preview() {
         description: data.content,
         images: imagesData,
       });
+
+      (async () => {
+        const htmlContent = await markdownToHtml(data.content);
+
+        setHtmlContent(htmlContent);
+      })();
     }
   }, [aiContent, images, aiContentIndex]);
 
@@ -61,14 +67,14 @@ export default function Preview() {
     }
   }, [selectIndex]);
 
-  useEffect(() => {
-    if (contentData)
-      (async () => {
-        const htmlContent = await markdownToHtml(contentData.description);
+  // useEffect(() => {
+  //   // if (contentData)
+  //   (async () => {
+  //     const htmlContent = await markdownToHtml(contentData.description);
 
-        setHtmlContent(htmlContent);
-      })();
-  }, [contentData]);
+  //     setHtmlContent(htmlContent);
+  //   })();
+  // }, [contentData]);
 
   useEffect(() => {
     console.log("iaContent", aiContent);

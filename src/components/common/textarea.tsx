@@ -8,19 +8,6 @@ interface Props extends React.HTMLProps<HTMLTextAreaElement> {
   placeholderContent?: ReactNode;
 }
 
-const DefaultPlaceholder = () => {
-  return (
-    <p className="text-[15px] tracking-tight">
-      {`Tell us a little story about this image! We'll handle the rest to
-            generate the perfect blog content.`}
-      <br />
-      <br />
-      {`For example: 'A serene beach at sunset, with golden skies and waves
-            gently lapping at the shore.'`}
-    </p>
-  );
-};
-
 export default function Textarea({
   // value,
   // setValue,
