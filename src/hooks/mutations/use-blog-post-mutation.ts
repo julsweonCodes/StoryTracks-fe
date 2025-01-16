@@ -28,8 +28,6 @@ const useBlogPostMutation = (
     mutationFn: async (data: BlogPost) => {
       const formData = new FormData();
 
-      console.log("오잉",data);
-
       data.files.forEach((file, index) => {
         console.log(`files[${index}]`, file);
         formData.append(`files`, file);
@@ -62,7 +60,7 @@ const useBlogPostMutation = (
       // JSON 문자열로 변환하여 FormData에 추가
       //formData.append("blogPost", JSON.stringify(blogPost));
 
-      const response = await fetch(`${BASE_URL}/blog/save`, {
+      const response = await fetch(`${process.env.BASE_URL}/blog/save`, {
         method: "POST",
         body: formData,
       });
