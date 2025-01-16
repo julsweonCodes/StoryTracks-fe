@@ -73,7 +73,7 @@ export default function Setting() {
           Reset
         </button>
         <button
-          className="h-[40px] flex-1 rounded-lg bg-[#A099FF] leading-5 tracking-tight text-white-primary"
+          className="h-[46px] flex-1 rounded-lg bg-[#A099FF] leading-5 tracking-tight text-white-primary"
           onClick={handleApply}
         >
           Apply
