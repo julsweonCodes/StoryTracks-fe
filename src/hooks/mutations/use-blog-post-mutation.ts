@@ -42,7 +42,7 @@ const useBlogPostMutation = (
       data.imgSaveList.forEach((image, index) => {
         formData.append(`imgSaveList[${index}].fileName`, image.fileName);
         formData.append(`imgSaveList[${index}].geoLat`, image.geoLat);
-        formData.append(`imgSaveList[${index}].geoLong`, image.geoLong*-1); // -1을 곱한이유는 경도의 W에 대응하기위해
+        formData.append(`imgSaveList[${index}].geoLong`, String(Number(image.geoLong) * -1)); // -1을 곱한이유는 경도의 W에 대응하기위해
         formData.append(`imgSaveList[${index}].imgDtm`, image.imgDtm);
         formData.append(`imgSaveList[${index}].thumbYn`, image.thumbYn);
       });
