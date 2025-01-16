@@ -1,4 +1,3 @@
-import { BASE_URL } from '../../config';
 import { http, HttpResponse } from "msw";
 
 export const postGenerate = http.post(

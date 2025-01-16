@@ -1,4 +1,3 @@
-import { BASE_URL } from '../../config';
 import { useQuery } from "react-query";
 import { DefaultResponse } from "../utils/fetcher";
 

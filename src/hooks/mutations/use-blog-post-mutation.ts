@@ -1,4 +1,3 @@
-import { BASE_URL } from '../../config';
 import { useMutation, UseMutationOptions } from "react-query";
 
 interface BlogPostResponse {

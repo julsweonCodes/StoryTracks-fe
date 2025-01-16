@@ -1,4 +1,3 @@
-import { BASE_URL } from '../../config';
 import { http, HttpResponse } from "msw";
 
 export const getPostsDetail = http.get(`${BASE_URL}/posts/:post_id`, () => {
