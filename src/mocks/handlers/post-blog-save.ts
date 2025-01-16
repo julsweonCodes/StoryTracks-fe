@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/hooks/utils/fetcher";
+import { BASE_URL } from '../../config';
 import { http, HttpResponse } from "msw";
 
 export const postBlogSave = http.post(

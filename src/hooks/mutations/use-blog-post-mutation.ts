@@ -1,5 +1,5 @@
+import { BASE_URL } from '../../config';
 import { useMutation, UseMutationOptions } from "react-query";
-import { BASE_URL } from "../utils/fetcher";
 
 interface BlogPostResponse {
   postId: string;

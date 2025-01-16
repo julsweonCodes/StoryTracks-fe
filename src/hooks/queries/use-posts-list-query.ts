@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
-import { BASE_URL, DefaultResponse } from "../utils/fetcher";
+import { DefaultResponse } from "../utils/fetcher";
 import { markdownToPlainText } from "@/utils/markdown-to-plain-text";
+import { BASE_URL } from '../../config';
 
 export interface ProcessedBlog {
   postId: number;
@@ -26,7 +27,6 @@ interface Blog {
 }
 
 const usePostsListQuery = () => {
-  console.log("usePostsListQuery");
   return useQuery<Blog[]>({
     queryKey: ["blog-list"],
     queryFn: () => fetch(`${BASE_URL}/posts/list`).then((res) => res.json()),

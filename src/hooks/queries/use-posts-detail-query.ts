@@ -1,5 +1,6 @@
+import { BASE_URL } from '../../config';
 import { useQuery } from "react-query";
-import { BASE_URL, DefaultResponse } from "../utils/fetcher";
+import { DefaultResponse } from "../utils/fetcher";
 
 interface Image {
   imgId: number;
