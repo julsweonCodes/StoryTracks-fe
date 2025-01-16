@@ -86,7 +86,7 @@ export default function DescriptionForm() {
 
     const imgInfo: GenerateImageInfo = {
       geoLat: images[0].lat.toString(),
-      geoLong: images[0].lon.toString(),
+      geoLong: ((images[0].lon)*-1).toString(),  // -1을 곱한이유는 경도의 W에 대응하기위해
       imgDtm: new Date(earliestDate).toISOString(), // ISO 형식으로 변환
     };
 
