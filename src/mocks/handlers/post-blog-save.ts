@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 
 export const postBlogSave = http.post(
-  `${BASE_URL}/blog/save`,
+  `${process.env.BASE_URL}/blog/save`,
   async ({ request }) => {
     const formData = await request.formData();
 

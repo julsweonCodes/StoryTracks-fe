@@ -27,7 +27,7 @@ interface BlogDetail {
 const usePostsDetailQuery = (id?: string) => {
   return useQuery<BlogDetail>({
     queryKey: ["blog-detail", id],
-    queryFn: () => fetch(`${BASE_URL}/posts/${id}`).then((res) => res.json()),
+    queryFn: () => fetch(`${process.env.BASE_URL}/posts/${id}`).then((res) => res.json()),
     enabled: !!id,
   });
 };

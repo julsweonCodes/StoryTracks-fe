@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-export const getPostsDetail = http.get(`${BASE_URL}/posts/:post_id`, () => {
+export const getPostsDetail = http.get(`${process.env.BASE_URL}/posts/:post_id`, () => {
   return HttpResponse.json({
     postId: 1,
     title: "블로그 제목12",

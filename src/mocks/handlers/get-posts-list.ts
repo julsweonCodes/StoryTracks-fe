@@ -123,7 +123,7 @@ const markersMock = [
   },
 ];
 
-export const getPostsList = http.get(`${BASE_URL}/posts/list`, () => {
+export const getPostsList = http.get(`${process.env.BASE_URL}/posts/list`, () => {
   return HttpResponse.json(
     markersMock.map((v, index) => ({
       postId: Math.floor(Math.random() * 100),
