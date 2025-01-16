@@ -1,9 +1,11 @@
 import { ReactNode, useRef, useState } from "react";
 
-interface Props {
-  value: string;
-  setValue: (value: string) => void;
-  placeholder?: ReactNode;
+interface Props extends React.HTMLProps<HTMLTextAreaElement> {
+  // value: string;
+  // setValue: (value: string) => void;
+  // placeholder?: ReactNode;
+  contentClassName?: string;
+  placeholderContent?: ReactNode;
 }
 
 const DefaultPlaceholder = () => {
@@ -20,9 +22,12 @@ const DefaultPlaceholder = () => {
 };
 
 export default function Textarea({
-  value,
-  setValue,
-  placeholder = <DefaultPlaceholder />,
+  // value,
+  // setValue,
+  // placeholder = <DefaultPlaceholder />,
+  contentClassName,
+  placeholderContent,
+  ...textareaProps
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -33,13 +38,19 @@ export default function Textarea({
   };
 
   return (
-    <div className="relative aspect-[7/5] overflow-hidden rounded-lg bg-[#262626]">
-      {!value && !isFocused && (
+    <div
+      className={
+        contentClassName
+          ? contentClassName
+          : "relative aspect-[7/5] overflow-hidden rounded-lg bg-[#262626]"
+      }
+    >
+      {!textareaProps.value && !isFocused && placeholderContent && (
         <div
           className="absolute left-0 top-0 flex flex-col gap-2 p-4 text-[#7A7A7A]"
           onClick={handleFocus}
         >
-          {placeholder}
+          {placeholderContent}
         </div>
       )}
       <textarea
@@ -49,8 +60,10 @@ export default function Textarea({
         className="h-full w-full rounded-lg bg-[#262626] p-5"
         onFocus={handleFocus}
         onBlur={() => setIsFocused(false)}
-        onChange={(e) => setValue(e.target.value)}
-        value={value}
+        // onChange={(e) => setValue(e.target.value)}
+        // value={value}
+        {...textareaProps}
+        style={{ resize: "none" }}
       />
     </div>
   );

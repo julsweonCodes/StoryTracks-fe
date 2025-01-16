@@ -50,7 +50,7 @@ export default function Home() {
           button={
             <div
               onClick={handleChange}
-              className="text-white flex h-[62px] cursor-pointer flex-col items-center justify-between rounded rounded-t-3xl bg-black-primary px-4 py-2"
+              className={`text-white flex h-[62px] cursor-pointer flex-col items-center justify-between ${isOpen ? "" : "rounded-t-3xl"} bg-black-primary px-4 py-2`}
             >
               <div className="h-[4px] w-[40px] rounded-full bg-white-primary" />
               <span className="text-[14px] text-white-primary">

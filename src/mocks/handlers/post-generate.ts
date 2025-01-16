@@ -2,7 +2,7 @@ import { BASE_URL } from "@/hooks/utils/fetcher";
 import { http, HttpResponse } from "msw";
 
 export const postGenerate = http.post(
-  `${BASE_URL}/api/blog/generate`,
+  `${BASE_URL}/blog/generate`,
   async ({ request }) => {
     const generate = await request.json();
 

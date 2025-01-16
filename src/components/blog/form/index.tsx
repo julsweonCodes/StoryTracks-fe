@@ -20,7 +20,7 @@ export default function Form() {
   const headers = {
     write: GeneratorHeader,
     generator: GeneratorHeader,
-    preview: BlogHeader,
+    preview: GeneratorHeader,
     setting: GeneratorHeader,
   };
 
