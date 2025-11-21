@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - BASE_URL=http://localhost:8080/api
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - frontend-network
+
+networks:
+  frontend-network:
+    driver: bridge

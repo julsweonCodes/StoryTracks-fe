@@ -111,7 +111,7 @@ export default function UploadImage() {
       for (const file of fileArray) {
         console.log(file);
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
-        if (!["jpg", "jpeg", "png"].includes(fileExtension || "")) {
+        if (!["jpg", "jpeg", "png", "heic"].includes(fileExtension || "")) {
           invalidFiles.push(file.name);
           continue;
         }

@@ -1,5 +1,5 @@
 # ---- Development image ----
-FROM node:20-alpine
+FROM node:23.5.0-alpine
 
 WORKDIR /app
 

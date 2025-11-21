@@ -2,6 +2,32 @@ import { useQuery } from "react-query";
 import { DefaultResponse } from "../utils/fetcher";
 import { markdownToPlainText } from "@/utils/markdown-to-plain-text";
 
+interface PaginatedBlogResponse {
+  content: Blog[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+  };
+  totalPages: number;
+  totalElements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
+};
+
 export interface ProcessedBlog {
   postId: number;
   title: string;
@@ -14,7 +40,7 @@ interface Blog {
   title: string;
   ogText: string;
   aiGenText: string;
-  password: string;
+  // password: string;
   rgstDtm: string;
   chngDtm: null;
   thumbHash: {
@@ -28,7 +54,10 @@ interface Blog {
 const usePostsListQuery = () => {
   return useQuery<Blog[]>({
     queryKey: ["blog-list"],
-    queryFn: () => fetch(`${process.env.BASE_URL}/posts/list`).then((res) => res.json()),
+    queryFn: () => 
+      fetch(`${process.env.BASE_URL}/posts/list`)
+        .then((res) => res.json())
+        .then((response: DefaultResponse<PaginatedBlogResponse>) => response.data.content),
   });
 };
 
