@@ -66,6 +66,7 @@ export default function Home() {
               title={post.title}
               description={post.des}
               src={post.src}
+              rgstDtm={post.rgstDtm}
             />
           ))}
         </Drawer>

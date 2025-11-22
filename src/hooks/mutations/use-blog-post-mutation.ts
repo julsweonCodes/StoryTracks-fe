@@ -54,7 +54,9 @@ const useBlogPostMutation = (
         imgSaveList: data.imgSaveList, // imgSaveList 포함
       };
 
-      const jsonBlob = new Blob([JSON.stringify(blogPost)], { type: "application/json" });
+      const jsonBlob = new Blob([JSON.stringify(blogPost)], {
+        type: "application/json",
+      });
       formData.append("blogPost", jsonBlob);
 
       const response = await fetch(`${process.env.BASE_URL}/blog/save`, {

@@ -48,9 +48,10 @@ const mapStyles = [
 
 interface Props {
   markers: google.maps.LatLngLiteral[];
+  zoom?: number;
 }
 
-export default function Map({ markers = [] }: Props) {
+export default function Map({ markers = [], zoom: customZoom }: Props) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -59,7 +60,7 @@ export default function Map({ markers = [] }: Props) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [center, setCenter] = useState(defaultCenter); // 중심 좌표
-  const [zoom] = useState(15); // 줌 레벨
+  const [zoom] = useState(customZoom ?? 15); // 줌 레벨
   const markerClusterRef = useRef<MarkerClusterer | null>(null);
 
   const [clusters, setClusters] = useState<

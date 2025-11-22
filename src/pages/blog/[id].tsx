@@ -7,6 +7,7 @@ import Minimalistic from "@/components/icons/minimalistic";
 import TrashIcon from "@/components/icons/trash";
 import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
 import { markdownToHtml } from "@/utils/markdown-to-html";
+import { formatLocalizedDateTime } from "@/utils/format-date";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -79,7 +80,7 @@ export default function Detail() {
                   John Doe
                 </span>
                 <span className="text-[12px] tracking-tight text-black-tertiary">
-                  2024.12.28. 13:08
+                  {formatLocalizedDateTime(data.rgstDtm)}
                 </span>
               </div>
               {/* <div className="relative" onClick={() => setIsDropDownOpen(true)}>

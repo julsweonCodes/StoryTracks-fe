@@ -26,23 +26,24 @@ interface PaginatedBlogResponse {
   numberOfElements: number;
   first: boolean;
   empty: boolean;
-};
+}
 
 export interface ProcessedBlog {
   postId: number;
   title: string;
   src: string;
   des: string;
+  rgstDtm: string;
 }
 
 interface Blog {
   postId: number;
   title: string;
-  ogText: string;
+  ogText: string | null;
   aiGenText: string;
   // password: string;
-  rgstDtm: string;
-  chngDtm: null;
+  rgstDtm: string; // ISO 8601 format from Java OffsetDateTime
+  chngDtm: string | null; // ISO 8601 format from Java OffsetDateTime
   thumbHash: {
     thumbGeoLong: string;
     thumbImgPath: string;
@@ -54,10 +55,10 @@ interface Blog {
 const usePostsListQuery = () => {
   return useQuery<Blog[]>({
     queryKey: ["blog-list"],
-    queryFn: () => 
-      fetch(`${process.env.BASE_URL}/posts/list`)
+    queryFn: () =>
+      fetch(`${process.env.BASE_URL}/posts/feed`)
         .then((res) => res.json())
-        .then((response: DefaultResponse<PaginatedBlogResponse>) => response.data.content),
+        .then((response: PaginatedBlogResponse) => response.content),
   });
 };
 
@@ -80,6 +81,7 @@ const processBlogs = async (blogs?: Blog[]): Promise<ProcessedBlog[]> => {
       title: blog.title,
       src: blog.thumbHash.thumbImgPath,
       des: await markdownToPlainText(blog.aiGenText),
+      rgstDtm: blog.rgstDtm,
     })),
   );
 

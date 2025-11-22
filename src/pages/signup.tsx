@@ -32,7 +32,7 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
   const isLengthValid = password.length >= 8 && password.length <= 30;
 
   return (
-    <div className="text-[12px] text-gray-400 space-y-1 mt-2">
+    <div className="mt-2 space-y-1 text-[12px] text-gray-400">
       <div className={hasLowercase ? "text-green-500" : "text-gray-400"}>
         ✓ Lowercase letters (a-z)
       </div>
@@ -61,28 +61,52 @@ export default function SignUpPage() {
     nickname: "",
     birthDate: "",
     bio: "",
+    blogName: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] =
+    useState(false);
+  const [takenUserId, setTakenUserId] = useState<string | null>(null);
+  const [takenEmail, setTakenEmail] = useState<string | null>(null);
 
   const handleBack = () => {
     window.history.back();
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
     setError("");
+    // If userId changes, clear the takenUserId marker
+    if (name === "userId") {
+      setTakenUserId(null);
+    }
+    // If email-related fields change, clear the takenEmail marker
+    if (
+      name === "emailId" ||
+      name === "emailDomain" ||
+      name === "emailCustom"
+    ) {
+      setTakenEmail(null);
+    }
   };
 
   // Validation rules
   const isUserIdValid = /^[a-z0-9]{8,}$/.test(formData.userId);
+  const isUserIdAvailable = !takenUserId || formData.userId !== takenUserId;
   const getEmail = () => {
-    const domain = formData.emailDomain === "custom" ? formData.emailCustom : formData.emailDomain;
+    const domain =
+      formData.emailDomain === "custom"
+        ? formData.emailCustom
+        : formData.emailDomain;
     return `${formData.emailId}@${domain}`;
   };
   const isEmailIdValid = !!formData.emailId.trim();
@@ -91,13 +115,20 @@ export default function SignUpPage() {
       ? true
       : /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.emailCustom);
   const isEmailValid = isEmailIdValid && isEmailDomainValid;
-  const isPasswordValid =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,30}$/.test(formData.password);
+  const isEmailAvailable = !takenEmail || getEmail() !== takenEmail;
+  const isPasswordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,30}$/.test(
+    formData.password,
+  );
   const isConfirmPasswordValid =
     formData.confirmPassword === formData.password && isPasswordValid;
   const isNicknameValid =
-    formData.nickname.length >= 5 && !/[!@#$%^&*(),.?":{}|<>]/.test(formData.nickname);
+    formData.nickname.length >= 5 &&
+    !/[!@#$%^&*(),.?":{}|<>]/.test(formData.nickname);
   const isBirthDateValid = !!formData.birthDate;
+  const isBlogNameValid =
+    formData.blogName.length > 0 &&
+    formData.blogName.length <= 50 &&
+    !/[!@#$%^&*(),.?":{}|<>\\/]/.test(formData.blogName);
 
   const isFormValid =
     isUserIdValid &&
@@ -105,11 +136,14 @@ export default function SignUpPage() {
     isPasswordValid &&
     isConfirmPasswordValid &&
     isNicknameValid &&
-    isBirthDateValid;
+    isBirthDateValid &&
+    isBlogNameValid;
 
   const validateForm = (): boolean => {
     if (!isUserIdValid) {
-      setError("User ID must be at least 8 characters (lowercase letters and numbers only)");
+      setError(
+        "User ID must be at least 8 characters (lowercase letters and numbers only)",
+      );
       return false;
     }
     if (!isEmailValid) {
@@ -117,7 +151,9 @@ export default function SignUpPage() {
       return false;
     }
     if (!isPasswordValid) {
-      setError("Password must be 8-30 characters with uppercase, lowercase, and numbers");
+      setError(
+        "Password must be 8-30 characters with uppercase, lowercase, and numbers",
+      );
       return false;
     }
     if (!isConfirmPasswordValid) {
@@ -125,11 +161,23 @@ export default function SignUpPage() {
       return false;
     }
     if (!isNicknameValid) {
-      setError("Nickname must be at least 5 characters (no special characters)");
+      setError(
+        "Nickname must be at least 5 characters (no special characters)",
+      );
       return false;
     }
     if (!isBirthDateValid) {
       setError("Birth date is required");
+      return false;
+    }
+    if (!isBlogNameValid) {
+      if (formData.blogName.length === 0) {
+        setError("Blog name is required");
+      } else if (formData.blogName.length > 50) {
+        setError("Blog name must be under 50 bytes");
+      } else {
+        setError("Blog name cannot contain special characters");
+      }
       return false;
     }
     return true;
@@ -141,39 +189,71 @@ export default function SignUpPage() {
     setLoading(true);
     try {
       const birthYmd = formData.birthDate.replace(/-/g, "");
+      const jsonObj = JSON.stringify({
+        userId: formData.userId,
+        pwd: formData.password,
+        email: getEmail(),
+        birthYmd: birthYmd || null,
+        nickname: formData.nickname,
+        blogName: formData.blogName,
+        bio: formData.bio || null,
+      });
+      console.log("This is signup Request obj: ", jsonObj);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api"}/auth/signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: formData.userId,
-            pwd: formData.password,
-            email: getEmail(),
-            birthYmd: birthYmd || null,
-            nickname: formData.nickname,
-            bio: formData.bio || null,
-          }),
-        }
-      );
+      const response = await fetch(`${process.env.BASE_URL}/users/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: formData.userId,
+          pwd: formData.password,
+          email: getEmail(),
+          birthYmd: birthYmd || null,
+          nickname: formData.nickname,
+          blogName: formData.blogName,
+          bio: formData.bio || null,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || "Sign up failed");
+        console.log("Signup error response data:", errorData);
+        const errorMessage =
+          errorData.data?.message || errorData.message || "Sign up failed";
+
+        // If it's a "user already exists" error, mark the userId as taken
+        if (
+          errorMessage.toLowerCase().includes("user") &&
+          (errorMessage.toLowerCase().includes("already") ||
+            errorMessage.toLowerCase().includes("exist"))
+        ) {
+          setTakenUserId(formData.userId);
+        }
+
+        // If it's an "email already exists" error, mark the email as taken
+        if (
+          errorMessage.toLowerCase().includes("email") &&
+          (errorMessage.toLowerCase().includes("already") ||
+            errorMessage.toLowerCase().includes("exist"))
+        ) {
+          setTakenEmail(getEmail());
+        }
+
+        // Show system alert
+        alert("Sign Up Error: " + errorMessage);
         return;
       }
 
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userEmail", getEmail());
-      localStorage.setItem("userId", formData.userId);
-      localStorage.setItem("nickname", formData.nickname);
-
-      router.push("/");
+      // Show success alert
+      alert("Account created successfully! Please log in.");
+      // Don't auto-login, redirect to login page instead
+      router.push("/login");
     } catch (err) {
-      setError("An error occurred during sign up. Please try again.");
+      const errorMessage =
+        "An error occurred during sign up. Please try again.";
+      // Show system alert
+      alert("Sign Up Error: " + errorMessage);
       console.error(err);
     } finally {
       setLoading(false);
@@ -186,12 +266,12 @@ export default function SignUpPage() {
 
   return (
     <div
-      className="flex min-h-screen flex-col items-center gap-5 bg-black-primary text-white-primary"
+      className="flex h-screen flex-col items-center gap-5 overflow-y-auto bg-black-primary text-white-primary"
       style={{ position: "relative" }}
     >
       <div className="relative flex w-full items-center justify-start px-5 pt-5">
         <div
-          className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] cursor-pointer hover:bg-[#3a3a3a]"
+          className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-lg bg-[#262626] hover:bg-[#3a3a3a]"
           onClick={handleBack}
         >
           <FaChevronLeft />
@@ -208,8 +288,6 @@ export default function SignUpPage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          {error && <p className="text-sm text-red-500">{error}</p>}
-
           {/* User ID */}
           <div>
             <Input
@@ -218,18 +296,31 @@ export default function SignUpPage() {
               name="userId"
               value={formData.userId}
               onChange={handleInputChange}
-              icon={<ValidationIcon isFilled={isUserIdValid} />}
+              icon={
+                takenUserId && formData.userId === takenUserId ? (
+                  <FaX className="text-red-500" />
+                ) : (
+                  <ValidationIcon
+                    isFilled={isUserIdValid && isUserIdAvailable}
+                  />
+                )
+              }
             />
             {formData.userId && !isUserIdValid && (
-              <p className="text-[12px] text-red-500 mt-1">
+              <p className="mt-1 text-[12px] text-red-500">
                 Must be at least 8 characters (lowercase a-z and 0-9 only)
+              </p>
+            )}
+            {takenUserId === formData.userId && (
+              <p className="mt-1 text-[12px] text-red-500">
+                This user ID is already taken
               </p>
             )}
           </div>
 
           {/* Email */}
           <div>
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <div className="flex-1">
                 <Input
                   type="text"
@@ -259,7 +350,11 @@ export default function SignUpPage() {
                     className="h-[56px] w-full rounded-lg bg-[#262626] px-4 text-white-primary focus:outline-none focus:ring-1 focus:ring-key-primary"
                   >
                     {COMMON_EMAIL_DOMAINS.map((domain) => (
-                      <option key={domain} value={domain} className="bg-[#262626]">
+                      <option
+                        key={domain}
+                        value={domain}
+                        className="bg-[#262626]"
+                      >
                         {domain}
                       </option>
                     ))}
@@ -271,8 +366,12 @@ export default function SignUpPage() {
               </div>
             </div>
             {isEmailIdValid && isEmailDomainValid && (
-              <p className="text-[12px] text-green-500 mt-1">
-                Email: {getEmail()}
+              <p
+                className={`mt-1 text-[12px] ${takenEmail === getEmail() ? "text-red-500" : "text-green-500"}`}
+              >
+                {takenEmail === getEmail()
+                  ? "This email is already taken"
+                  : `Email: ${getEmail()}`}
               </p>
             )}
           </div>
@@ -280,7 +379,13 @@ export default function SignUpPage() {
           {/* Password */}
           <div>
             <Input
-              icon={formData.password && isPasswordValid ? <FaCheck className="text-green-500" /> : <LockIcon />}
+              icon={
+                formData.password && isPasswordValid ? (
+                  <FaCheck className="text-green-500" />
+                ) : (
+                  <LockIcon />
+                )
+              }
               type="password"
               placeholder="Password (8-30 chars, uppercase, lowercase, numbers)"
               name="password"
@@ -323,7 +428,7 @@ export default function SignUpPage() {
               icon={<ValidationIcon isFilled={isNicknameValid} />}
             />
             {formData.nickname && !isNicknameValid && (
-              <p className="text-[12px] text-red-500 mt-1">
+              <p className="mt-1 text-[12px] text-red-500">
                 {formData.nickname.length < 5
                   ? "Must be at least 5 characters"
                   : "No special characters allowed"}
@@ -341,6 +446,27 @@ export default function SignUpPage() {
               onChange={handleInputChange}
               className="h-[48px] rounded-lg bg-[#262626] px-4 text-white-primary placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-key-primary"
             />
+          </div>
+
+          {/* Blog Name */}
+          <div>
+            <Input
+              type="text"
+              placeholder="Blog Name (no special characters, max 50 bytes)"
+              name="blogName"
+              value={formData.blogName}
+              onChange={handleInputChange}
+              icon={<ValidationIcon isFilled={isBlogNameValid} />}
+            />
+            {formData.blogName && !isBlogNameValid && (
+              <p className="mt-1 text-[12px] text-red-500">
+                {formData.blogName.length === 0
+                  ? "Blog name is required"
+                  : formData.blogName.length > 50
+                    ? "Must be under 50 bytes"
+                    : "No special characters allowed"}
+              </p>
+            )}
           </div>
 
           {/* Bio */}
@@ -362,8 +488,8 @@ export default function SignUpPage() {
           <button
             className={`h-[48px] w-full rounded-lg py-2 font-bold text-[#0C0C0DB2] transition-opacity ${
               isFormValid && !loading
-                ? "bg-key-primary cursor-pointer hover:opacity-90"
-                : "bg-[#5B578A] cursor-not-allowed opacity-50"
+                ? "cursor-pointer bg-key-primary hover:opacity-90"
+                : "cursor-not-allowed bg-[#5B578A] opacity-50"
             }`}
             disabled={!isFormValid || loading}
             onClick={handleSignUp}

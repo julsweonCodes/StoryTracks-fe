@@ -123,27 +123,30 @@ const markersMock = [
   },
 ];
 
-export const getPostsList = http.get(`${process.env.BASE_URL}/posts/list`, () => {
-  return HttpResponse.json(
-    markersMock.map((v, index) => ({
-      postId: Math.floor(Math.random() * 100),
-      title: `[${index}]` + "블로그 제목",
-      ogText:
-        `[${index}]` +
-        "**Version 1:**\n\n**Morning in the Heart of Africa**\n\nAs the golden rays of dawn kissed the equatorial land at 6:30 AM, I found myself immersed in the vibrant heart of Africa. Latitude 10 and longitude 30 marked my location, where the rhythmic beat of life pulsated with every breath.\n\nI embarked on a guided safari, scanning the vast expanse for elusive wildlife. With each step, my senses were tantalized by the symphony of nature. The roar of lions echoed through the dense jungle, while the gentle flutter of birds painted the sky in hues of emerald and azure.\n\n**Version 2:**\n\n**An Encounter in the African Savannah**\n\nAt the break of dawn, I ventured deep into the untamed African savannah at 6:30 AM. Latitude 10 and longitude 30 served as my compass, leading me towards a realm of wonder.\n\nAtop an open-air jeep, I witnessed the majestic dance of wildlife. Elephants lumbered through the golden grass, their trumpeting calls resonating across the plains. Zebras galloped with breathtaking grace, their striped patterns shimmering in the morning light.\n\n**Version 3:**\n\n**A Day in Africa's Tropical Paradise**\n\nWith the sun casting a golden glow upon the lush landscape, I set out on an adventure at 6:30 AM, guided by the coordinates of latitude 10 and longitude 30. I found myself in a tropical paradise, brimming with vibrant life.\n\nAs I strolled through the rainforest, the air was heavy with the sweet scent of exotic flowers. Monkeys swung effortlessly through the trees, while vibrant birdsong filled the air with a cacophony of melodies. I couldn't help but feel a sense of awe and gratitude to have witnessed such natural beauty.",
-      aiGenText:
-        `[${index}]\n` +
-        "**Version 1:**\n\n**Morning in the Heart of Africa**\n\nAs the golden rays of dawn kissed the equatorial land at 6:30 AM, I found myself immersed in the vibrant heart of Africa. Latitude 10 and longitude 30 marked my location, where the rhythmic beat of life pulsated with every breath.\n\nI embarked on a guided safari, scanning the vast expanse for elusive wildlife. With each step, my senses were tantalized by the symphony of nature. The roar of lions echoed through the dense jungle, while the gentle flutter of birds painted the sky in hues of emerald and azure.\n\n**Version 2:**\n\n**An Encounter in the African Savannah**\n\nAt the break of dawn, I ventured deep into the untamed African savannah at 6:30 AM. Latitude 10 and longitude 30 served as my compass, leading me towards a realm of wonder.\n\nAtop an open-air jeep, I witnessed the majestic dance of wildlife. Elephants lumbered through the golden grass, their trumpeting calls resonating across the plains. Zebras galloped with breathtaking grace, their striped patterns shimmering in the morning light.\n\n**Version 3:**\n\n**A Day in Africa's Tropical Paradise**\n\nWith the sun casting a golden glow upon the lush landscape, I set out on an adventure at 6:30 AM, guided by the coordinates of latitude 10 and longitude 30. I found myself in a tropical paradise, brimming with vibrant life.\n\nAs I strolled through the rainforest, the air was heavy with the sweet scent of exotic flowers. Monkeys swung effortlessly through the trees, while vibrant birdsong filled the air with a cacophony of melodies. I couldn't help but feel a sense of awe and gratitude to have witnessed such natural beauty.",
-      password:
-        "5906ac361a137e2d286465cd6588ebb5ac3f5ae955001100bc41577c3d751764",
-      rgstDtm: "2025-01-05 10:26:27",
-      chngDtm: null,
-      thumbHash: {
-        thumbGeoLong: v.lng.toString(),
-        thumbImgPath: "/image1.jpeg",
-        thumbImgId: "1",
-        thumbGeoLat: v.lat.toString(),
-      },
-    })),
-  );
-});
+export const getPostsList = http.get(
+  `${process.env.BASE_URL}/posts/list`,
+  () => {
+    return HttpResponse.json(
+      markersMock.map((v, index) => ({
+        postId: Math.floor(Math.random() * 100),
+        title: `[${index}]` + "블로그 제목",
+        ogText:
+          `[${index}]` +
+          "**Version 1:**\n\n**Morning in the Heart of Africa**\n\nAs the golden rays of dawn kissed the equatorial land at 6:30 AM, I found myself immersed in the vibrant heart of Africa. Latitude 10 and longitude 30 marked my location, where the rhythmic beat of life pulsated with every breath.\n\nI embarked on a guided safari, scanning the vast expanse for elusive wildlife. With each step, my senses were tantalized by the symphony of nature. The roar of lions echoed through the dense jungle, while the gentle flutter of birds painted the sky in hues of emerald and azure.\n\n**Version 2:**\n\n**An Encounter in the African Savannah**\n\nAt the break of dawn, I ventured deep into the untamed African savannah at 6:30 AM. Latitude 10 and longitude 30 served as my compass, leading me towards a realm of wonder.\n\nAtop an open-air jeep, I witnessed the majestic dance of wildlife. Elephants lumbered through the golden grass, their trumpeting calls resonating across the plains. Zebras galloped with breathtaking grace, their striped patterns shimmering in the morning light.\n\n**Version 3:**\n\n**A Day in Africa's Tropical Paradise**\n\nWith the sun casting a golden glow upon the lush landscape, I set out on an adventure at 6:30 AM, guided by the coordinates of latitude 10 and longitude 30. I found myself in a tropical paradise, brimming with vibrant life.\n\nAs I strolled through the rainforest, the air was heavy with the sweet scent of exotic flowers. Monkeys swung effortlessly through the trees, while vibrant birdsong filled the air with a cacophony of melodies. I couldn't help but feel a sense of awe and gratitude to have witnessed such natural beauty.",
+        aiGenText:
+          `[${index}]\n` +
+          "**Version 1:**\n\n**Morning in the Heart of Africa**\n\nAs the golden rays of dawn kissed the equatorial land at 6:30 AM, I found myself immersed in the vibrant heart of Africa. Latitude 10 and longitude 30 marked my location, where the rhythmic beat of life pulsated with every breath.\n\nI embarked on a guided safari, scanning the vast expanse for elusive wildlife. With each step, my senses were tantalized by the symphony of nature. The roar of lions echoed through the dense jungle, while the gentle flutter of birds painted the sky in hues of emerald and azure.\n\n**Version 2:**\n\n**An Encounter in the African Savannah**\n\nAt the break of dawn, I ventured deep into the untamed African savannah at 6:30 AM. Latitude 10 and longitude 30 served as my compass, leading me towards a realm of wonder.\n\nAtop an open-air jeep, I witnessed the majestic dance of wildlife. Elephants lumbered through the golden grass, their trumpeting calls resonating across the plains. Zebras galloped with breathtaking grace, their striped patterns shimmering in the morning light.\n\n**Version 3:**\n\n**A Day in Africa's Tropical Paradise**\n\nWith the sun casting a golden glow upon the lush landscape, I set out on an adventure at 6:30 AM, guided by the coordinates of latitude 10 and longitude 30. I found myself in a tropical paradise, brimming with vibrant life.\n\nAs I strolled through the rainforest, the air was heavy with the sweet scent of exotic flowers. Monkeys swung effortlessly through the trees, while vibrant birdsong filled the air with a cacophony of melodies. I couldn't help but feel a sense of awe and gratitude to have witnessed such natural beauty.",
+        password:
+          "5906ac361a137e2d286465cd6588ebb5ac3f5ae955001100bc41577c3d751764",
+        rgstDtm: "2025-01-05 10:26:27",
+        chngDtm: null,
+        thumbHash: {
+          thumbGeoLong: v.lng.toString(),
+          thumbImgPath: "/image1.jpeg",
+          thumbImgId: "1",
+          thumbGeoLat: v.lat.toString(),
+        },
+      })),
+    );
+  },
+);

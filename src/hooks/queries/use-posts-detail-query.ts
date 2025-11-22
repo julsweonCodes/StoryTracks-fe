@@ -9,7 +9,7 @@ interface Image {
   imgPath: string;
   imgDtm: string;
   rgstDtm: string;
-  thumbYn: string;
+  thumbYn: string | null;
   fileName: string;
 }
 
@@ -18,16 +18,19 @@ interface BlogDetail {
   title: string;
   ogText: string;
   aiGenText: string;
-  password: string;
-  rgstDtm: string;
-  chngDtm: null;
+  password?: string;
+  rgstDtm: string; // ISO 8601 format from Java OffsetDateTime
+  chngDtm: string | null; // ISO 8601 format from Java OffsetDateTime
   blogImgList: Image[];
 }
 
 const usePostsDetailQuery = (id?: string) => {
   return useQuery<BlogDetail>({
     queryKey: ["blog-detail", id],
-    queryFn: () => fetch(`${process.env.BASE_URL}/posts/${id}`).then((res) => res.json()),
+    queryFn: () =>
+      fetch(`${process.env.BASE_URL}/posts/${id}`)
+        .then((res) => res.json())
+        .then((response: DefaultResponse<BlogDetail>) => response.data),
     enabled: !!id,
   });
 };
