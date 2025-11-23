@@ -1,6 +1,7 @@
 import Input from "@/components/common/input";
 import LockIcon from "@/components/icons/lock";
 import SmsIcon from "@/components/icons/sms";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa6";
@@ -17,47 +18,34 @@ export default function LoginPage() {
   };
 
   const handleLogin = async () => {
+    console.log("[LOGIN_PAGE] handleLogin called");
     setLoading(true);
+    setError("");
+
     try {
-      const response = await fetch(`${process.env.BASE_URL}/users/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: userId,
-          pwd: password,
-        }),
+      console.log("[LOGIN_PAGE] Calling signIn with userId:", userId);
+      const result = await signIn("credentials", {
+        userId,
+        password,
+        redirect: false,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage =
-          errorData.data?.message || errorData.message || "Login failed";
+      console.log("[LOGIN_PAGE] signIn result:", result);
 
-        // Show system alert
-        alert("Login Error: " + errorMessage);
+      if (!result?.ok) {
+        console.error("[LOGIN_PAGE] Login failed, error:", result?.error);
+        setError(result?.error || "Login failed");
+        alert("Login Error: " + (result?.error || "Login failed"));
         return;
       }
 
-      const loginData = await response.json();
-      const userData = loginData.data;
-
-      // Store login info
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("id", String(userData.id || ""));
-      localStorage.setItem("userEmail", userData.email || "");
-      localStorage.setItem("userId", userData.userId || "");
-      localStorage.setItem("nickname", userData.nickname || "");
-      localStorage.setItem("userBio", userData.bio || "");
-      localStorage.setItem("userBlogName", userData.blogName || "");
-      localStorage.setItem("userBirthYmd", userData.birthYmd || "");
-
+      console.log("[LOGIN_PAGE] Login successful, redirecting to home");
+      // Redirect to home on successful login
       router.push("/");
     } catch (err) {
       const errorMessage = "An error occurred during login. Please try again.";
       alert("Login Error: " + errorMessage);
-      console.error(err);
+      console.error("[LOGIN_PAGE] Error:", err);
     } finally {
       setLoading(false);
     }

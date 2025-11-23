@@ -7,21 +7,27 @@ import Image from "next/image";
 import Dropdown from "./dropdown";
 import { FiLogOut } from "react-icons/fi";
 import { MdHome, MdArticle, MdPerson } from "react-icons/md";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태 관리
-  const [nickname, setNickname] = useState("User"); // 사용자 닉네임
+  const { data: session, status } = useSession();
+  const [nickname, setNickname] = useState("User");
+  const [profileImg, setProfileImg] = useState<string | null>(null);
   const router = useRouter();
   const [config, setConfig] = useState<Required<AvatarFullConfig>>();
 
-  const handleLogout = () => {
+  const isLoggedIn = status === "authenticated";
+
+  const handleLogout = async () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userId");
     localStorage.removeItem("nickname");
-    setIsLoggedIn(false);
-    setNickname("User");
+    localStorage.removeItem("userProfileImg");
+    
+    await signOut({ redirect: false });
     alert("You have successfully logged out from your account");
+    router.push("/login");
   };
 
   const handleMenuSelect = (option: string) => {
@@ -34,13 +40,44 @@ export default function Header() {
     }
   };
 
+  // Update from session when logged in
   useEffect(() => {
-    // localStorage에서 로그인 여부 및 닉네임 확인
-    const loggedInStatus = localStorage.getItem("isLoggedIn");
-    const savedNickname = localStorage.getItem("nickname");
-    setIsLoggedIn(loggedInStatus === "true");
-    setNickname(savedNickname || "User");
-    setConfig(genConfig(savedNickname || "User"));
+    if (isLoggedIn && session?.user) {
+      console.log("[HEADER] Session updated:", {
+        nickname: session.user.nickname,
+        profileImg: session.user.profileImg,
+      });
+      const displayNickname = session.user.nickname || "User";
+      setNickname(displayNickname);
+      setProfileImg(session.user.profileImg || null);
+      setConfig(genConfig(displayNickname));
+
+      // Also update localStorage for fallback
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("nickname", displayNickname);
+      if (session.user.profileImg) {
+        localStorage.setItem("userProfileImg", session.user.profileImg);
+      }
+    } else if (!isLoggedIn) {
+      console.log("[HEADER] Not logged in");
+      setNickname("User");
+      setProfileImg(null);
+      setConfig(genConfig("User"));
+    }
+  }, [session, isLoggedIn]);
+
+  // Listen for profile updates and refresh user data
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      // Trigger a session refresh by reloading the page
+      // Or we could use a more sophisticated cache invalidation strategy
+      window.location.reload();
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
   }, []);
 
   return (
@@ -63,12 +100,17 @@ export default function Header() {
               itemsClassName="absolute right-0 top-12 w-[150px] bg-black-primary overflow-hidden rounded-lg shadow-lg z-50"
               label={
                 <div className="flex cursor-pointer items-center gap-2 pr-[16px]">
-                  <Image
-                    src="/icons/profile.png"
-                    width={24}
-                    height={24}
-                    alt="profile"
-                  />
+                  <div className="relative h-[24px] w-[24px] overflow-hidden rounded-full bg-[#1a1a1a]">
+                    {profileImg ? (
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${profileImg}`}
+                        alt="Profile"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      config && <Avatar className="h-full w-full" {...config} />
+                    )}
+                  </div>
                   <span style={{ color: "white" }}>{nickname}</span>
                 </div>
               }

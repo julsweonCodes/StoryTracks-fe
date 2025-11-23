@@ -25,13 +25,16 @@ const useGenerateMutation = (
   return useMutation({
     mutationKey: "generate",
     mutationFn: async (data: GenerateMutation) => {
-      const response = await fetch(`${process.env.BASE_URL}/blog/generate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/blog/generate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         },
-        body: JSON.stringify(data),
-      });
+      );
       return response.json();
     },
     ...options,

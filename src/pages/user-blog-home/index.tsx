@@ -9,6 +9,8 @@ import Header from "@/components/common/header";
 import Map from "@/components/map";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Avatar, { AvatarFullConfig, genConfig } from "react-nice-avatar";
+import { useSession } from "next-auth/react";
 
 const formatNumber = (num?: number): string => {
   return num?.toLocaleString() || "0";
@@ -37,22 +39,27 @@ const getLastActiveTime = (lastLoginDtm?: string): string => {
 
 export default function UserBlogHome() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated";
+  
   const [userId, setUserId] = useState("");
   const [blogName, setBlogName] = useState("");
   const [userNickname, setUserNickname] = useState("");
   const [userBio, setUserBio] = useState("");
+  const [profileImg, setProfileImg] = useState<string | null>(null);
   const [lastLoginDtm, setLastLoginDtm] = useState<string>();
   const { data } = usePostsListQuery();
   const [userPosts, setUserPosts] = useState<ProcessedBlog[]>([]);
   const [loading, setLoading] = useState(true);
   const [blogLoading, setBlogLoading] = useState(true);
+  const [config, setConfig] = useState<Required<AvatarFullConfig>>();
 
   useEffect(() => {
     // Get user ID from router query parameter first (for viewing other blogs)
-    // Fall back to localStorage userId (for viewing own blog from dropdown menu)
+    // Fall back to session userId (for viewing own blog from dropdown menu)
     const queryId = router.query.id as string;
-    const localStorageId = localStorage.getItem("userId") || "";
-    const idToUse = queryId || localStorageId;
+    const sessionId = session?.user?.userId || "";
+    const idToUse = queryId || sessionId;
 
     if (!idToUse) {
       router.push("/login");
@@ -60,16 +67,29 @@ export default function UserBlogHome() {
     }
 
     setUserId(idToUse);
-  }, [router, router.query]);
+  }, [router, router.query, session]);
 
   // Fetch user blog data from backend
   useEffect(() => {
     if (!userId) return;
 
+    // If viewing own blog and logged in, use session data
+    if (isLoggedIn && session?.user?.userId === userId) {
+      console.log("[USER_BLOG_HOME] Using session data for own blog");
+      setBlogName(session.user.blogName || "");
+      setUserNickname(session.user.nickname || "");
+      setUserBio(session.user.bio || "");
+      setProfileImg(session.user.profileImg || null);
+      setConfig(genConfig(session.user.nickname || "User"));
+      setBlogLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch from backend
     const fetchUserBlogData = async () => {
       try {
         const response = await fetch(
-          `${process.env.BASE_URL}/users/${userId}/profile`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/profile`,
           {
             method: "GET",
             headers: {
@@ -79,14 +99,14 @@ export default function UserBlogHome() {
         );
 
         if (!response.ok) {
-          // Fallback to localStorage if API call fails
-          const storedNickname = localStorage.getItem("nickname") || "";
-          const storedBio = localStorage.getItem("userBio") || "";
-          const storedBlogName = localStorage.getItem("userBlogName") || "";
-
-          setUserNickname(storedNickname);
-          setUserBio(storedBio);
-          setBlogName(storedBlogName);
+          // Fallback to session if available
+          if (isLoggedIn && session?.user) {
+            setUserNickname(session.user.nickname || "");
+            setUserBio(session.user.bio || "");
+            setBlogName(session.user.blogName || "");
+            setProfileImg(session.user.profileImg || null);
+            setConfig(genConfig(session.user.nickname || "User"));
+          }
           setBlogLoading(false);
           return;
         }
@@ -97,30 +117,27 @@ export default function UserBlogHome() {
         setBlogName(user.blogName || "");
         setUserNickname(user.nickname || "");
         setUserBio(user.bio || "");
+        setProfileImg(user.profileImg || null);
         setLastLoginDtm(user.lastLoginDtm);
-
-        // Update localStorage with fresh data
-        localStorage.setItem("nickname", user.nickname || "");
-        localStorage.setItem("userBio", user.bio || "");
-        localStorage.setItem("userBlogName", user.blogName || "");
+        setConfig(genConfig(user.nickname || "User"));
 
         setBlogLoading(false);
       } catch (err) {
         console.error("Error fetching user blog data:", err);
-        // Fallback to localStorage
-        const storedNickname = localStorage.getItem("nickname") || "";
-        const storedBio = localStorage.getItem("userBio") || "";
-        const storedBlogName = localStorage.getItem("userBlogName") || "";
-
-        setUserNickname(storedNickname);
-        setUserBio(storedBio);
-        setBlogName(storedBlogName);
+        // Fallback to session
+        if (isLoggedIn && session?.user) {
+          setUserNickname(session.user.nickname || "");
+          setUserBio(session.user.bio || "");
+          setBlogName(session.user.blogName || "");
+          setProfileImg(session.user.profileImg || null);
+          setConfig(genConfig(session.user.nickname || "User"));
+        }
         setBlogLoading(false);
       }
     };
 
     fetchUserBlogData();
-  }, [userId]);
+  }, [userId, isLoggedIn, session]);
 
   useEffect(() => {
     if (data && userId && !blogLoading) {
@@ -166,21 +183,40 @@ export default function UserBlogHome() {
             <div className="border-b border-[#404040] px-4 py-8 sm:px-6">
               <h1 className="text-[32px] font-bold">{blogName}</h1>
 
-              {/* User Info Line */}
-              <div className="mt-3 flex items-center gap-2 text-[14px] text-gray-400">
-                <span className="font-semibold text-white-primary">
-                  {userNickname}
-                </span>
-                <span>•</span>
-                <span>{getLastActiveTime(lastLoginDtm)}</span>
-              </div>
+              {/* User Info with Profile Image */}
+              <div className="mt-6 flex items-start gap-4">
+                {/* Profile Image - 1:1 Square */}
+                <div className="relative h-[100px] w-[100px] flex-shrink-0 overflow-hidden rounded-lg bg-[#1a1a1a]">
+                  {profileImg ? (
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${profileImg}`}
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    config && <Avatar className="h-full w-full" {...config} />
+                  )}
+                </div>
 
-              {/* Bio */}
-              {userBio && (
-                <p className="mt-4 text-[14px] leading-relaxed text-gray-300">
-                  {userBio}
-                </p>
-              )}
+                {/* User Info */}
+                <div className="flex flex-1 flex-col justify-center">
+                  {/* User Info Line */}
+                  <div className="flex items-center gap-2 text-[14px] text-gray-400">
+                    <span className="font-semibold text-white-primary">
+                      {userNickname}
+                    </span>
+                    <span>•</span>
+                    <span>{getLastActiveTime(lastLoginDtm)}</span>
+                  </div>
+
+                  {/* Bio */}
+                  {userBio && (
+                    <p className="mt-2 text-[14px] leading-relaxed text-gray-300">
+                      {userBio}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Small Faded Map */}

@@ -10,25 +10,9 @@ const containerStyle = {
 };
 
 const defaultCenter = {
-  lat: 37.579617,
-  lng: 126.977041,
+  lat: 49.2827,
+  lng: -123.1207,
 };
-
-const mapStyles = [
-  // {
-  //   featureType: "poi", // POI(관심 지점) 제거
-  //   stylers: [{ visibility: "off" }],
-  // },
-  {
-    featureType: "transit", // 대중교통 관련 요소 제거
-    stylers: [{ visibility: "off" }],
-  },
-  //   {
-  //     featureType: "road", // 도로명 제거
-  //     elementType: "labels",
-  //     stylers: [{ visibility: "off" }],
-  //   },
-];
 
 // const generateRandomMarkers = (
 //   center: google.maps.LatLngLiteral,
@@ -51,7 +35,7 @@ interface Props {
   zoom?: number;
 }
 
-export default function Map({ markers = [], zoom: customZoom }: Props) {
+export default function Map({ markers = [], zoom = 15 }: Props) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -60,7 +44,6 @@ export default function Map({ markers = [], zoom: customZoom }: Props) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [center, setCenter] = useState(defaultCenter); // 중심 좌표
-  const [zoom] = useState(customZoom ?? 15); // 줌 레벨
   const markerClusterRef = useRef<MarkerClusterer | null>(null);
 
   const [clusters, setClusters] = useState<
@@ -216,7 +199,6 @@ export default function Map({ markers = [], zoom: customZoom }: Props) {
       onUnmount={onUnmount}
       options={{
         disableDefaultUI: true, // 부가적인 UI 비활성화
-        styles: mapStyles,
       }}
     >
       <button

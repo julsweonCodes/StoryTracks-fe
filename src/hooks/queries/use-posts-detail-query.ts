@@ -28,7 +28,7 @@ const usePostsDetailQuery = (id?: string) => {
   return useQuery<BlogDetail>({
     queryKey: ["blog-detail", id],
     queryFn: () =>
-      fetch(`${process.env.BASE_URL}/posts/${id}`)
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/posts/${id}`)
         .then((res) => res.json())
         .then((response: DefaultResponse<BlogDetail>) => response.data),
     enabled: !!id,

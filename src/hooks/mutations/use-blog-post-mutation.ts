@@ -59,10 +59,13 @@ const useBlogPostMutation = (
       });
       formData.append("blogPost", jsonBlob);
 
-      const response = await fetch(`${process.env.BASE_URL}/blog/save`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/blog/save`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       if (!response.ok) {
         throw new Error("Failed to upload blog post");

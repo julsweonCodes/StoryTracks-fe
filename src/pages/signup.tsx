@@ -200,21 +200,24 @@ export default function SignUpPage() {
       });
       console.log("This is signup Request obj: ", jsonObj);
 
-      const response = await fetch(`${process.env.BASE_URL}/users/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: formData.userId,
+            pwd: formData.password,
+            email: getEmail(),
+            birthYmd: birthYmd || null,
+            nickname: formData.nickname,
+            blogName: formData.blogName,
+            bio: formData.bio || null,
+          }),
         },
-        body: JSON.stringify({
-          userId: formData.userId,
-          pwd: formData.password,
-          email: getEmail(),
-          birthYmd: birthYmd || null,
-          nickname: formData.nickname,
-          blogName: formData.blogName,
-          bio: formData.bio || null,
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();

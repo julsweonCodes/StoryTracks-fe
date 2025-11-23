@@ -56,7 +56,7 @@ const usePostsListQuery = () => {
   return useQuery<Blog[]>({
     queryKey: ["blog-list"],
     queryFn: () =>
-      fetch(`${process.env.BASE_URL}/posts/feed`)
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed`)
         .then((res) => res.json())
         .then((response: PaginatedBlogResponse) => response.content),
   });

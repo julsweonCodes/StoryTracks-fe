@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaCheck, FaX } from "react-icons/fa6";
 import Avatar, { AvatarFullConfig, genConfig } from "react-nice-avatar";
+import { useSession } from "next-auth/react";
 
 function ValidationIcon({ isFilled }: { isFilled: boolean }) {
   if (isFilled) {
@@ -14,16 +15,16 @@ function ValidationIcon({ isFilled }: { isFilled: boolean }) {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [id, setId] = useState("");
-  const [userId, setUserId] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [birthYmd, setBirthYmd] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const { data: session, status, update } = useSession();
+  const isLoggedIn = status === "authenticated";
+
+  // State for editable fields
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [profileImg, setProfileImg] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+  const [profileImg, setProfileImg] = useState<string | null>(null);
+  const [config, setConfig] = useState<Required<AvatarFullConfig>>();
 
   const [editData, setEditData] = useState({
     nickname: "",
@@ -31,7 +32,8 @@ export default function ProfilePage() {
     blogName: "",
   });
 
-  const [config, setConfig] = useState<Required<AvatarFullConfig>>();
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const isNicknameValid =
     editData.nickname.length >= 5 &&
@@ -43,33 +45,25 @@ export default function ProfilePage() {
   const isBioValid = editData.bio.length === 0 || editData.bio.length <= 500;
   const isEditFormValid = isNicknameValid && isBlogNameValid && isBioValid;
 
+  // Redirect if not logged in
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem("isLoggedIn");
-    if (loggedInStatus !== "true") {
+    if (status === "unauthenticated") {
       router.push("/login");
-    } else {
-      setIsLoggedIn(true);
-      const storedId = localStorage.getItem("id") || "";
-      const storedUserId = localStorage.getItem("userId") || "";
-      const storedNickname = localStorage.getItem("nickname") || "";
-      const storedEmail = localStorage.getItem("userEmail") || "";
-      const storedBio = localStorage.getItem("userBio") || "";
-      const storedBlogName = localStorage.getItem("userBlogName") || "";
-      const storedBirthYmd = localStorage.getItem("userBirthYmd") || "";
-      const storedProfileImg = localStorage.getItem("userProfileImg");
-      setId(storedId);
-      setUserId(storedUserId);
-      setUserEmail(storedEmail);
-      setBirthYmd(storedBirthYmd);
-      setProfileImg(storedProfileImg);
-      setConfig(genConfig(storedNickname || "User"));
+    }
+  }, [status, router]);
+
+  // Initialize form with session data - only on first load or when NOT editing
+  useEffect(() => {
+    if (isLoggedIn && session?.user && !isEditing) {
+      setProfileImg(session.user.profileImg || null);
+      setConfig(genConfig(session.user.nickname || "User"));
       setEditData({
-        nickname: storedNickname,
-        bio: storedBio,
-        blogName: storedBlogName,
+        nickname: session.user.nickname || "",
+        bio: session.user.bio || "",
+        blogName: session.user.blogName || "",
       });
     }
-  }, [router]);
+  }, [session, isLoggedIn, isEditing]);
 
   const handleEditChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -82,7 +76,7 @@ export default function ProfilePage() {
     setError("");
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -93,41 +87,13 @@ export default function ProfilePage() {
       return;
     }
 
-    setImageLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch(
-        `${process.env.BASE_URL}/images/profile/${userId}`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage =
-          errorData.data?.message || errorData.message || "Upload failed";
-        alert("Image Upload Error: " + errorMessage);
-        return;
-      }
-
-      const imageData = await response.json();
-      const imageUrl = imageData.data?.url || imageData.data;
-
-      setProfileImg(imageUrl);
-      localStorage.setItem("userProfileImg", imageUrl);
-      alert("Profile image updated successfully!");
-    } catch (err) {
-      const errorMessage =
-        "An error occurred during image upload. Please try again.";
-      alert("Image Upload Error: " + errorMessage);
-      console.error(err);
-    } finally {
-      setImageLoading(false);
-    }
+    // Store file for later upload and create preview
+    setSelectedImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviewImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSaveProfile = async () => {
@@ -138,45 +104,150 @@ export default function ProfilePage() {
 
     setLoading(true);
     try {
-      const numericId = Number(id);
+      let finalProfileImg = profileImg;
+
+      // Upload image to S3 if a new one was selected
+      if (selectedImageFile) {
+        const formData = new FormData();
+        formData.append("file", selectedImageFile);
+
+        const uploadResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/s3/upload/profile`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          const errorMessage =
+            errorData.data?.message ||
+            errorData.message ||
+            "Image upload failed";
+          alert("Image Upload Error: " + errorMessage);
+          setLoading(false);
+          return;
+        }
+
+        const uploadData = await uploadResponse.json();
+        const fileName = uploadData.data || uploadData;
+
+        // Store only the filename (not the full URL)
+        finalProfileImg = fileName;
+
+        setProfileImg(finalProfileImg);
+        setSelectedImageFile(null);
+        setPreviewImage(null);
+      }
+
+      // Save profile with image URL to database
+      const numericId = Number(session?.user?.id);
+      
+      // Create request body with current editData values
+      const requestBody = {
+        nickname: editData.nickname,
+        bio: editData.bio.length === 0 ? null : editData.bio,
+        blogName: editData.blogName,
+        profileImg: finalProfileImg || null,
+      };
+
+      const jsonBody = JSON.stringify(requestBody);
+
       const response = await fetch(
-        `${process.env.BASE_URL}/users/${numericId}/profile`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${numericId}/profile`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            nickname: editData.nickname,
-            bio: editData.bio || null,
-            blogName: editData.blogName,
-            profileImg: profileImg || null,
-          }),
+          body: jsonBody,
         },
       );
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
         const errorMessage =
-          errorData.data?.message || errorData.message || "Update failed";
+          responseData.data?.message ||
+          responseData.message ||
+          "Update failed";
         alert("Update Error: " + errorMessage);
         return;
       }
 
-      // Update localStorage with new values
-      localStorage.setItem("nickname", editData.nickname);
-      localStorage.setItem("userBio", editData.bio);
-      localStorage.setItem("userBlogName", editData.blogName);
-      if (profileImg) {
-        localStorage.setItem("userProfileImg", profileImg);
+      // Fetch fresh user data from backend to ensure we have the latest
+      const userResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${numericId}/profile`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      let freshUserData = {
+        nickname: editData.nickname,
+        bio: editData.bio,
+        blogName: editData.blogName,
+        profileImg: finalProfileImg,
+      };
+
+      if (userResponse.ok) {
+        const freshData = await userResponse.json();
+        const user = freshData.data;
+
+        freshUserData = {
+          nickname: user.nickname || editData.nickname,
+          bio: user.bio || editData.bio,
+          blogName: user.blogName || editData.blogName,
+          profileImg: user.profileImg || finalProfileImg,
+        };
+
+        // Update the local state with fresh data
+        setProfileImg(user.profileImg || null);
+        setConfig(genConfig(user.nickname || "User"));
+        setEditData({
+          nickname: user.nickname || "",
+          bio: user.bio || "",
+          blogName: user.blogName || "",
+        });
       }
 
+      // Call the update function to refresh the session
+      // This will trigger NextAuth to refresh the JWT token with new data
+      try {
+        const syncResponse = await fetch("/api/auth/sync-session", {
+          method: "POST",
+        });
+
+        if (syncResponse.ok) {
+          const syncedData = await syncResponse.json();
+
+          // Update the session with the synced data from the backend
+          await update(syncedData);
+        } else {
+          // Fallback to the freshUserData we already have
+          await update(freshUserData);
+        }
+      } catch (updateError) {
+        // Fallback to the freshUserData we already have
+        await update(freshUserData);
+      }
+
+      // Dispatch custom event to trigger header refresh
+      window.dispatchEvent(new Event("profileUpdated"));
+
       setIsEditing(false);
-      alert("Profile updated successfully!");
+      
+      // Small delay to ensure session is updated before showing alert
+      setTimeout(() => {
+        alert("Profile updated successfully!");
+      }, 100);
     } catch (err) {
       const errorMessage = "An error occurred during update. Please try again.";
       alert("Update Error: " + errorMessage);
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -199,9 +270,15 @@ export default function ProfilePage() {
             {/* Profile Image */}
             <div className="flex flex-col items-center gap-3">
               <div className="relative h-[120px] w-[120px] overflow-hidden rounded-full bg-[#1a1a1a]">
-                {profileImg ? (
+                {previewImage ? (
                   <img
-                    src={profileImg}
+                    src={previewImage}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : profileImg ? (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${profileImg}`}
                     alt="Profile"
                     className="h-full w-full object-cover"
                   />
@@ -209,37 +286,55 @@ export default function ProfilePage() {
                   config && <Avatar className="h-full w-full" {...config} />
                 )}
               </div>
-              <label className="cursor-pointer rounded-lg bg-key-primary px-4 py-2 text-[12px] font-bold text-[#0C0C0DB2] transition-opacity hover:opacity-90">
-                {imageLoading ? "Uploading..." : "Upload Image"}
-                <input
-                  type="file"
-                  accept=".jpg,.jpeg,.png,image/jpeg,image/png,image/jpg"
-                  onChange={handleImageUpload}
-                  disabled={imageLoading}
-                  className="hidden"
-                />
-              </label>
+              {isEditing && (
+                <div className="flex gap-2">
+                  <label className="cursor-pointer rounded-lg bg-key-primary px-4 py-2 text-[12px] font-bold text-[#0C0C0DB2] transition-opacity hover:opacity-90">
+                    {selectedImageFile ? "Change Image" : "Upload Image"}
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,image/jpeg,image/png,image/jpg"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  {(profileImg || previewImage) && (
+                    <button
+                      onClick={() => {
+                        setProfileImg(null);
+                        setPreviewImage(null);
+                        setSelectedImageFile(null);
+                      }}
+                      className="rounded-lg bg-red-600 px-4 py-2 text-[12px] font-bold text-white transition-opacity hover:opacity-90"
+                    >
+                      Delete Image
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Immutable Fields - Inline Format */}
             <div className="flex items-center justify-between">
               <span className="text-[14px] text-gray-400">ID</span>
-              <span className="text-[16px] text-white-primary">{userId}</span>
+              <span className="text-[16px] text-white-primary">
+                {session?.user?.userId}
+              </span>
             </div>
 
             <div className="flex items-center justify-between">
               <span className="text-[14px] text-gray-400">Email</span>
               <span className="text-[16px] text-white-primary">
-                {userEmail}
+                {session?.user?.email}
               </span>
             </div>
 
-            {birthYmd && (
+            {session?.user?.birthYmd && (
               <div className="flex items-center justify-between">
                 <span className="text-[14px] text-gray-400">Birth Date</span>
                 <span className="text-[16px] text-white-primary">
-                  {birthYmd.slice(0, 4)}-{birthYmd.slice(4, 6)}-
-                  {birthYmd.slice(6, 8)}
+                  {session.user.birthYmd.slice(0, 4)}-
+                  {session.user.birthYmd.slice(4, 6)}-
+                  {session.user.birthYmd.slice(6, 8)}
                 </span>
               </div>
             )}
@@ -353,7 +448,9 @@ export default function ProfilePage() {
 
                 <button
                   className="h-[48px] rounded-lg bg-key-primary py-2 font-bold text-[#0C0C0DB2] transition-opacity hover:opacity-90"
-                  onClick={() => setIsEditing(true)}
+                  onClick={() => {
+                    setIsEditing(true);
+                  }}
                 >
                   Edit Profile
                 </button>
