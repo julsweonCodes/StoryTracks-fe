@@ -41,7 +41,7 @@ export default function UserBlogHome() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
-  
+
   const [userId, setUserId] = useState("");
   const [blogName, setBlogName] = useState("");
   const [userNickname, setUserNickname] = useState("");

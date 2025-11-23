@@ -24,7 +24,7 @@ export default function Header() {
     localStorage.removeItem("userId");
     localStorage.removeItem("nickname");
     localStorage.removeItem("userProfileImg");
-    
+
     await signOut({ redirect: false });
     alert("You have successfully logged out from your account");
     router.push("/login");

@@ -143,7 +143,7 @@ export default function ProfilePage() {
 
       // Save profile with image URL to database
       const numericId = Number(session?.user?.id);
-      
+
       // Create request body with current editData values
       const requestBody = {
         nickname: editData.nickname,
@@ -169,9 +169,7 @@ export default function ProfilePage() {
 
       if (!response.ok) {
         const errorMessage =
-          responseData.data?.message ||
-          responseData.message ||
-          "Update failed";
+          responseData.data?.message || responseData.message || "Update failed";
         alert("Update Error: " + errorMessage);
         return;
       }
@@ -184,7 +182,7 @@ export default function ProfilePage() {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       let freshUserData = {
@@ -240,7 +238,7 @@ export default function ProfilePage() {
       window.dispatchEvent(new Event("profileUpdated"));
 
       setIsEditing(false);
-      
+
       // Small delay to ensure session is updated before showing alert
       setTimeout(() => {
         alert("Profile updated successfully!");
@@ -304,7 +302,7 @@ export default function ProfilePage() {
                         setPreviewImage(null);
                         setSelectedImageFile(null);
                       }}
-                      className="rounded-lg bg-red-600 px-4 py-2 text-[12px] font-bold text-white transition-opacity hover:opacity-90"
+                      className="text-white rounded-lg bg-red-600 px-4 py-2 text-[12px] font-bold transition-opacity hover:opacity-90"
                     >
                       Delete Image
                     </button>
