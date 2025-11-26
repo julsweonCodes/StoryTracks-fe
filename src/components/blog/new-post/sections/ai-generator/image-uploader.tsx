@@ -21,7 +21,9 @@ interface ImageUploaderProps {
   onUploadComplete?: () => void;
 }
 
-export default function ImageUploader({ onUploadComplete }: ImageUploaderProps) {
+export default function ImageUploader({
+  onUploadComplete,
+}: ImageUploaderProps) {
   const { setStatusInfo, setImages, images, aiContent, activeComponentKey } =
     useFormContext();
   const swiperRef = useRef<SwiperCore | null>(null);
@@ -159,7 +161,9 @@ export default function ImageUploader({ onUploadComplete }: ImageUploaderProps) 
       }
 
       if (filesWithoutMetadata.length > 0) {
-        const withoutMetadataNames = filesWithoutMetadata.map((f) => f.fileName).join("\n");
+        const withoutMetadataNames = filesWithoutMetadata
+          .map((f) => f.fileName)
+          .join("\n");
         alert(
           `The following images do not have location metadata. You can set the thumbnail image manually:\n${withoutMetadataNames}`,
         );

@@ -171,7 +171,7 @@ export default function AiGenerator() {
               </div>
             ) : (
               <div
-                className="flex justify-end gap-1 cursor-pointer"
+                className="flex cursor-pointer justify-end gap-1"
                 onClick={() => setIsRecording(true)}
               >
                 <MicrophoneIcon />
@@ -185,7 +185,7 @@ export default function AiGenerator() {
         {isAiContent ? (
           <div className="flex w-full flex-col gap-2">
             <button
-              className={`flex h-[48px] w-full items-center justify-center gap-2 rounded-lg text-black-secondary transition-colors ${aiContentIndex !== undefined ? "bg-key-primary hover:bg-[#9b8fed]" : "bg-[#5B578A] cursor-not-allowed"}`}
+              className={`flex h-[48px] w-full items-center justify-center gap-2 rounded-lg text-black-secondary transition-colors ${aiContentIndex !== undefined ? "bg-key-primary hover:bg-[#9b8fed]" : "cursor-not-allowed bg-[#5B578A]"}`}
               disabled={aiContentIndex === undefined}
               onClick={handleSubmit}
             >
@@ -193,7 +193,7 @@ export default function AiGenerator() {
               Use this Content
             </button>
             <button
-              className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors disabled:opacity-50"
+              className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232] disabled:opacity-50"
               disabled={isLoading}
               onClick={handleAiSubmit}
             >
@@ -211,7 +211,7 @@ export default function AiGenerator() {
           </div>
         ) : (
           <button
-            className={`flex h-[48px] w-full items-center justify-center gap-1 rounded-lg text-black-secondary transition-colors ${description.length > 0 && !isLoading && images.length > 0 ? "bg-key-primary hover:bg-[#9b8fed]" : "bg-[#5B578A] cursor-not-allowed"}`}
+            className={`flex h-[48px] w-full items-center justify-center gap-1 rounded-lg text-black-secondary transition-colors ${description.length > 0 && !isLoading && images.length > 0 ? "bg-key-primary hover:bg-[#9b8fed]" : "cursor-not-allowed bg-[#5B578A]"}`}
             disabled={
               isLoading || description.length === 0 || images.length === 0
             }

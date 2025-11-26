@@ -14,17 +14,17 @@ export interface ImageInfo {
   lon?: number;
   createDate?: string;
   previewUrl?: string;
-  fileName?: string;           // Used during editing (local)
+  fileName?: string; // Used during editing (local)
   active?: boolean;
   file?: File;
   // Backend response fields
   imgId?: number;
   postId?: number;
-  geoLat?: string;             // Backend uses string
-  geoLong?: string;            // Backend uses string
-  imgPath?: string;            // S3 path: "posts/1698765432000_filename.png"
-  imgFileName?: string;        // From backend ImageResponse
-  filePath?: string;           // Full S3 URL (from backend)
+  geoLat?: string; // Backend uses string
+  geoLong?: string; // Backend uses string
+  imgPath?: string; // S3 path: "posts/1698765432000_filename.png"
+  imgFileName?: string; // From backend ImageResponse
+  filePath?: string; // Full S3 URL (from backend)
   thumbYn?: boolean;
   imgDtm?: string;
   rgstDtm?: string;
@@ -47,8 +47,8 @@ export interface ImageResponse {
 export interface PostDetailResponse {
   postId: number;
   title: string;
-  ogText: string;              // Blog description/content
-  aiGenText: string;           // AI generated content
+  ogText: string; // Blog description/content
+  aiGenText: string; // AI generated content
   rgstDtm: string;
   chngDtm: string;
   blogImgList: ImageResponse[];

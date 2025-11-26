@@ -298,7 +298,9 @@ export default function Home() {
       processBlogs(data).then((processed) => {
         setProcessedData(processed);
         // Check if we should show "Load More" button for initial posts
-        setHasMoreInitialPages(processed.length > 0 && processed.length % 20 === 0);
+        setHasMoreInitialPages(
+          processed.length > 0 && processed.length % 20 === 0,
+        );
         setInitialPageNumber(1);
       });
     }
@@ -358,7 +360,9 @@ export default function Home() {
           }
           showRefetchButton={
             (selectedClusterPosts.length > 0 && hasMorePages) ||
-            (selectedClusterPosts.length === 0 && processedData.length > 0 && hasMoreInitialPages)
+            (selectedClusterPosts.length === 0 &&
+              processedData.length > 0 &&
+              hasMoreInitialPages)
           }
           isLoadingMore={isLoadingMore || isLoadingInitialPosts}
           onRefresh={handleRefreshFeed}

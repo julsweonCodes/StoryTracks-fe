@@ -49,7 +49,7 @@ export default function Drawer({
 
   return (
     <div
-      className="absolute bottom-0 h-full w-full rounded-t-3xl bg-black-primary transition-transform overflow-visible"
+      className="absolute bottom-0 h-full w-full overflow-visible rounded-t-3xl bg-black-primary transition-transform"
       style={{
         transform: `translateY(${isOpen ? `0` : "calc(100% - 63px)"})`,
       }}

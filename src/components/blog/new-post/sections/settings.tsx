@@ -26,7 +26,7 @@ export default function Settings() {
             setValue(e.target.value)
           }
           placeholderContent={
-            <p className="leading-5 tracking-tight text-[15px]">
+            <p className="text-[15px] leading-5 tracking-tight">
               What would you like Gemini to know about you to provide better
               response?
             </p>
@@ -46,7 +46,7 @@ export default function Settings() {
           ].map((tone, index) => (
             <div
               key={index}
-              className={`rounded-lg border border-[#454545] px-3 py-2 text-[14px] leading-5 tracking-tight cursor-pointer transition-colors ${active === index ? "bg-key-primary text-[#262626]" : "bg-[#262626] text-white-primary"}`}
+              className={`cursor-pointer rounded-lg border border-[#454545] px-3 py-2 text-[14px] leading-5 tracking-tight transition-colors ${active === index ? "bg-key-primary text-[#262626]" : "bg-[#262626] text-white-primary"}`}
               onClick={() => setActive(index)}
             >
               {tone}
@@ -63,7 +63,7 @@ export default function Settings() {
       </div>
       <div className="fixed bottom-0 left-0 flex w-full gap-5 bg-black-primary p-4 text-[14px]">
         <button
-          className="h-[46px] flex-1 rounded-lg bg-[#333333] leading-5 tracking-tight text-white-primary hover:bg-[#404040] transition-colors"
+          className="h-[46px] flex-1 rounded-lg bg-[#333333] leading-5 tracking-tight text-white-primary transition-colors hover:bg-[#404040]"
           onClick={() => {
             setValue("");
             setActive(undefined);
@@ -73,7 +73,7 @@ export default function Settings() {
           Reset
         </button>
         <button
-          className="h-[46px] flex-1 rounded-lg bg-[#A099FF] leading-5 tracking-tight text-white-primary hover:bg-[#9b8fed] transition-colors"
+          className="h-[46px] flex-1 rounded-lg bg-[#A099FF] leading-5 tracking-tight text-white-primary transition-colors hover:bg-[#9b8fed]"
           onClick={handleApply}
         >
           Apply

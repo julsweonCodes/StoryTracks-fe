@@ -1,4 +1,8 @@
-import { ImageInfo, ImageResponse, PostDetailResponse } from "@/context/form-context";
+import {
+  ImageInfo,
+  ImageResponse,
+  PostDetailResponse,
+} from "@/context/form-context";
 
 /**
  * Converts backend ImageResponse to frontend ImageInfo
@@ -7,7 +11,7 @@ import { ImageInfo, ImageResponse, PostDetailResponse } from "@/context/form-con
  * - Backend: geoLat/geoLong (strings) → Frontend: lat/lon (optional numbers)
  */
 export const convertImageResponseToImageInfo = (
-  imgResponse: ImageResponse
+  imgResponse: ImageResponse,
 ): ImageInfo => {
   return {
     imgId: imgResponse.imgId,
@@ -33,7 +37,7 @@ export const convertImageResponseToImageInfo = (
  * Extracts images, title, and content for editing
  */
 export const convertPostDetailResponseToFormData = (
-  postResponse: PostDetailResponse
+  postResponse: PostDetailResponse,
 ): {
   title: string;
   description: string;

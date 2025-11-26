@@ -6,7 +6,10 @@ import MagicIcon from "@/components/icons/magic";
 import { useState, useRef, ChangeEvent, ReactNode } from "react";
 import ImageUploader from "./ai-generator/image-uploader";
 import Textarea from "@/components/common/textarea";
-import { useGenerateMutation, GenerateImageInfo } from "@/hooks/mutations/use-generate-mutation";
+import {
+  useGenerateMutation,
+  GenerateImageInfo,
+} from "@/hooks/mutations/use-generate-mutation";
 import Loading from "@/components/common/loading";
 import { FiCopy, FiCheck } from "react-icons/fi";
 import CameraIcon from "@/components/icons/camera";
@@ -23,8 +26,13 @@ interface AiModalState {
 }
 
 export default function Write() {
-  const { setActiveComponentKey, description, updateDescription, images, setImages } =
-    useFormContext();
+  const {
+    setActiveComponentKey,
+    description,
+    updateDescription,
+    images,
+    setImages,
+  } = useFormContext();
   const [showAiPrompt, setShowAiPrompt] = useState(true);
   const [aiModal, setAiModal] = useState<AiModalState>({
     isOpen: false,
@@ -37,12 +45,13 @@ export default function Write() {
   const [showPreview, setShowPreview] = useState(false);
   const [title, setTitle] = useState("");
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [locationModalImage, setLocationModalImage] = useState<ImageInfo | null>(null);
+  const [locationModalImage, setLocationModalImage] =
+    useState<ImageInfo | null>(null);
   const [locationInput, setLocationInput] = useState({ lat: "", lon: "" });
   const [locationError, setLocationError] = useState("");
   const promptRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
+
   const { mutate } = useGenerateMutation({
     onSuccess: (data) => {
       setAiModal({
@@ -152,7 +161,8 @@ export default function Write() {
 
     // Pattern to match markdown elements, img tags, and img-url tags
     // Matches: **text**, *text*, <u>text</u>, <img>filename</img>, <img-url>URL</img-url>
-    const pattern = /\*\*(.+?)\*\*|\*(.+?)\*|<u>(.+?)<\/u>|<img>(.+?)<\/img>|<img-url>(.+?)<\/img-url>/g;
+    const pattern =
+      /\*\*(.+?)\*\*|\*(.+?)\*|<u>(.+?)<\/u>|<img>(.+?)<\/img>|<img-url>(.+?)<\/img-url>/g;
     let match: RegExpExecArray | null;
 
     while ((match = pattern.exec(text)) !== null) {
@@ -167,28 +177,28 @@ export default function Write() {
         parts.push(
           <strong key={parts.length} className="font-bold">
             {match[1]}
-          </strong>
+          </strong>,
         );
       } else if (match[2]) {
         // Italic
         parts.push(
           <em key={parts.length} className="italic">
             {match[2]}
-          </em>
+          </em>,
         );
       } else if (match[3]) {
         // Underline
         parts.push(
           <u key={parts.length} className="underline">
             {match[3]}
-          </u>
+          </u>,
         );
       } else if (match[4]) {
         // Image (filename - for preview during editing)
         const filename = match[4];
         // Find the image with matching filename to get previewUrl (data URL from browser)
         const matchedImage = images.find(
-          (img) => img.fileName === filename || img.imgFileName === filename
+          (img) => img.fileName === filename || img.imgFileName === filename,
         );
         parts.push(
           <div key={parts.length} className="my-4">
@@ -197,7 +207,7 @@ export default function Write() {
               alt={filename}
               className="max-h-96 max-w-full rounded-lg"
             />
-          </div>
+          </div>,
         );
       } else if (match[5]) {
         // Image URL (from S3 - for display after fetching)
@@ -208,7 +218,7 @@ export default function Write() {
               alt="Blog image"
               className="max-h-96 max-w-full rounded-lg"
             />
-          </div>
+          </div>,
         );
       }
 
@@ -241,10 +251,12 @@ export default function Write() {
       setShowLocationModal(true);
       return;
     }
-    
+
     // Mark as thumbnail/active
     const updatedImages = images.map((img) =>
-      img.id === image.id ? { ...img, active: true } : { ...img, active: false },
+      img.id === image.id
+        ? { ...img, active: true }
+        : { ...img, active: false },
     );
     setImages(updatedImages);
   };
@@ -253,12 +265,12 @@ export default function Write() {
     if (!locationModalImage) return;
 
     setLocationError("");
-    
+
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          
+
           // Update the image with current location
           const updatedImages = images.map((img) =>
             img.id === locationModalImage.id
@@ -266,14 +278,16 @@ export default function Write() {
               : { ...img, active: false },
           );
           setImages(updatedImages);
-          
+
           // Close modal
           setShowLocationModal(false);
           setLocationModalImage(null);
         },
         (error) => {
           console.error("Geolocation error:", error);
-          setLocationError("Unable to get your location. Please enter it manually.");
+          setLocationError(
+            "Unable to get your location. Please enter it manually.",
+          );
         },
       );
     } else {
@@ -283,26 +297,28 @@ export default function Write() {
 
   const handleManualLocationSubmit = () => {
     if (!locationModalImage) return;
-    
+
     const lat = parseFloat(locationInput.lat);
     const lon = parseFloat(locationInput.lon);
-    
+
     // Validate latitude and longitude
     if (isNaN(lat) || isNaN(lon)) {
-      setLocationError("Please enter valid numbers for latitude and longitude.");
+      setLocationError(
+        "Please enter valid numbers for latitude and longitude.",
+      );
       return;
     }
-    
+
     if (lat < -90 || lat > 90) {
       setLocationError("Latitude must be between -90 and 90.");
       return;
     }
-    
+
     if (lon < -180 || lon > 180) {
       setLocationError("Longitude must be between -180 and 180.");
       return;
     }
-    
+
     // Update the image with manual location
     const updatedImages = images.map((img) =>
       img.id === locationModalImage.id
@@ -310,7 +326,7 @@ export default function Write() {
         : { ...img, active: false },
     );
     setImages(updatedImages);
-    
+
     // Close modal
     setShowLocationModal(false);
     setLocationModalImage(null);
@@ -325,16 +341,18 @@ export default function Write() {
     if (imageToDelete) {
       const displayName = imageToDelete.fileName || imageToDelete.imgFileName;
       const imageTag = `<img>${displayName}</img>`;
-      const newDescription = description.replace(imageTag, "").replace(/\n\n\n/g, "\n\n");
+      const newDescription = description
+        .replace(imageTag, "")
+        .replace(/\n\n\n/g, "\n\n");
       updateDescription(newDescription);
     }
   };
 
   return (
     <>
-      <div className="relative flex h-full w-full flex-col gap-0 p-5 pb-0 overflow-hidden">
+      <div className="relative flex h-full w-full flex-col gap-0 overflow-hidden p-5 pb-0">
         {/* Title Section */}
-        <div className="w-full border-b border-black-secondary pb-3 mb-4">
+        <div className="mb-4 w-full border-b border-black-secondary pb-3">
           <input
             type="text"
             value={title}
@@ -345,54 +363,54 @@ export default function Write() {
         </div>
 
         {/* Button Group - Upload and Text Editing */}
-        <div className="flex gap-2 mb-4">
+        <div className="mb-4 flex gap-2">
           <button
             onClick={uploadImage}
-            className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors group relative"
+            className="group relative flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232]"
             title="Upload Images"
           >
             <CameraIcon />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#444444] text-white-primary text-[12px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-[#444444] px-2 py-1 text-[12px] text-white-primary opacity-0 transition-opacity group-hover:opacity-100">
               Upload Images
             </div>
           </button>
           <button
             onClick={applyBold}
-            className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors group relative"
+            className="group relative flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232]"
             title="Bold (select text first)"
           >
-            <span className="font-bold text-[18px]">B</span>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#444444] text-white-primary text-[12px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <span className="text-[18px] font-bold">B</span>
+            <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-[#444444] px-2 py-1 text-[12px] text-white-primary opacity-0 transition-opacity group-hover:opacity-100">
               Bold
             </div>
           </button>
           <button
             onClick={applyItalic}
-            className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors group relative"
+            className="group relative flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232]"
             title="Italic (select text first)"
           >
             <PiTextItalic size={18} />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#444444] text-white-primary text-[12px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-[#444444] px-2 py-1 text-[12px] text-white-primary opacity-0 transition-opacity group-hover:opacity-100">
               Italic
             </div>
           </button>
           <button
             onClick={applyUnderline}
-            className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors group relative"
+            className="group relative flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232]"
             title="Underline (select text first)"
           >
             <LuUnderline size={18} />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#444444] text-white-primary text-[12px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-[#444444] px-2 py-1 text-[12px] text-white-primary opacity-0 transition-opacity group-hover:opacity-100">
               Underline
             </div>
           </button>
           <button
             onClick={() => setShowPreview(true)}
-            className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors group relative ml-auto"
+            className="group relative ml-auto flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232]"
             title="Preview"
           >
             <LuEye size={18} />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#444444] text-white-primary text-[12px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-[#444444] px-2 py-1 text-[12px] text-white-primary opacity-0 transition-opacity group-hover:opacity-100">
               Preview
             </div>
           </button>
@@ -421,16 +439,13 @@ export default function Write() {
           {/* Preview Images Below Content with Thumbnail Toggle */}
           {images.length > 0 && (
             <div className="flex flex-col gap-2">
-              <h4 className="text-[12px] font-semibold text-[#7A7A7A] uppercase">
+              <h4 className="text-[12px] font-semibold uppercase text-[#7A7A7A]">
                 Embedded Images ({images.length})
               </h4>
               <div className="flex flex-wrap gap-2">
                 {images.map((image, index) => (
-                  <div
-                    key={image.id}
-                    className="relative group flex flex-col"
-                  >
-                    <div className="relative w-[60px] h-[60px] rounded-t-lg overflow-hidden border border-[#444444] hover:border-key-primary transition-colors">
+                  <div key={image.id} className="group relative flex flex-col">
+                    <div className="relative h-[60px] w-[60px] overflow-hidden rounded-t-lg border border-[#444444] transition-colors hover:border-key-primary">
                       <Image
                         src={image.previewUrl || "/placeholder.png"}
                         alt={`Image ${index + 1}`}
@@ -440,26 +455,30 @@ export default function Write() {
                       {/* Delete Button - Top Right */}
                       <button
                         onClick={() => deleteImage(image.id || "")}
-                        className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 hover:bg-red-600 transition-colors text-white text-[12px] font-bold"
+                        className="text-white absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[12px] font-bold transition-colors hover:bg-red-600"
                         title="Delete image"
                       >
                         ×
                       </button>
                     </div>
-                    
+
                     {/* Thumbnail Checkbox - Bottom */}
                     <button
                       onClick={() => setImageAsThumbnail(image)}
-                      className="w-full h-6 rounded-b-lg border border-t-0 border-[#444444] bg-[#262626] hover:bg-[#323232] transition-all flex items-center justify-center"
+                      className="flex h-6 w-full items-center justify-center rounded-b-lg border border-t-0 border-[#444444] bg-[#262626] transition-all hover:bg-[#323232]"
                       title="Set as thumbnail"
                     >
-                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
-                        image.active
-                          ? "bg-green-500 border-green-500"
-                          : "border-[#7A7A7A]"
-                      }`}>
+                      <div
+                        className={`flex h-4 w-4 items-center justify-center rounded border-2 transition-all ${
+                          image.active
+                            ? "border-green-500 bg-green-500"
+                            : "border-[#7A7A7A]"
+                        }`}
+                      >
                         {image.active && (
-                          <span className="text-white text-xs font-bold">✓</span>
+                          <span className="text-white text-xs font-bold">
+                            ✓
+                          </span>
                         )}
                       </div>
                     </button>
@@ -472,24 +491,26 @@ export default function Write() {
 
         {/* Image Upload Modal Trigger */}
         {showImageUploadModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className="relative flex max-h-[80vh] w-full max-w-2xl flex-col rounded-lg bg-black-primary shadow-2xl overflow-hidden">
+          <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4">
+            <div className="relative flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-black-primary shadow-2xl">
               <div className="flex items-center justify-between border-b border-black-secondary px-6 py-4">
                 <h3 className="text-lg font-semibold text-white-primary">
                   Upload Images
                 </h3>
                 <button
                   onClick={() => setShowImageUploadModal(false)}
-                  className="text-[#A9A9A9] hover:text-white-primary transition-colors"
+                  className="text-[#A9A9A9] transition-colors hover:text-white-primary"
                 >
                   <IoClose size={24} />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto px-6 py-4">
-                <ImageUploader onUploadComplete={() => {
-                  console.log("Upload complete, closing modal");
-                  setShowImageUploadModal(false);
-                }} />
+                <ImageUploader
+                  onUploadComplete={() => {
+                    console.log("Upload complete, closing modal");
+                    setShowImageUploadModal(false);
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -498,7 +519,7 @@ export default function Write() {
         {!showAiPrompt && (
           <button
             onClick={handleOpenPrompt}
-            className="fixed bottom-8 right-8 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-gradient-to-br from-green-300 via-blue-300 to-pink-300 shadow-lg hover:shadow-xl transition-shadow"
+            className="fixed bottom-8 right-8 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-gradient-to-br from-green-300 via-blue-300 to-pink-300 shadow-lg transition-shadow hover:shadow-xl"
           >
             <MagicIcon color="#262626" size={24} />
           </button>
@@ -508,15 +529,15 @@ export default function Write() {
         {showAiPrompt && (
           <div
             ref={promptRef}
-            className="w-full flex-shrink-0 flex flex-col gap-3 rounded-lg bg-gradient-to-br from-green-300 via-blue-300 to-pink-300 p-4 shadow-lg mb-4"
+            className="mb-4 flex w-full flex-shrink-0 flex-col gap-3 rounded-lg bg-gradient-to-br from-green-300 via-blue-300 to-pink-300 p-4 shadow-lg"
           >
             <div className="flex items-start justify-between">
-              <div className="flex h-[40px] w-[40px] items-center justify-center rounded-lg bg-[#262626] flex-shrink-0">
+              <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-lg bg-[#262626]">
                 <RiLightbulbFlashLine className="text-green-300" size={20} />
               </div>
               <button
                 onClick={handleClosePrompt}
-                className="transition-transform hover:scale-110 flex-shrink-0"
+                className="flex-shrink-0 transition-transform hover:scale-110"
               >
                 <IoClose size={20} className="text-[#262626]" />
               </button>
@@ -531,7 +552,7 @@ export default function Write() {
             </div>
             <div className="flex gap-2">
               <button
-                className="flex h-[48px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors"
+                className="flex h-[48px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232]"
                 onClick={handleGenerateAi}
                 disabled={images.length === 0 || description.length === 0}
               >
@@ -545,8 +566,8 @@ export default function Write() {
 
       {/* AI Results Modal */}
       {aiModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="relative flex max-h-[80vh] w-full max-w-2xl flex-col rounded-lg bg-black-primary shadow-2xl overflow-hidden">
+        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4">
+          <div className="relative flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-black-primary shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-black-secondary px-6 py-4">
               <h3 className="text-lg font-semibold text-white-primary">
@@ -554,7 +575,7 @@ export default function Write() {
               </h3>
               <button
                 onClick={handleCloseModal}
-                className="text-[#A9A9A9] hover:text-white-primary transition-colors"
+                className="text-[#A9A9A9] transition-colors hover:text-white-primary"
               >
                 <IoClose size={24} />
               </button>
@@ -584,7 +605,7 @@ export default function Write() {
               <div className="border-t border-black-secondary px-6 py-4">
                 <button
                   onClick={handleCopyContent}
-                  className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-key-primary text-black-secondary hover:bg-[#9b8fed] transition-colors"
+                  className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-key-primary text-black-secondary transition-colors hover:bg-[#9b8fed]"
                 >
                   {copySuccess ? (
                     <>
@@ -606,14 +627,16 @@ export default function Write() {
 
       {/* Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="relative flex max-h-[80vh] w-full max-w-4xl flex-col rounded-lg bg-black-primary shadow-2xl overflow-hidden border border-black-secondary">
+        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4">
+          <div className="relative flex max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-black-secondary bg-black-primary shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-black-secondary px-6 py-4">
-              <h3 className="text-lg font-semibold text-white-primary">Preview</h3>
+              <h3 className="text-lg font-semibold text-white-primary">
+                Preview
+              </h3>
               <button
                 onClick={() => setShowPreview(false)}
-                className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#323232] transition-colors"
+                className="flex h-8 w-8 items-center justify-center rounded transition-colors hover:bg-[#323232]"
               >
                 <IoClose size={24} className="text-white-primary" />
               </button>
@@ -629,7 +652,7 @@ export default function Write() {
               )}
 
               {/* Description with markdown rendering */}
-              <div className="prose prose-invert max-w-none text-[15px] leading-7 text-[#D0D0D0] whitespace-pre-wrap">
+              <div className="prose prose-invert max-w-none whitespace-pre-wrap text-[15px] leading-7 text-[#D0D0D0]">
                 {renderMarkdown(description)}
               </div>
 
@@ -646,8 +669,8 @@ export default function Write() {
 
       {/* Location Metadata Modal */}
       {showLocationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="relative flex max-h-[80vh] w-full max-w-md flex-col rounded-lg bg-black-primary shadow-2xl overflow-hidden border border-black-secondary">
+        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4">
+          <div className="relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-black-secondary bg-black-primary shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-black-secondary px-6 py-4">
               <h3 className="text-lg font-semibold text-white-primary">
@@ -659,14 +682,14 @@ export default function Write() {
                   setLocationModalImage(null);
                   setLocationError("");
                 }}
-                className="text-[#A9A9A9] hover:text-white-primary transition-colors"
+                className="text-[#A9A9A9] transition-colors hover:text-white-primary"
               >
                 <IoClose size={24} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
               <p className="text-[14px] text-[#D0D0D0]">
                 This image doesn't have location metadata. Choose how to set it:
               </p>
@@ -674,51 +697,61 @@ export default function Write() {
               {/* Option 1: Auto-detect current location */}
               <button
                 onClick={handleGetCurrentLocation}
-                className="flex h-[48px] items-center justify-center gap-2 rounded-lg bg-key-primary text-black-secondary hover:bg-[#9b8fed] transition-colors font-semibold"
+                className="flex h-[48px] items-center justify-center gap-2 rounded-lg bg-key-primary font-semibold text-black-secondary transition-colors hover:bg-[#9b8fed]"
               >
                 📍 Use My Current Location
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-px bg-black-secondary"></div>
+                <div className="h-px flex-1 bg-black-secondary"></div>
                 <span className="text-[12px] text-[#7A7A7A]">OR</span>
-                <div className="flex-1 h-px bg-black-secondary"></div>
+                <div className="h-px flex-1 bg-black-secondary"></div>
               </div>
 
               {/* Option 2: Manual entry */}
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="text-[12px] font-semibold text-[#A9A9A9] block mb-2">
+                  <label className="mb-2 block text-[12px] font-semibold text-[#A9A9A9]">
                     Latitude (-90 to 90)
                   </label>
                   <input
                     type="number"
                     step="0.0001"
                     value={locationInput.lat}
-                    onChange={(e) => setLocationInput({ ...locationInput, lat: e.target.value })}
+                    onChange={(e) =>
+                      setLocationInput({
+                        ...locationInput,
+                        lat: e.target.value,
+                      })
+                    }
                     placeholder="e.g., 37.7749"
-                    className="w-full px-3 py-2 rounded-lg bg-[#262626] text-white-primary placeholder:text-[#7A7A7A] border border-black-secondary focus:border-key-primary focus:outline-none"
+                    className="w-full rounded-lg border border-black-secondary bg-[#262626] px-3 py-2 text-white-primary placeholder:text-[#7A7A7A] focus:border-key-primary focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[12px] font-semibold text-[#A9A9A9] block mb-2">
+                  <label className="mb-2 block text-[12px] font-semibold text-[#A9A9A9]">
                     Longitude (-180 to 180)
                   </label>
                   <input
                     type="number"
                     step="0.0001"
                     value={locationInput.lon}
-                    onChange={(e) => setLocationInput({ ...locationInput, lon: e.target.value })}
+                    onChange={(e) =>
+                      setLocationInput({
+                        ...locationInput,
+                        lon: e.target.value,
+                      })
+                    }
                     placeholder="e.g., -122.4194"
-                    className="w-full px-3 py-2 rounded-lg bg-[#262626] text-white-primary placeholder:text-[#7A7A7A] border border-black-secondary focus:border-key-primary focus:outline-none"
+                    className="w-full rounded-lg border border-black-secondary bg-[#262626] px-3 py-2 text-white-primary placeholder:text-[#7A7A7A] focus:border-key-primary focus:outline-none"
                   />
                 </div>
 
                 <button
                   onClick={handleManualLocationSubmit}
-                  className="flex h-[48px] items-center justify-center gap-2 rounded-lg bg-[#262626] text-white-primary hover:bg-[#323232] transition-colors font-semibold mt-2"
+                  className="mt-2 flex h-[48px] items-center justify-center gap-2 rounded-lg bg-[#262626] font-semibold text-white-primary transition-colors hover:bg-[#323232]"
                 >
                   ✓ Confirm Location
                 </button>
@@ -726,7 +759,7 @@ export default function Write() {
 
               {/* Error message */}
               {locationError && (
-                <div className="p-3 rounded-lg bg-red-500 bg-opacity-20 border border-red-500">
+                <div className="rounded-lg border border-red-500 bg-red-500 bg-opacity-20 p-3">
                   <p className="text-[13px] text-red-400">{locationError}</p>
                 </div>
               )}

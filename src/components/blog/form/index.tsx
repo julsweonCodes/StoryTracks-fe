@@ -34,7 +34,7 @@ export default function Form() {
       <Header />
       <ActiveComponent />
       {statusInfo?.type && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-[#262626] border border-[#444444] p-4 shadow-lg flex items-center gap-3 max-w-sm">
+        <div className="fixed bottom-4 right-4 z-50 flex max-w-sm items-center gap-3 rounded-lg border border-[#444444] bg-[#262626] p-4 shadow-lg">
           <div>
             <Loading
               type={statusInfo?.type}
