@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { IoRefresh } from "react-icons/io5";
 
 interface Props {
   isOpen: boolean;
@@ -8,6 +9,8 @@ interface Props {
   onRefetch?: () => void;
   showRefetchButton?: boolean;
   isLoadingMore?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export default function Drawer({
@@ -18,6 +21,8 @@ export default function Drawer({
   onRefetch,
   showRefetchButton,
   isLoadingMore,
+  onRefresh,
+  isRefreshing,
 }: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -44,48 +49,67 @@ export default function Drawer({
 
   return (
     <div
-      className="absolute bottom-0 h-full w-full rounded-t-3xl bg-black-primary transition-transform"
+      className="absolute bottom-0 h-full w-full rounded-t-3xl bg-black-primary transition-transform overflow-visible"
       style={{
         transform: `translateY(${isOpen ? `0` : "calc(100% - 63px)"})`,
       }}
     >
       {button}
-      <div className="relative h-full max-h-screen">
+      <div className="relative flex h-full flex-col overflow-visible">
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex h-full flex-col gap-8 overflow-y-auto bg-black-primary p-[18px] pb-20"
+          className="flex flex-1 flex-col gap-8 overflow-y-auto bg-black-primary p-[18px]"
         >
           {children}
         </div>
 
-        {/* Refetch button in bottom right - positioned absolutely */}
-        {showRefetchButton && (
-          <button
-            onClick={onRefetch}
-            disabled={isLoadingMore}
-            className="absolute bottom-8 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-key-primary text-black-primary shadow-lg transition-opacity hover:opacity-90 disabled:opacity-50"
-            title="Load more posts"
-          >
-            {isLoadingMore ? (
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-black-primary border-t-transparent" />
-            ) : (
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                />
-              </svg>
-            )}
-          </button>
-        )}
+        {/* Refresh and Refetch buttons - fixed at bottom right */}
+        <div className="absolute bottom-20 right-6 z-50 flex flex-col gap-3">
+          {/* Refresh button - on top */}
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#262626] text-white-primary shadow-lg transition-opacity hover:bg-[#323232] disabled:opacity-50"
+              title="Refresh feed"
+            >
+              {isRefreshing ? (
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white-primary border-t-transparent" />
+              ) : (
+                <IoRefresh size={20} />
+              )}
+            </button>
+          )}
+
+          {/* Load more button - below refresh */}
+          {showRefetchButton && (
+            <button
+              onClick={onRefetch}
+              disabled={isLoadingMore}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-key-primary text-black-primary shadow-lg transition-opacity hover:opacity-90 disabled:opacity-50"
+              title="Load more posts"
+            >
+              {isLoadingMore ? (
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-black-primary border-t-transparent" />
+              ) : (
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

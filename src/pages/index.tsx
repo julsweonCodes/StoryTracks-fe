@@ -29,9 +29,13 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMorePages, setHasMorePages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoadingInitialPosts, setIsLoadingInitialPosts] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const mapRef = useRef<any>(null);
   const { data } = usePostsListQuery();
   const [processedData, setProcessedData] = useState<ProcessedBlog[]>([]);
+  const [hasMoreInitialPages, setHasMoreInitialPages] = useState(false);
+  const [initialPageNumber, setInitialPageNumber] = useState(0);
   const [currentZoom, setCurrentZoom] = useState(5);
   const [clusters, setClusters] = useState<any[]>([]);
   const [maxZoom, setMaxZoom] = useState<number | null>(null);
@@ -123,6 +127,33 @@ export default function Home() {
 
   const handleChange = () => {
     setIsOpen(!isOpen);
+  };
+
+  // Refresh feed - fetch fresh data from /posts/feed
+  const handleRefreshFeed = async () => {
+    try {
+      setIsRefreshing(true);
+      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed?page=0`;
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error(`Failed to refresh feed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const newPosts = data.data?.content || data.content || data || [];
+
+      if (newPosts && newPosts.length > 0) {
+        const processed = await processBlogs(newPosts);
+        setProcessedData(processed);
+        setInitialPageNumber(1);
+        // Check if there are more pages
+        setHasMoreInitialPages(newPosts.length === 20);
+      }
+    } catch (error) {
+      console.error("Error refreshing feed:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   // Load more posts from cluster when paginating
@@ -230,9 +261,46 @@ export default function Home() {
     }
   };
 
+  // Load more initial posts (when showing all posts, not from a cluster)
+  const loadMoreInitialPosts = async (pageNum: number) => {
+    try {
+      setIsLoadingInitialPosts(true);
+      // Use the same usePostsListQuery hook's endpoint pattern
+      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed?page=${pageNum}`;
+
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch posts: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const newPosts = data.data?.content || data.content || data || [];
+
+      if (newPosts && newPosts.length > 0) {
+        const processed = await processBlogs(newPosts);
+        setProcessedData((prev) => [...prev, ...processed]);
+        setInitialPageNumber(pageNum + 1);
+
+        // Check if there are more pages (if returned count is less than expected page size)
+        setHasMoreInitialPages(newPosts.length === 20); // Assuming page size is 20
+      } else {
+        setHasMoreInitialPages(false);
+      }
+    } catch (error) {
+      console.error("Error loading more initial posts:", error);
+    } finally {
+      setIsLoadingInitialPosts(false);
+    }
+  };
+
   useEffect(() => {
     if (data) {
-      processBlogs(data).then(setProcessedData);
+      processBlogs(data).then((processed) => {
+        setProcessedData(processed);
+        // Check if we should show "Load More" button for initial posts
+        setHasMoreInitialPages(processed.length > 0 && processed.length % 20 === 0);
+        setInitialPageNumber(1);
+      });
     }
   }, [data]);
 
@@ -252,7 +320,7 @@ export default function Home() {
         <Header />
         <Search />
       </div>
-      <div className="relative flex h-full w-full flex-col">
+      <div className="relative flex h-full w-full flex-col overflow-visible">
         <div className="h-full w-full flex-1 overflow-hidden">
           {(() => {
             const filteredClusters = getFilteredClusters(clusters, currentZoom);
@@ -288,16 +356,26 @@ export default function Home() {
               </span>
             </div>
           }
-          showRefetchButton={selectedClusterPosts.length > 0 && hasMorePages}
-          isLoadingMore={isLoadingMore}
+          showRefetchButton={
+            (selectedClusterPosts.length > 0 && hasMorePages) ||
+            (selectedClusterPosts.length === 0 && processedData.length > 0 && hasMoreInitialPages)
+          }
+          isLoadingMore={isLoadingMore || isLoadingInitialPosts}
+          onRefresh={handleRefreshFeed}
+          isRefreshing={isRefreshing}
           onRefetch={() => {
-            if (selectedClusterInfo) {
+            // If showing cluster posts, load more from cluster
+            if (selectedClusterPosts.length > 0 && selectedClusterInfo) {
               loadMoreClusterPosts(
                 selectedClusterInfo.lat,
                 selectedClusterInfo.lng,
                 selectedClusterInfo.level || 1,
                 currentPage,
               );
+            }
+            // Otherwise load more initial posts
+            else if (selectedClusterPosts.length === 0 && hasMoreInitialPages) {
+              loadMoreInitialPosts(initialPageNumber);
             }
           }}
         >
@@ -314,7 +392,7 @@ export default function Home() {
               rgstDtm={post.rgstDtm}
             />
           ))}
-          {isLoadingMore && (
+          {(isLoadingMore || isLoadingInitialPosts) && (
             <div className="flex justify-center py-4">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-white-primary" />
             </div>
