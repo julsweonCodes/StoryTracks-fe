@@ -10,13 +10,48 @@ export type FormComponentKey = "write" | "generator" | "preview" | "setting";
 
 export interface ImageInfo {
   id?: string;
-  lat: number;
-  lon: number;
-  createDate: string;
-  previewUrl: string;
-  fileName: string;
-  active: boolean;
-  file: File;
+  lat?: number;
+  lon?: number;
+  createDate?: string;
+  previewUrl?: string;
+  fileName?: string;           // Used during editing (local)
+  active?: boolean;
+  file?: File;
+  // Backend response fields
+  imgId?: number;
+  postId?: number;
+  geoLat?: string;             // Backend uses string
+  geoLong?: string;            // Backend uses string
+  imgPath?: string;            // S3 path: "posts/1698765432000_filename.png"
+  imgFileName?: string;        // From backend ImageResponse
+  filePath?: string;           // Full S3 URL (from backend)
+  thumbYn?: boolean;
+  imgDtm?: string;
+  rgstDtm?: string;
+}
+
+// Backend response types
+export interface ImageResponse {
+  imgId: number;
+  postId: number;
+  geoLat: string;
+  geoLong: string;
+  imgPath: string;
+  imgFileName: string;
+  imgDtm: string;
+  rgstDtm: string;
+  thumbYn: boolean;
+  filePath: string;
+}
+
+export interface PostDetailResponse {
+  postId: number;
+  title: string;
+  ogText: string;              // Blog description/content
+  aiGenText: string;           // AI generated content
+  rgstDtm: string;
+  chngDtm: string;
+  blogImgList: ImageResponse[];
 }
 
 export interface StatusInfo {
@@ -44,6 +79,7 @@ interface FormContextType {
   setAiContent: Dispatch<SetStateAction<AiContentInfo[]>>;
   aiContentIndex?: number;
   setAiContentIndex: Dispatch<SetStateAction<number | undefined>>;
+  resetWriteState: () => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -65,6 +101,13 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
     setDescription(description);
   };
 
+  const resetWriteState = () => {
+    setImages([]);
+    setDescription("");
+    setAiContent([]);
+    setAiContentIndex(undefined);
+  };
+
   return (
     <FormContext.Provider
       value={{
@@ -81,6 +124,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setAiContent,
         aiContentIndex,
         setAiContentIndex,
+        resetWriteState,
       }}
     >
       {children}

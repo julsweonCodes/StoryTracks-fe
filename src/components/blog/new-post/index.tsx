@@ -1,13 +1,13 @@
 import Loading from "@/components/common/loading";
 import { useFormContext } from "@/context/form-context";
-import Preview from "./preview";
+import Preview from "./sections/preview";
 import BlogHeader from "@/components/common/blog-header";
 import GeneratorHeader from "@/components/common/generator-header";
-import Generator from "./generaltor";
-import Write from "./write";
-import Setting from "./setting";
+import Generator from "./sections/ai-generator";
+import Write from "./sections/write";
+import Setting from "./sections/settings";
 
-export default function Form() {
+export default function NewPostForm() {
   const { activeComponentKey, statusInfo } = useFormContext();
 
   const components = {
@@ -34,15 +34,13 @@ export default function Form() {
       <Header />
       <ActiveComponent />
       {statusInfo?.type && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-[#262626] border border-[#444444] p-4 shadow-lg flex items-center gap-3 max-w-sm">
-          <div>
-            <Loading
-              type={statusInfo?.type}
-              title={statusInfo?.title}
-              description={statusInfo?.description}
-              color="#A099FF"
-            />
-          </div>
+        <div className="absolute left-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center gap-4 bg-black-primary p-10 text-center">
+          <Loading
+            type={statusInfo?.type}
+            title={statusInfo?.title}
+            description={statusInfo?.description}
+            color="#A099FF"
+          />
         </div>
       )}
     </div>

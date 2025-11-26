@@ -1,4 +1,4 @@
-import Form from "@/components/blog/form";
+import Form from "@/components/blog/new-post";
 import SEOHeader from "@/components/common/seo-header";
 import { FormProvider } from "@/context/form-context";
 
