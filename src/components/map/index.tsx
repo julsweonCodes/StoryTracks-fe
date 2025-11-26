@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
-import CustomMarker from "./custom-marker";
+import MarkerTooltip from "./marker-tooltip";
+import ClusterMarker from "./cluster-marker";
 import { BiSolidNavigation } from "react-icons/bi";
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
+import {
+  ImageCluster,
+  getClusterLevelFromZoom,
+} from "@/hooks/queries/use-image-clusters";
 
 const containerStyle = {
   width: "100%",
@@ -14,28 +18,54 @@ const defaultCenter = {
   lng: -123.1207,
 };
 
-// const generateRandomMarkers = (
-//   center: google.maps.LatLngLiteral,
-//   count: number,
-//   radius: number = 0.01,
-// ): google.maps.LatLngLiteral[] => {
-//   const markers: google.maps.LatLngLiteral[] = [];
-
-//   for (let i = 0; i < count; i++) {
-//     const randomLat = center.lat + (Math.random() - 0.5) * radius * 2;
-//     const randomLng = center.lng + (Math.random() - 0.5) * radius * 2;
-//     markers.push({ lat: randomLat, lng: randomLng });
-//   }
-
-//   return markers;
-// };
-
-interface Props {
-  markers: google.maps.LatLngLiteral[];
-  zoom?: number;
+interface PostThumbnail {
+  postId: number;
+  title: string;
+  src: string;
 }
 
-export default function Map({ markers = [], zoom = 15 }: Props) {
+interface MarkerWithData extends google.maps.LatLngLiteral {
+  postId?: number;
+  title?: string;
+  src?: string;
+  des?: string;
+}
+
+interface ClusterWithPosts extends google.maps.LatLngLiteral {
+  count?: number;
+  posts?: MarkerWithData[];
+  thumbnails?: PostThumbnail[];
+}
+
+interface Props {
+  markers?: MarkerWithData[];
+  imageClusters?: ImageCluster[];
+  zoom?: number;
+  maxZoom?: number;
+  minZoom?: number;
+  center?: { lat: number; lng: number };
+  onMarkerClick?: (lat: number, lng: number, posts: MarkerWithData[]) => void;
+  onClusterClick?: (cluster: ImageCluster) => void;
+  onZoomChange?: (zoom: number) => void;
+  onClusterLevelChange?: (level: 1 | 2 | 3) => void;
+  useBackendClusters?: boolean;
+  mapRef?: React.MutableRefObject<google.maps.Map | null>;
+}
+
+export default function Map({
+  markers = [],
+  imageClusters = [],
+  zoom = 15,
+  maxZoom = 18,
+  minZoom = 0,
+  center: initialCenter,
+  onMarkerClick,
+  onClusterClick,
+  onZoomChange,
+  onClusterLevelChange,
+  useBackendClusters = false,
+  mapRef: externalMapRef,
+}: Props) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -43,15 +73,20 @@ export default function Map({ markers = [], zoom = 15 }: Props) {
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
-  const [center, setCenter] = useState(defaultCenter); // 중심 좌표
-  const markerClusterRef = useRef<MarkerClusterer | null>(null);
+  const [center, setCenter] = useState(initialCenter || defaultCenter);
+  const [currentZoom, setCurrentZoom] = useState(zoom);
 
-  const [clusters, setClusters] = useState<
-    { lat: number; lng: number; count?: number }[]
-  >([]);
+  // Local clustering (frontend-based)
+  const [clusters, setClusters] = useState<ClusterWithPosts[]>([]);
 
+  // Calculate clusters from local markers (frontend method)
   const calculateClusters = useCallback(() => {
-    if (!mapRef.current || !isMapReady || markers.length === 0) {
+    if (
+      !mapRef.current ||
+      !isMapReady ||
+      markers.length === 0 ||
+      useBackendClusters
+    ) {
       return;
     }
 
@@ -60,10 +95,10 @@ export default function Map({ markers = [], zoom = 15 }: Props) {
     if (!bounds) return;
 
     const zoom = map.getZoom() || 15;
-    const gridSize = 0.002 / Math.pow(2, zoom - 15); // 줌 레벨에 따른 그리드 크기 조정
-    const clusters: Record<
+    const gridSize = 0.002 / Math.pow(2, zoom - 15);
+    const clusterMap: Record<
       string,
-      { lat: number; lng: number; count: number }
+      { lat: number; lng: number; count: number; posts: MarkerWithData[] }
     > = {};
 
     markers.forEach((marker) => {
@@ -71,56 +106,103 @@ export default function Map({ markers = [], zoom = 15 }: Props) {
       const gridLng = Math.floor(marker.lng / gridSize);
       const gridKey = `${gridLat}-${gridLng}`;
 
-      if (!clusters[gridKey]) {
-        clusters[gridKey] = { lat: 0, lng: 0, count: 0 };
+      if (!clusterMap[gridKey]) {
+        clusterMap[gridKey] = { lat: 0, lng: 0, count: 0, posts: [] };
       }
 
-      clusters[gridKey].lat += marker.lat;
-      clusters[gridKey].lng += marker.lng;
-      clusters[gridKey].count += 1;
+      clusterMap[gridKey].lat += marker.lat;
+      clusterMap[gridKey].lng += marker.lng;
+      clusterMap[gridKey].count += 1;
+      clusterMap[gridKey].posts.push(marker);
     });
 
-    const clustersResult = Object.values(clusters).map((cluster) => ({
-      lat: cluster.lat / cluster.count,
-      lng: cluster.lng / cluster.count,
-      count: cluster.count,
-    }));
+    let clustersResult = Object.values(clusterMap).map((cluster) => {
+      const thumbnails: PostThumbnail[] = cluster.posts
+        .slice(0, 4)
+        .map((post) => ({
+          postId: post.postId || 0,
+          title: post.title || "Untitled",
+          src: post.src || "",
+        }));
+
+      return {
+        lat: cluster.lat / cluster.count,
+        lng: cluster.lng / cluster.count,
+        count: cluster.count,
+        posts: cluster.posts,
+        thumbnails,
+      };
+    });
+
+    // For main feed (non-backend), show only top 20 sparse clusters to avoid crowding
+    if (clustersResult.length > 20) {
+      // Sort by count descending and take top 20 most significant clusters
+      clustersResult = clustersResult
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 20);
+    }
 
     setClusters(clustersResult);
-  }, [markers, isMapReady]);
+  }, [markers, isMapReady, useBackendClusters]);
 
   useEffect(() => {
     if (!isMapReady || !mapRef.current) return;
 
     const map = mapRef.current;
 
-    // 초기 계산
-    calculateClusters();
+    if (!useBackendClusters) {
+      // Frontend clustering mode
+      calculateClusters();
 
-    // 맵 이동, 줌 변경 등의 이벤트에 대한 리스너
-    const listeners = [
-      map.addListener("idle", calculateClusters),
-      map.addListener("zoom_changed", calculateClusters),
-      map.addListener("dragend", calculateClusters),
-    ];
+      const listeners = [
+        map.addListener("idle", calculateClusters),
+        map.addListener("zoom_changed", calculateClusters),
+        map.addListener("dragend", calculateClusters),
+      ];
+
+      return () => {
+        listeners.forEach((listener) =>
+          google.maps.event.removeListener(listener),
+        );
+      };
+    }
+  }, [isMapReady, calculateClusters, useBackendClusters]);
+
+  // Handle zoom changes for backend cluster refetching
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const map = mapRef.current;
+
+    const handleZoomChange = () => {
+      const newZoom = map.getZoom() || 15;
+      setCurrentZoom(newZoom);
+      onZoomChange?.(newZoom);
+
+      // Notify about cluster level change
+      const newLevel = getClusterLevelFromZoom(newZoom);
+      onClusterLevelChange?.(newLevel);
+    };
+
+    const listener = map.addListener("zoom_changed", handleZoomChange);
 
     return () => {
-      listeners.forEach((listener) =>
-        google.maps.event.removeListener(listener),
-      );
+      google.maps.event.removeListener(listener);
     };
-  }, [isMapReady, calculateClusters]);
+  }, [onZoomChange, onClusterLevelChange]);
 
-  const onLoad = useCallback(function callback(map: google.maps.Map) {
-    mapRef.current = map;
-    setIsMapReady(true);
-  }, []);
+  const onLoad = useCallback(
+    function callback(map: google.maps.Map) {
+      mapRef.current = map;
+      if (externalMapRef) {
+        externalMapRef.current = map;
+      }
+      setIsMapReady(true);
+    },
+    [externalMapRef],
+  );
 
   const onUnmount = useCallback(function callback() {
-    if (markerClusterRef.current) {
-      markerClusterRef.current.setMap(null);
-      markerClusterRef.current = null;
-    }
     mapRef.current = null;
     setIsMapReady(false);
   }, []);
@@ -190,6 +272,12 @@ export default function Map({ markers = [], zoom = 15 }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    if (initialCenter) {
+      setCenter(initialCenter);
+    }
+  }, [initialCenter]);
+
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
@@ -198,7 +286,9 @@ export default function Map({ markers = [], zoom = 15 }: Props) {
       onLoad={onLoad}
       onUnmount={onUnmount}
       options={{
-        disableDefaultUI: true, // 부가적인 UI 비활성화
+        disableDefaultUI: true,
+        maxZoom: maxZoom,
+        minZoom: minZoom,
       }}
     >
       <button
@@ -208,9 +298,58 @@ export default function Map({ markers = [], zoom = 15 }: Props) {
       >
         <BiSolidNavigation className="text-black-primary" size={26} />
       </button>
-      {clusters.map((marker, index) => (
-        <CustomMarker key={index} position={marker} text={`${marker.count}`} />
-      ))}
+
+      {/* Always show individual post markers */}
+      {markers.length > 0
+        ? markers.map((marker, index) => {
+            // Skip rendering if no src available
+            if (!marker.src) return null;
+
+            return (
+              <MarkerTooltip
+                key={`individual-marker-${marker.postId}-${index}`}
+                position={marker}
+                posts={[
+                  {
+                    postId: marker.postId || 0,
+                    title: marker.title || "",
+                    src: marker.src,
+                  },
+                ]}
+                count={1}
+                onMarkerClick={() =>
+                  onMarkerClick?.(marker.lat, marker.lng, [marker])
+                }
+              />
+            );
+          })
+        : null}
+
+      {/* Backend Image Clusters (overlay on top of markers) */}
+      {useBackendClusters && imageClusters.length > 0
+        ? imageClusters.map((cluster, index) => (
+            <ClusterMarker
+              key={`backend-cluster-${cluster.cluster_lat}-${cluster.cluster_long}-${index}`}
+              cluster={cluster}
+              onClusterClick={onClusterClick}
+            />
+          ))
+        : null}
+
+      {/* Frontend Post Clusters (when not using backend clusters) */}
+      {!useBackendClusters && clusters.length > 0
+        ? clusters.map((marker, index) => (
+            <MarkerTooltip
+              key={`frontend-cluster-${marker.lat}-${marker.lng}-${index}`}
+              position={marker}
+              posts={marker.thumbnails || []}
+              count={marker.count || 0}
+              onMarkerClick={() =>
+                onMarkerClick?.(marker.lat, marker.lng, marker.posts || [])
+              }
+            />
+          ))
+        : null}
     </GoogleMap>
   ) : (
     <></>

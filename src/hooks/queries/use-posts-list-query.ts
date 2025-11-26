@@ -66,8 +66,8 @@ const usePostsListQuery = () => {
 const mapToLatLng = (blogs?: Blog[]): google.maps.LatLngLiteral[] => {
   return (
     blogs?.map((blog) => ({
-      lat: parseFloat(blog.thumbHash.thumbGeoLat),
-      lng: parseFloat(blog.thumbHash.thumbGeoLong),
+      lat: blog.thumbHash ? parseFloat(blog.thumbHash.thumbGeoLat) : 37.7749,
+      lng: blog.thumbHash ? parseFloat(blog.thumbHash.thumbGeoLong) : -122.4194,
     })) || []
   );
 };
@@ -79,7 +79,7 @@ const processBlogs = async (blogs?: Blog[]): Promise<ProcessedBlog[]> => {
     blogs.map(async (blog) => ({
       postId: blog.postId,
       title: blog.title,
-      src: blog.thumbHash.thumbImgPath,
+      src: `${process.env.NEXT_PUBLIC_S3_BASE_URL}${blog.thumbHash?.thumbImgPath || ""}`,
       des: await markdownToPlainText(blog.aiGenText),
       rgstDtm: blog.rgstDtm,
     })),
