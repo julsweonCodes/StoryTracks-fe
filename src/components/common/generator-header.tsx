@@ -44,7 +44,8 @@ export default function GeneratorHeader() {
       setModal({
         isOpen: true,
         title: "Failed to Publish",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
       });
     },
   });
@@ -63,13 +64,13 @@ export default function GeneratorHeader() {
 
   const handlePublish = async () => {
     if (isLoading) return;
-    
+
     console.log("[GeneratorHeader] Publish button clicked");
     console.log("[GeneratorHeader] Title value:", title);
     console.log("[GeneratorHeader] Description value:", description.length);
     console.log("[GeneratorHeader] Images count:", images.length);
     console.log("[GeneratorHeader] Session userId:", session?.user?.userId);
-    
+
     if (!session?.user?.userId) {
       console.error("[GeneratorHeader] User not logged in");
       setModal({
@@ -104,7 +105,8 @@ export default function GeneratorHeader() {
       setModal({
         isOpen: true,
         title: "Thumbnail Required",
-        description: "Please select at least one image and mark it as thumbnail",
+        description:
+          "Please select at least one image and mark it as thumbnail",
       });
       return;
     }
@@ -114,7 +116,9 @@ export default function GeneratorHeader() {
 
     try {
       // Step 1: Upload images to S3
-      console.log(`[GeneratorHeader] Uploading ${images.length} image(s) to S3...`);
+      console.log(
+        `[GeneratorHeader] Uploading ${images.length} image(s) to S3...`,
+      );
       const imageFiles = images
         .filter((img) => img.file)
         .map((img) => img.file as File);
@@ -133,8 +137,10 @@ export default function GeneratorHeader() {
         })
         .map((img) => {
           const originalName = img.fileName || "";
-          const s3FileName = s3FileNames.find((s3Name) => s3Name.includes(originalName)) || originalName;
-          
+          const s3FileName =
+            s3FileNames.find((s3Name) => s3Name.includes(originalName)) ||
+            originalName;
+
           return {
             imgFileName: originalName,
             imgPath: `posts/${s3FileName}`,
@@ -146,11 +152,17 @@ export default function GeneratorHeader() {
         });
 
       // Step 4: Call publish mutation
-      const userId = typeof session.user.id === 'string' 
-        ? parseInt(session.user.id) 
-        : session.user.id;
-      console.log("[GeneratorHeader] Parsed userId:", userId, "type:", typeof userId);
-      
+      const userId =
+        typeof session.user.id === "string"
+          ? parseInt(session.user.id)
+          : session.user.id;
+      console.log(
+        "[GeneratorHeader] Parsed userId:",
+        userId,
+        "type:",
+        typeof userId,
+      );
+
       publishBlogPost({
         userId: userId,
         title: title,
@@ -199,7 +211,7 @@ export default function GeneratorHeader() {
       )}
       {isPublish && (
         <div
-          className="absolute right-0 flex h-[40px] w-[78px] items-center justify-center rounded-lg bg-[#262626] text-[14px] leading-4 tracking-tight cursor-pointer hover:bg-[#323232] transition-colors"
+          className="absolute right-0 flex h-[40px] w-[78px] cursor-pointer items-center justify-center rounded-lg bg-[#262626] text-[14px] leading-4 tracking-tight transition-colors hover:bg-[#323232]"
           onClick={handlePublish}
         >
           {isLoading ? <Loading type="loading" color="#ffffff" /> : "Publish"}

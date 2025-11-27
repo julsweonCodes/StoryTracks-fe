@@ -177,31 +177,51 @@ export const replaceImageFileNamesWithS3Urls = (
     // Get the image file name (could be either imgFileName or fileName)
     const imageFileName = image.imgFileName || image.fileName || "";
     if (!imageFileName) {
-      console.warn("[replaceImageFileNamesWithS3Urls] No fileName found for image:", image);
+      console.warn(
+        "[replaceImageFileNamesWithS3Urls] No fileName found for image:",
+        image,
+      );
       return;
     }
 
     // Escape special regex characters in filename (important for filenames with spaces, dots, etc.)
-    const escapedFileName = imageFileName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    
+    const escapedFileName = imageFileName.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&",
+    );
+
     // Find <img>imgFileName</img> tag - use /\s*/g to handle spaces around tags
-    const imageTagPattern = new RegExp(`<img>\\s*${escapedFileName}\\s*</img>`, "g");
+    const imageTagPattern = new RegExp(
+      `<img>\\s*${escapedFileName}\\s*</img>`,
+      "g",
+    );
     // Construct full S3 URL
     const s3Url = `${s3BaseUrl}${image.imgPath}`;
     const urlImageTag = `<img src="${s3Url}">`;
 
-    console.log(`[replaceImageFileNamesWithS3Urls] Trying to match pattern: <img>\\s*${escapedFileName}\\s*</img>`);
-    console.log(`[replaceImageFileNamesWithS3Urls] Pattern matches:`, imageTagPattern.test(content));
-    console.log(`[replaceImageFileNamesWithS3Urls] Replacing with: ${urlImageTag}`);
-    
+    console.log(
+      `[replaceImageFileNamesWithS3Urls] Trying to match pattern: <img>\\s*${escapedFileName}\\s*</img>`,
+    );
+    console.log(
+      `[replaceImageFileNamesWithS3Urls] Pattern matches:`,
+      imageTagPattern.test(content),
+    );
+    console.log(
+      `[replaceImageFileNamesWithS3Urls] Replacing with: ${urlImageTag}`,
+    );
+
     // Replace all occurrences
     const beforeReplace = result;
     result = result.replace(imageTagPattern, urlImageTag);
-    
+
     if (beforeReplace !== result) {
-      console.log(`[replaceImageFileNamesWithS3Urls] ✓ Successfully replaced ${imageFileName}`);
+      console.log(
+        `[replaceImageFileNamesWithS3Urls] ✓ Successfully replaced ${imageFileName}`,
+      );
     } else {
-      console.warn(`[replaceImageFileNamesWithS3Urls] ✗ No match found for ${imageFileName}`);
+      console.warn(
+        `[replaceImageFileNamesWithS3Urls] ✗ No match found for ${imageFileName}`,
+      );
     }
   });
 

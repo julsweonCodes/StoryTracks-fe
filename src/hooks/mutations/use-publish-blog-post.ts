@@ -34,7 +34,12 @@ const usePublishBlogPost = (
     mutationFn: async (payload: PublishBlogPostPayload) => {
       console.log("[Publish] Starting blog post publication...");
       console.log("[Publish] Payload:", JSON.stringify(payload, null, 2));
-      console.log("[Publish] userId:", payload.userId, "type:", typeof payload.userId);
+      console.log(
+        "[Publish] userId:",
+        payload.userId,
+        "type:",
+        typeof payload.userId,
+      );
 
       // Step 2: Create blog post with S3 image references
       console.log("[Publish] Creating blog post with S3 images...");

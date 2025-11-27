@@ -38,7 +38,7 @@ export default function ErrorModal({
         <div className="border-t border-black-secondary px-6 py-4">
           <button
             onClick={onClose}
-            className="flex h-[48px] w-full items-center justify-center rounded-lg bg-key-primary text-black-secondary font-semibold transition-colors hover:bg-[#9b8fed]"
+            className="flex h-[48px] w-full items-center justify-center rounded-lg bg-key-primary font-semibold text-black-secondary transition-colors hover:bg-[#9b8fed]"
           >
             Close
           </button>

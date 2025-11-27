@@ -45,7 +45,8 @@ export default function BlogHeader() {
       setModal({
         isOpen: true,
         title: "Failed to Publish",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
       });
     },
   });
@@ -103,11 +104,13 @@ export default function BlogHeader() {
         .map((img) => {
           // Find the matching S3 file name
           const originalName = img.fileName || "";
-          const s3FileName = s3FileNames.find((s3Name) => s3Name.includes(originalName)) || originalName;
-          
+          const s3FileName =
+            s3FileNames.find((s3Name) => s3Name.includes(originalName)) ||
+            originalName;
+
           return {
-            imgFileName: originalName,  // Original file name (e.g., IMG_5717.JPG)
-            imgPath: `posts/${s3FileName}`,  // S3 path (e.g., posts/1763882165078_IMG_5717.JPG)
+            imgFileName: originalName, // Original file name (e.g., IMG_5717.JPG)
+            imgPath: `posts/${s3FileName}`, // S3 path (e.g., posts/1763882165078_IMG_5717.JPG)
             geoLat: (img.lat || 0).toString(),
             geoLong: (img.lon || 0).toString(),
             imgDtm: img.createDate || new Date().toISOString(),
@@ -116,15 +119,16 @@ export default function BlogHeader() {
         });
 
       // Step 3: Call publish mutation to create blog post
-      const userId = typeof session.user.id === 'string' 
-        ? parseInt(session.user.id) 
-        : session.user.id;
-      
+      const userId =
+        typeof session.user.id === "string"
+          ? parseInt(session.user.id)
+          : session.user.id;
+
       publishBlogPost({
-        userId: userId,  // Get user ID from session (numeric id, not userId string)
-        title: title,  // Use page title, not AI generated title
-        ogText: description,  // Save description as-is with <img>imgFileName</img> tags (original file names only)
-        aiGenText: "",  // Empty for now (AI content is handled separately)
+        userId: userId, // Get user ID from session (numeric id, not userId string)
+        title: title, // Use page title, not AI generated title
+        ogText: description, // Save description as-is with <img>imgFileName</img> tags (original file names only)
+        aiGenText: "", // Empty for now (AI content is handled separately)
         images: imageMetadata,
       });
     } catch (error) {
@@ -133,7 +137,8 @@ export default function BlogHeader() {
       setModal({
         isOpen: true,
         title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to upload images",
+        description:
+          error instanceof Error ? error.message : "Failed to upload images",
       });
     }
   };
@@ -143,7 +148,10 @@ export default function BlogHeader() {
       className={`flex h-[36px] items-center justify-between bg-black-primary p-5 text-white-primary`}
     >
       {activeComponentKey === "preview" ? (
-        <div className="text-[14px] tracking-tight cursor-pointer hover:opacity-80 transition-opacity" onClick={handleCancel}>
+        <div
+          className="cursor-pointer text-[14px] tracking-tight transition-opacity hover:opacity-80"
+          onClick={handleCancel}
+        >
           Cancel
         </div>
       ) : (
@@ -156,8 +164,8 @@ export default function BlogHeader() {
       <button
         className={`text-[14px] tracking-tight transition-colors ${
           activeComponentKey === "preview"
-            ? "text-white-primary hover:opacity-80 cursor-pointer"
-            : "text-[#7A7A7A] cursor-not-allowed"
+            ? "cursor-pointer text-white-primary hover:opacity-80"
+            : "cursor-not-allowed text-[#7A7A7A]"
         }`}
         disabled={activeComponentKey !== "preview" || isLoading}
         onClick={handlePublish}

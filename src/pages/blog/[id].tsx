@@ -51,26 +51,35 @@ export default function Detail() {
   useEffect(() => {
     if (data)
       (async () => {
-        console.log("[Blog Detail] Entire response from GET /posts/{id}:", JSON.stringify(data, null, 2));
+        console.log(
+          "[Blog Detail] Entire response from GET /posts/{id}:",
+          JSON.stringify(data, null, 2),
+        );
         console.log("[Blog Detail] blogImgList:", data.blogImgList);
-        console.log("[Blog Detail] blogImgList length:", data.blogImgList?.length);
-        
+        console.log(
+          "[Blog Detail] blogImgList length:",
+          data.blogImgList?.length,
+        );
+
         // Step 1: Replace image file names with full S3 URLs
         const s3BaseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL;
         console.log("[Blog Detail] Original ogText:", data.ogText);
         console.log("[Blog Detail] S3 Base URL:", s3BaseUrl);
-        
+
         const ogTextWithImageUrls = replaceImageFileNamesWithS3Urls(
           data.ogText,
           data.blogImgList as any,
-          s3BaseUrl || ""
+          s3BaseUrl || "",
         );
-        
-        console.log("[Blog Detail] After replaceImageFileNamesWithS3Urls:", ogTextWithImageUrls);
+
+        console.log(
+          "[Blog Detail] After replaceImageFileNamesWithS3Urls:",
+          ogTextWithImageUrls,
+        );
 
         // Step 2: Convert markdown to HTML
         const htmlContent = await markdownToHtml(ogTextWithImageUrls);
-        
+
         console.log("[Blog Detail] After markdownToHtml:", htmlContent);
 
         setHtmlContent(htmlContent);

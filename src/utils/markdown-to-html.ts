@@ -20,7 +20,10 @@ export async function markdownToHtml(markdown: string): Promise<string> {
     return placeholder;
   });
 
-  console.log("[markdownToHtml] After placeholder replacement:", imgPlaceholders);
+  console.log(
+    "[markdownToHtml] After placeholder replacement:",
+    imgPlaceholders,
+  );
   console.log("[markdownToHtml] Total img tags found:", imgTags.length);
 
   // Step 2: Process markdown (without img tags)
@@ -34,7 +37,7 @@ export async function markdownToHtml(markdown: string): Promise<string> {
     const placeholder = `IMGPLACEHOLDER${index}ENDIMG`;
     console.log(`[markdownToHtml] Looking for placeholder: ${placeholder}`);
     console.log(`[markdownToHtml] Will replace with: ${imgTag}`);
-    
+
     // The placeholder might be wrapped in <p> tags by markdown
     // Replace it directly - won't need regex since we're not using special chars
     htmlResult = htmlResult.split(`<p>${placeholder}</p>`).join(imgTag);

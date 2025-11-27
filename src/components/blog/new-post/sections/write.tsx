@@ -446,9 +446,13 @@ export default function Write() {
               <div className="flex flex-wrap gap-2">
                 {images.map((image, index) => (
                   <div key={image.id} className="group relative flex flex-col">
-                    <div 
-                      className="relative h-[60px] w-[60px] overflow-hidden rounded-t-lg border border-[#444444] transition-colors hover:border-key-primary cursor-pointer"
-                      onClick={() => insertImageTag(image.fileName || image.imgFileName || "")}
+                    <div
+                      className="relative h-[60px] w-[60px] cursor-pointer overflow-hidden rounded-t-lg border border-[#444444] transition-colors hover:border-key-primary"
+                      onClick={() =>
+                        insertImageTag(
+                          image.fileName || image.imgFileName || "",
+                        )
+                      }
                       title="Click to insert image tag into description"
                     >
                       <Image

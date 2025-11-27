@@ -179,7 +179,11 @@ export default function ImageUploader({
     <div className="flex flex-col gap-4">
       {/* Image Limit Info */}
       <div className="text-[12px] text-[#7A7A7A]">
-        Images added: <span className="text-white-primary font-semibold">{images.length}</span> / {IMAGE_LIMIT}
+        Images added:{" "}
+        <span className="font-semibold text-white-primary">
+          {images.length}
+        </span>{" "}
+        / {IMAGE_LIMIT}
       </div>
 
       {/* Grid Layout 3x n */}
@@ -188,7 +192,7 @@ export default function ImageUploader({
         {canAddMore && (
           <label
             htmlFor="file-upload"
-            className="aspect-square flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-[#444444] hover:border-key-primary transition-colors bg-[#262626] hover:bg-[#2d2d2d]"
+            className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-[#444444] bg-[#262626] transition-colors hover:border-key-primary hover:bg-[#2d2d2d]"
           >
             <div className="flex flex-col items-center gap-1">
               <GallerySendIcon />
@@ -201,7 +205,7 @@ export default function ImageUploader({
         {images.map((preview) => (
           <div
             key={preview.id}
-            className="aspect-square rounded-lg overflow-hidden border border-[#444444] relative group"
+            className="group relative aspect-square overflow-hidden rounded-lg border border-[#444444]"
           >
             <Thumbnail
               src={preview.previewUrl as string}

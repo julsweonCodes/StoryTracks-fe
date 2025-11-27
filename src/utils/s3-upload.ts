@@ -34,7 +34,9 @@ export const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
   files.forEach((file) => {
     // Sanitize the filename before sending to backend
     const sanitizedFileName = sanitizeFileName(file.name);
-    const sanitizedFile = new File([file], sanitizedFileName, { type: file.type });
+    const sanitizedFile = new File([file], sanitizedFileName, {
+      type: file.type,
+    });
     formData.append("files", sanitizedFile);
   });
 
