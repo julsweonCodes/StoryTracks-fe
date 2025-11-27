@@ -188,7 +188,7 @@ LIMIT 100;
 
 #### Option 1: Location-Based Query
 
-**Endpoint:** `GET /api/v1/users/{userId}/posts/by-location`
+**Endpoint:** `GET /api/v1/user-blog/{userId}/posts/by-location`
 
 **Query Parameters:**
 ```
@@ -216,7 +216,7 @@ lngMax=145.00
 
 **Backend Implementation (Spring Boot):**
 ```java
-@GetMapping("/users/{userId}/posts/by-location")
+@GetMapping("/user-blog/{userId}/posts/by-location")
 public ResponseEntity<?> getPostsByLocation(
   @PathVariable Long userId,
   @RequestParam Double latMin,
@@ -258,7 +258,7 @@ List<PostLocation> findByUserAndLocationBox(
 
 #### Option 2: Pre-Computed Clusters (Recommended for Scale)
 
-**Endpoint:** `GET /api/v1/users/{userId}/posts/clusters`
+**Endpoint:** `GET /api/v1/user-blog{userId}/posts/clusters`
 
 **Query Parameters:**
 ```
@@ -289,7 +289,7 @@ gridSize=2.048
 
 **Backend Implementation:**
 ```java
-@GetMapping("/users/{userId}/posts/clusters")
+@GetMapping("/user-blog/{userId}/posts/clusters")
 public ResponseEntity<?> getClusteredPosts(
   @PathVariable Long userId,
   @RequestParam Integer zoomLevel,
@@ -500,9 +500,9 @@ src/
 
 | Endpoint | Method | Purpose | Status |
 |----------|--------|---------|--------|
-| `/users/{userId}/posts/by-location` | GET | Fetch posts by lat/lng box | TODO |
-| `/users/{userId}/posts/clusters` | GET | Get pre-computed clusters | TODO |
-| `/users/{userId}/posts/{postId}/marker-count` | GET | Get count for specific area | TODO |
+| `/user-blog/{userId}/posts/by-location` | GET | Fetch posts by lat/lng box | TODO |
+| `/user-blog/{userId}/posts/clusters` | GET | Get pre-computed clusters | TODO |
+| `/user-blog/{userId}/posts/{postId}/marker-count` | GET | Get count for specific area | TODO |
 
 ---
 

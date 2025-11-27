@@ -15,7 +15,7 @@ Backend Database
   ↓
   [Images grouped by geographic level]
   ↓
-API Endpoint: /api/v1/users/{userId}/image-clusters?level={1|2|3}
+API Endpoint: /api/v1/user-blog/{userId}/image-clusters?level={1|2|3}
   ↓
 Frontend Hook: useImageClusters
   ↓
@@ -144,7 +144,7 @@ if (!useBackendClusters && clusters.length > 0) {
 ### Endpoint
 
 ```
-GET /api/v1/users/{userId}/image-clusters?level={1|2|3}
+GET /api/v1/user-blog/{userId}/image-clusters?level={1|2|3}
 ```
 
 ### Request Parameters
@@ -287,7 +287,7 @@ LIMIT 1000;
 
 ```java
 @RestController
-@RequestMapping("/api/v1/users/{userId}/image-clusters")
+@RequestMapping("/api/v1/user-blog/{userId}/image-clusters")
 public class ImageClusterController {
   
   @Autowired

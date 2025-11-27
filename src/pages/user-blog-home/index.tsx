@@ -195,7 +195,22 @@ export default function UserBlogHome() {
     const sessionId = session?.user?.userId || "";
     const idToUse = queryId || sessionId;
 
+    console.log("[UserBlogHome] Session status:", status);
+    console.log("[UserBlogHome] Session data:", {
+      userId: session?.user?.userId,
+      id: session?.user?.id,
+    });
+    console.log("[UserBlogHome] Query ID:", queryId);
+    console.log("[UserBlogHome] idToUse:", idToUse);
+
+    // Don't redirect if status is still loading
+    if (status === "loading") {
+      console.log("[UserBlogHome] Session still loading, waiting...");
+      return;
+    }
+
     if (!idToUse) {
+      console.log("[UserBlogHome] No user ID found, redirecting to login");
       router.push("/login");
       return;
     }
@@ -208,7 +223,7 @@ export default function UserBlogHome() {
     if (viewing && session?.user?.id) {
       setUserNumId(Number(session.user.id));
     }
-  }, [router, router.query, session, isLoggedIn]);
+  }, [router, router.query, session, isLoggedIn, status]);
 
   // Fetch user blog data and posts from backend
   useEffect(() => {
@@ -269,8 +284,8 @@ export default function UserBlogHome() {
         if (!id) return;
 
         const endpoint = isViewingOwnBlog
-          ? `/users/${id}/my-blog-home`
-          : `/users/${id}/blog-home`;
+          ? `/user-blog/${id}/my-blog-home`
+          : `/user-blog/${id}/blog-home`;
 
         const postsResponse = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL}${endpoint}`,

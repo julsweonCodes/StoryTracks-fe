@@ -1,15 +1,9 @@
 import Thumbnail from "@/components/common/thumbnail";
-import { Swiper, SwiperSlide } from "swiper/react";
 import GallerySendIcon from "@/components/icons/gallery-send";
 import { ImageInfo, useFormContext } from "@/context/form-context";
+import ErrorModal from "@/components/common/error-modal";
 import exifr from "exifr";
-import SwiperCore from "swiper";
-
-import "swiper/css";
-import "swiper/css/free-mode";
-
-import { FreeMode } from "swiper/modules";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { convertToDecimal } from "@/utils/convert-to-decimal";
 
 interface PreviewImage {
@@ -21,58 +15,34 @@ interface ImageUploaderProps {
   onUploadComplete?: () => void;
 }
 
+interface ModalState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+}
+
+const IMAGE_LIMIT = 10;
+
+/**
+ * Sanitize filename by replacing spaces with underscores
+ * Best practice for URLs and file handling
+ * @param fileName - Original file name
+ * @returns Sanitized file name with spaces replaced by underscores
+ */
+const sanitizeFileName = (fileName: string): string => {
+  return fileName.replace(/\s+/g, "_");
+};
+
 export default function ImageUploader({
   onUploadComplete,
 }: ImageUploaderProps) {
-  const { setStatusInfo, setImages, images, aiContent, activeComponentKey } =
-    useFormContext();
-  const swiperRef = useRef<SwiperCore | null>(null);
-  const scrollTrackRef = useRef<HTMLDivElement>(null);
-  const [scrollInfo, setScrollInfo] = useState({
-    thumbWidth: 0,
-    thumbLeft: 0,
+  const { setImages, images, aiContent } = useFormContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    title: "",
+    description: "",
   });
-
-  useEffect(() => {
-    if (!swiperRef.current || !scrollTrackRef.current) return;
-
-    const updateScrollbar = () => {
-      const swiper = swiperRef.current;
-      const track = scrollTrackRef.current;
-      if (!swiper || !track) return;
-
-      const trackWidth = track.clientWidth;
-      const slidesWidth =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (swiper as any).virtualSize ?? swiper.slides.length * swiper.width;
-      const viewportWidth = swiper.width;
-
-      const ratio = Math.min(1, viewportWidth / slidesWidth);
-      const thumbWidth = Math.max(40, trackWidth * ratio);
-
-      const maxTravel = trackWidth - thumbWidth;
-      const thumbLeft = swiper.progress * maxTravel;
-
-      setScrollInfo({
-        thumbWidth,
-        thumbLeft,
-      });
-    };
-
-    const swiper = swiperRef.current;
-
-    updateScrollbar();
-
-    swiper.on("progress", updateScrollbar);
-    swiper.on("resize", updateScrollbar);
-    swiper.on("slideChange", updateScrollbar);
-
-    return () => {
-      swiper.off("progress", updateScrollbar);
-      swiper.off("resize", updateScrollbar);
-      swiper.off("slideChange", updateScrollbar);
-    };
-  }, [images, activeComponentKey]);
 
   const createPreview = async (file: File): Promise<PreviewImage> => {
     return new Promise((resolve, reject) => {
@@ -104,13 +74,29 @@ export default function ImageUploader({
       const files = e.target.files;
       if (!files || files.length === 0) return;
 
-      setStatusInfo({
-        type: "loading",
-        title: "Processing Images",
-        description: "Reading image metadata...",
-      });
+      // Check if adding files would exceed limit
+      if (images.length >= IMAGE_LIMIT) {
+        setModal({
+          isOpen: true,
+          title: "Image Limit Reached",
+          description: `You can only add up to ${IMAGE_LIMIT} images.`,
+        });
+        return;
+      }
 
-      const fileArray = Array.from(files);
+      const remainingSlots = IMAGE_LIMIT - images.length;
+      const fileArray = Array.from(files).slice(0, remainingSlots);
+
+      if (fileArray.length < files.length) {
+        setModal({
+          isOpen: true,
+          title: "Too Many Images",
+          description: `You can only add ${remainingSlots} more image(s). Image limit is ${IMAGE_LIMIT}.`,
+        });
+      }
+
+      setIsLoading(true);
+
       const validFiles: ImageInfo[] = [];
       const filesWithoutMetadata: ImageInfo[] = [];
       const invalidFiles: string[] = [];
@@ -129,7 +115,7 @@ export default function ImageUploader({
         if (metadata?.CreateDate && metadata?.GPSLatitude) {
           validFiles.push({
             id: previewInfo.id,
-            fileName: file.name,
+            fileName: sanitizeFileName(file.name),
             createDate: metadata.CreateDate,
             lat: convertToDecimal(metadata.GPSLatitude, "N"),
             lon: convertToDecimal(metadata.GPSLongitude, "W"),
@@ -141,7 +127,7 @@ export default function ImageUploader({
           // Images without metadata - use current date and default coordinates
           filesWithoutMetadata.push({
             id: previewInfo.id,
-            fileName: file.name,
+            fileName: sanitizeFileName(file.name),
             createDate: new Date().toISOString(),
             lat: 0,
             lon: 0,
@@ -171,28 +157,15 @@ export default function ImageUploader({
 
       setImages((prev) => [...prev, ...allProcessedFiles]);
 
-      setStatusInfo({
-        type: "success",
-        title: "Images Processed",
-        description: `${allProcessedFiles.length} images have been added.${filesWithoutMetadata.length > 0 ? " Some images are missing metadata - you can set the thumbnail manually." : ""}`,
-      });
-
-      // Close modal immediately after successful upload
-      onUploadComplete?.();
-
-      setTimeout(() => {
-        setStatusInfo({ type: undefined });
-      }, 2000);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error processing files:", error);
-      setStatusInfo({
-        type: "error",
+      setIsLoading(false);
+      setModal({
+        isOpen: true,
         title: "Error",
         description: "An error occurred while processing the images.",
       });
-      setTimeout(() => {
-        setStatusInfo({ type: undefined });
-      }, 2000);
     }
   };
 
@@ -200,90 +173,63 @@ export default function ImageUploader({
     setImages((prev) => prev.filter((image) => image.id !== id));
   };
 
-  const isAddImages = aiContent.length === 0;
-  const isScroll = isAddImages ? images.length > 2 : images.length > 3;
+  const canAddMore = images.length < IMAGE_LIMIT;
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg bg-[#262626]">
-      {images.length > 0 ? (
-        <div className="px-4 py-4">
-          <div className="relative flex w-full flex-col gap-2">
-            <Swiper
-              onSwiper={(swiper) => (swiperRef.current = swiper)}
-              slidesPerView={3}
-              spaceBetween={10}
-              freeMode={true}
-              modules={[FreeMode]}
-              style={{ width: "100%", height: "100%" }}
-            >
-              {images.map((preview, index) => (
-                <SwiperSlide key={index} className="aspect-square h-full">
-                  <Thumbnail
-                    src={preview.previewUrl as string}
-                    id={preview.id as string}
-                    onRemove={
-                      aiContent.length > 0 ? undefined : handleRemoveImage
-                    }
-                  />
-                </SwiperSlide>
-              ))}
-              {isAddImages && (
-                <SwiperSlide className="aspect-square h-full">
-                  <label
-                    htmlFor="file-upload"
-                    className="flex h-full w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-[#7A7A7A]"
-                  >
-                    <GallerySendIcon />
-                  </label>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    multiple
-                    accept="jpeg, jpg, png"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </SwiperSlide>
-              )}
-            </Swiper>
-            {isScroll && (
-              <div
-                ref={scrollTrackRef}
-                className="relative h-[4px] w-full overflow-hidden"
-              >
-                <div
-                  className="absolute h-full rounded-full bg-[#444444] transition-all duration-100"
-                  style={{
-                    width: `${scrollInfo.thumbWidth}px`,
-                    left: `${scrollInfo.thumbLeft}px`,
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <>
+    <div className="flex flex-col gap-4">
+      {/* Image Limit Info */}
+      <div className="text-[12px] text-[#7A7A7A]">
+        Images added: <span className="text-white-primary font-semibold">{images.length}</span> / {IMAGE_LIMIT}
+      </div>
+
+      {/* Grid Layout 3x n */}
+      <div className="grid grid-cols-3 gap-3">
+        {/* Upload Button - Always in top left */}
+        {canAddMore && (
           <label
             htmlFor="file-upload"
-            className="flex h-[130px] cursor-pointer flex-col items-center justify-center leading-5 tracking-tight text-[#7A7A7A]"
+            className="aspect-square flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-[#444444] hover:border-key-primary transition-colors bg-[#262626] hover:bg-[#2d2d2d]"
           >
-            <GallerySendIcon />
-            <h6 className="text-[13px] font-semibold">Click to upload</h6>
-            <span className="text-[12px]">
-              SVG, PNG, or JPG (max. 800x400px)
-            </span>
+            <div className="flex flex-col items-center gap-1">
+              <GallerySendIcon />
+              <span className="text-[10px] text-[#7A7A7A]">Add</span>
+            </div>
           </label>
-          <input
-            id="file-upload"
-            type="file"
-            multiple
-            accept="image/*, .heic"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </>
-      )}
+        )}
+
+        {/* Existing Images */}
+        {images.map((preview) => (
+          <div
+            key={preview.id}
+            className="aspect-square rounded-lg overflow-hidden border border-[#444444] relative group"
+          >
+            <Thumbnail
+              src={preview.previewUrl as string}
+              id={preview.id as string}
+              onRemove={aiContent.length > 0 ? undefined : handleRemoveImage}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Hidden File Input */}
+      <input
+        id="file-upload"
+        type="file"
+        multiple
+        accept="image/jpeg, image/jpg, image/png, image/heic"
+        className="hidden"
+        onChange={handleFileChange}
+        disabled={!canAddMore || isLoading}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        description={modal.description}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+      />
     </div>
   );
 }

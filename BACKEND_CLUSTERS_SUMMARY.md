@@ -63,7 +63,7 @@ Zoom ≤ 7   →  Level 3 (Country clusters)
 ### Endpoint
 
 ```
-GET /api/v1/users/{userId}/image-clusters?level={1|2|3}
+GET /api/v1/user-blog/{userId}/image-clusters?level={1|2|3}
 ```
 
 ### Response Format
@@ -193,7 +193,7 @@ LIMIT 1000;
 
 ### Backend (⏳ TODO)
 
-- ⏳ Create `/api/v1/users/{userId}/image-clusters?level={1|2|3}` endpoint
+- ⏳ Create `/api/v1/user-blog/{userId}/image-clusters?level={1|2|3}` endpoint
 - ⏳ Implement clustering logic for 3 levels
 - ⏳ Add spatial indexes to images table
 - ⏳ Set up Redis caching (optional, recommended)
@@ -272,7 +272,7 @@ const handleZoomChange = (zoom: number) => {
 
 1. **Create API Endpoint:**
    ```
-   GET /api/v1/users/{userId}/image-clusters?level={1|2|3}
+   GET /api/v1/user-blog/{userId}/image-clusters?level={1|2|3}
    ```
 
 2. **Implement Clustering Logic:**

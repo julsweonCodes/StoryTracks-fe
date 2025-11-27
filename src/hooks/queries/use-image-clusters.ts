@@ -50,8 +50,8 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
         setLoading(true);
         setError(null);
 
-        // Format: http://localhost:8080/api/v1/google/users/{userId}/image-markers
-        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/google/users/${options.userId}/image-markers`;
+        // Format: http://localhost:8080/api/v1/google/user-blog/{userId}/image-markers
+        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/google/user-blog/${options.userId}/image-markers`;
 
         console.log("[useImageClusters] Fetching from:", endpoint);
         console.log(
@@ -94,6 +94,17 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
 
         const data = await response.json();
         console.log("[useImageClusters] Full response:", data);
+
+        // Check if response indicates an error
+        if (data.success === false) {
+          console.warn(
+            "[useImageClusters] Backend returned error:",
+            data.message,
+          );
+          // Return empty clusters instead of throwing - graceful degradation
+          setClusters([]);
+          return;
+        }
 
         const markerData = data.data || data || [];
         console.log("[useImageClusters] Marker data:", markerData);

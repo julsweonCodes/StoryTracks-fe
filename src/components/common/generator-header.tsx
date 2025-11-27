@@ -1,48 +1,59 @@
 import { useFormContext } from "@/context/form-context";
-import useBlogPostMutation, {
-  ImageSaveInfo,
-} from "@/hooks/mutations/use-blog-post-mutation";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa6";
 import { LuSettings } from "react-icons/lu";
 import Loading from "./loading";
+import usePublishBlogPost from "@/hooks/mutations/use-publish-blog-post";
+import { uploadImagesToS3 } from "@/utils/s3-upload";
+import ErrorModal from "./error-modal";
+
+interface ModalState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+}
 
 export default function GeneratorHeader() {
   const {
     setActiveComponentKey,
     description,
-    updateDescription,
-    aiContent,
-    setAiContent,
+    title,
     activeComponentKey,
     images,
-    setImages,
-    aiContentIndex,
-    setAiContentIndex,
   } = useFormContext();
   const router = useRouter();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  const { mutate } = useBlogPostMutation({
+  const [modal, setModal] = useState<ModalState>({
+    isOpen: false,
+    title: "",
+    description: "",
+  });
+
+  const { mutate: publishBlogPost } = usePublishBlogPost({
     onSuccess: (data) => {
+      console.log("[GeneratorHeader] Blog post published successfully:", data);
       setIsLoading(false);
-      router.push(`/blog/${data}?new=true`);
+      router.push(`/blog/${data.postId}?new=true`);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("[GeneratorHeader] Failed to publish blog post:", error);
       setIsLoading(false);
+      setModal({
+        isOpen: true,
+        title: "Failed to Publish",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+      });
     },
   });
 
   const handleCancel = () => {
     if (activeComponentKey === "preview") {
       setActiveComponentKey("generator");
-    } else if (aiContent.length > 0) {
-      setAiContent([]);
-      setAiContentIndex(undefined);
     } else if (activeComponentKey === "generator") {
       setActiveComponentKey("write");
-      updateDescription("");
-      setImages([]);
     } else if (activeComponentKey === "setting") {
       setActiveComponentKey("generator");
     } else if (activeComponentKey === "write") {
@@ -50,41 +61,107 @@ export default function GeneratorHeader() {
     }
   };
 
-  const handlePost = () => {
-    setIsLoading(true);
-
-    console.log("images", images);
-
-    if (images && aiContentIndex !== undefined) {
-      console.log("aiContentIndex", aiContentIndex);
-      const imgSaveList: ImageSaveInfo[] = images.map((image) => ({
-        fileName: image.fileName,
-        geoLat: image.lat.toString(),
-        geoLong: image.lon.toString(),
-        imgDtm: image.createDate,
-        thumbYn: image.active ? "Y" : "N",
-      }));
-      const aiContentResult = aiContent[aiContentIndex];
-      const aiGenText = aiContentResult.content;
-      const title = aiContentResult.title;
-      // const files = images
-      //   .flatMap(imageArray => imageArray) // 중첩 배열 풀기
-      //   .filter(image => image.previewUrl) // previewUrl 있는 것만 필터링
-      //   .map(image => image.previewUrl);
-
-      const files = images.map((image) => image.file);
-
-      console.log("여기서파일추가?", files);
-
-      mutate({ ogText: description, aiGenText, title, imgSaveList, files });
+  const handlePublish = async () => {
+    if (isLoading) return;
+    
+    console.log("[GeneratorHeader] Publish button clicked");
+    console.log("[GeneratorHeader] Title value:", title);
+    console.log("[GeneratorHeader] Description value:", description.length);
+    console.log("[GeneratorHeader] Images count:", images.length);
+    console.log("[GeneratorHeader] Session userId:", session?.user?.userId);
+    
+    if (!session?.user?.userId) {
+      console.error("[GeneratorHeader] User not logged in");
+      setModal({
+        isOpen: true,
+        title: "Login Required",
+        description: "Please log in to create a post",
+      });
+      return;
     }
-  };
+    if (!title || title.trim() === "") {
+      console.error("[GeneratorHeader] Title is required or empty");
+      setModal({
+        isOpen: true,
+        title: "Title Required",
+        description: "Please enter a title for your post",
+      });
+      return;
+    }
+    if (!description || description.trim() === "") {
+      console.error("[GeneratorHeader] Description is required or empty");
+      setModal({
+        isOpen: true,
+        title: "Description Required",
+        description: "Please write a description for your post",
+      });
+      return;
+    }
 
-  const handlePublish = () => {
-    if (activeComponentKey === "write") {
-      setActiveComponentKey("generator");
-    } else if (activeComponentKey === "preview") {
-      handlePost();
+    const thumbnailImage = images.find((img) => img.active);
+    if (!thumbnailImage) {
+      console.error("[GeneratorHeader] Thumbnail image is required");
+      setModal({
+        isOpen: true,
+        title: "Thumbnail Required",
+        description: "Please select at least one image and mark it as thumbnail",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    console.log("[GeneratorHeader] Starting publish workflow...");
+
+    try {
+      // Step 1: Upload images to S3
+      console.log(`[GeneratorHeader] Uploading ${images.length} image(s) to S3...`);
+      const imageFiles = images
+        .filter((img) => img.file)
+        .map((img) => img.file as File);
+
+      let s3FileNames: string[] = [];
+      if (imageFiles.length > 0) {
+        s3FileNames = await uploadImagesToS3(imageFiles);
+        console.log("[GeneratorHeader] S3 upload successful:", s3FileNames);
+      }
+
+      // Step 3: Prepare image metadata
+      const imageMetadata = images
+        .filter((img) => {
+          const originalName = img.fileName || "";
+          return s3FileNames.some((s3Name) => s3Name.includes(originalName));
+        })
+        .map((img) => {
+          const originalName = img.fileName || "";
+          const s3FileName = s3FileNames.find((s3Name) => s3Name.includes(originalName)) || originalName;
+          
+          return {
+            imgFileName: originalName,
+            imgPath: `posts/${s3FileName}`,
+            geoLat: (img.lat || 0).toString(),
+            geoLong: (img.lon || 0).toString(),
+            imgDtm: img.createDate || new Date().toISOString(),
+            thumbYn: (img.active ? "Y" : "N") as "Y" | "N",
+          };
+        });
+
+      // Step 4: Call publish mutation
+      const userId = typeof session.user.id === 'string' 
+        ? parseInt(session.user.id) 
+        : session.user.id;
+      console.log("[GeneratorHeader] Parsed userId:", userId, "type:", typeof userId);
+      
+      publishBlogPost({
+        userId: userId,
+        title: title,
+        ogText: description,
+        aiGenText: "",
+        images: imageMetadata,
+      });
+    } catch (error) {
+      console.error("[GeneratorHeader] Publish workflow failed:", error);
+      setIsLoading(false);
+      // Errors are already handled by mutation onError callback
     }
   };
 
@@ -94,7 +171,7 @@ export default function GeneratorHeader() {
     setting: "Content Settings",
   } as { [key: string]: string };
 
-  const title = titles[activeComponentKey] || "Add Description";
+  const headerTitle = titles[activeComponentKey] || "Add Description";
 
   const isGenerator = activeComponentKey === "generator";
 
@@ -110,7 +187,7 @@ export default function GeneratorHeader() {
         <FaChevronLeft />
       </div>
       <h1 className="flex h-[40px] items-center text-[16px] tracking-tight">
-        {title}
+        {headerTitle}
       </h1>
       {isGenerator && (
         <div
@@ -122,12 +199,20 @@ export default function GeneratorHeader() {
       )}
       {isPublish && (
         <div
-          className="absolute right-0 flex h-[40px] w-[78px] items-center justify-center rounded-lg bg-[#262626] text-[14px] leading-4 tracking-tight"
+          className="absolute right-0 flex h-[40px] w-[78px] items-center justify-center rounded-lg bg-[#262626] text-[14px] leading-4 tracking-tight cursor-pointer hover:bg-[#323232] transition-colors"
           onClick={handlePublish}
         >
           {isLoading ? <Loading type="loading" color="#ffffff" /> : "Publish"}
         </div>
       )}
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        description={modal.description}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+      />
     </div>
   );
 }

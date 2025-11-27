@@ -32,6 +32,8 @@ export default function Write() {
     updateDescription,
     images,
     setImages,
+    title,
+    setTitle,
   } = useFormContext();
   const [showAiPrompt, setShowAiPrompt] = useState(true);
   const [aiModal, setAiModal] = useState<AiModalState>({
@@ -43,7 +45,6 @@ export default function Write() {
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [title, setTitle] = useState("");
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationModalImage, setLocationModalImage] =
     useState<ImageInfo | null>(null);
@@ -445,7 +446,11 @@ export default function Write() {
               <div className="flex flex-wrap gap-2">
                 {images.map((image, index) => (
                   <div key={image.id} className="group relative flex flex-col">
-                    <div className="relative h-[60px] w-[60px] overflow-hidden rounded-t-lg border border-[#444444] transition-colors hover:border-key-primary">
+                    <div 
+                      className="relative h-[60px] w-[60px] overflow-hidden rounded-t-lg border border-[#444444] transition-colors hover:border-key-primary cursor-pointer"
+                      onClick={() => insertImageTag(image.fileName || image.imgFileName || "")}
+                      title="Click to insert image tag into description"
+                    >
                       <Image
                         src={image.previewUrl || "/placeholder.png"}
                         alt={`Image ${index + 1}`}
@@ -454,7 +459,10 @@ export default function Write() {
                       />
                       {/* Delete Button - Top Right */}
                       <button
-                        onClick={() => deleteImage(image.id || "")}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteImage(image.id || "");
+                        }}
                         className="text-white absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[12px] font-bold transition-colors hover:bg-red-600"
                         title="Delete image"
                       >

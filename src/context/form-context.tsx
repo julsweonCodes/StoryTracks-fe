@@ -60,6 +60,11 @@ export interface StatusInfo {
   description?: string;
 }
 
+export interface ErrorInfo {
+  title: string;
+  description: string;
+}
+
 export interface AiContentInfo {
   title: string;
   content: string;
@@ -71,10 +76,14 @@ interface FormContextType {
   removeImage: (id: string) => void;
   description: string;
   updateDescription: (description: string) => void;
+  title: string;
+  setTitle: Dispatch<SetStateAction<string>>;
   activeComponentKey: FormComponentKey;
   setActiveComponentKey: (key: FormComponentKey) => void;
   statusInfo: StatusInfo;
   setStatusInfo: Dispatch<SetStateAction<StatusInfo>>;
+  errorInfo: ErrorInfo | null;
+  setErrorInfo: Dispatch<SetStateAction<ErrorInfo | null>>;
   aiContent: AiContentInfo[];
   setAiContent: Dispatch<SetStateAction<AiContentInfo[]>>;
   aiContentIndex?: number;
@@ -87,9 +96,11 @@ const FormContext = createContext<FormContextType | undefined>(undefined);
 export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   const [images, setImages] = useState<ImageInfo[]>([]);
   const [description, setDescription] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
   const [activeComponentKey, setActiveComponentKey] =
     useState<FormComponentKey>("write");
   const [statusInfo, setStatusInfo] = useState<StatusInfo>({ type: undefined });
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
   const [aiContent, setAiContent] = useState<AiContentInfo[]>([]);
   const [aiContentIndex, setAiContentIndex] = useState<number>();
 
@@ -104,6 +115,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   const resetWriteState = () => {
     setImages([]);
     setDescription("");
+    setTitle("");
     setAiContent([]);
     setAiContentIndex(undefined);
   };
@@ -113,13 +125,17 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         images,
         description,
+        title,
         setImages,
+        setTitle,
         removeImage,
         updateDescription,
         activeComponentKey,
         setActiveComponentKey,
         statusInfo,
         setStatusInfo,
+        errorInfo,
+        setErrorInfo,
         aiContent,
         setAiContent,
         aiContentIndex,

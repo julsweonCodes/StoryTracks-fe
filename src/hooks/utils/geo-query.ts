@@ -41,7 +41,7 @@ export const fetchPostsByGeoLocation = async (
     const lngMax = params.lng + gridSize / 2;
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/users/${params.userId}/posts/by-location?` +
+      `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${params.userId}/posts/by-location?` +
         new URLSearchParams({
           latMin: latMin.toString(),
           latMax: latMax.toString(),
@@ -92,7 +92,7 @@ export const precomputeMarkerCounts = async (
 > => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/posts/marker-counts?zoomLevel=${zoomLevel}`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${userId}/posts/marker-counts?zoomLevel=${zoomLevel}`,
       {
         method: "GET",
         headers: {
@@ -181,7 +181,7 @@ export const buildGeoClusteringQuery = (
   gridSize: number,
 ) => {
   return {
-    endpoint: `/users/${userId}/posts/clusters`,
+    endpoint: `/user-blog/${userId}/posts/clusters`,
     params: {
       zoomLevel,
       gridSize,

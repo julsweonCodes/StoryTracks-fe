@@ -7,6 +7,7 @@ import Minimalistic from "@/components/icons/minimalistic";
 import TrashIcon from "@/components/icons/trash";
 import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
 import { markdownToHtml } from "@/utils/markdown-to-html";
+import { replaceImageFileNamesWithS3Urls } from "@/utils/replace-image-urls";
 import { formatLocalizedDateTime } from "@/utils/format-date";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -50,7 +51,27 @@ export default function Detail() {
   useEffect(() => {
     if (data)
       (async () => {
-        const htmlContent = await markdownToHtml(data.aiGenText);
+        console.log("[Blog Detail] Entire response from GET /posts/{id}:", JSON.stringify(data, null, 2));
+        console.log("[Blog Detail] blogImgList:", data.blogImgList);
+        console.log("[Blog Detail] blogImgList length:", data.blogImgList?.length);
+        
+        // Step 1: Replace image file names with full S3 URLs
+        const s3BaseUrl = process.env.NEXT_PUBLIC_S3_BASE_URL;
+        console.log("[Blog Detail] Original ogText:", data.ogText);
+        console.log("[Blog Detail] S3 Base URL:", s3BaseUrl);
+        
+        const ogTextWithImageUrls = replaceImageFileNamesWithS3Urls(
+          data.ogText,
+          data.blogImgList as any,
+          s3BaseUrl || ""
+        );
+        
+        console.log("[Blog Detail] After replaceImageFileNamesWithS3Urls:", ogTextWithImageUrls);
+
+        // Step 2: Convert markdown to HTML
+        const htmlContent = await markdownToHtml(ogTextWithImageUrls);
+        
+        console.log("[Blog Detail] After markdownToHtml:", htmlContent);
 
         setHtmlContent(htmlContent);
       })();
@@ -107,18 +128,6 @@ export default function Detail() {
             </div>
           </div>
           <div className="flex flex-col gap-5 pt-4">
-            <div className="flex flex-col gap-3">
-              {data.blogImgList.map((img, index) => (
-                <Image
-                  key={index}
-                  src={img.fileName}
-                  width={350}
-                  height={350}
-                  alt="image"
-                  className="aspect-square w-full object-cover"
-                />
-              ))}
-            </div>
             <div className="prose">
               <p
                 className="text-[16px] leading-6 tracking-tight"
