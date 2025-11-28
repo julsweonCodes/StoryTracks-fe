@@ -138,12 +138,12 @@ export interface ImageResponse {
   postId: number;
   geoLat: string;
   geoLong: string;
-  imgPath: string; // e.g., "posts/1763882165078_IMG_5717.JPG"
+  imgPath: string; // e.g., "1763882165078_IMG_5717.JPG" or "posts/1763882165078_IMG_5717.JPG"
   imgFileName?: string; // e.g., "IMG_5717.JPG"
   fileName?: string; // e.g., "IMG_5717.JPG" (alternative field name)
   imgDtm: string;
   rgstDtm: string;
-  thumbYn?: boolean | string;
+  thumbYn?: boolean;
   filePath?: string;
 }
 
@@ -195,12 +195,22 @@ export const replaceImageFileNamesWithS3Urls = (
       `<img>\\s*${escapedFileName}\\s*</img>`,
       "g",
     );
+
     // Construct full S3 URL
-    const s3Url = `${s3BaseUrl}${image.imgPath}`;
+    // imgPath might be "1764252482248_DSC00348.JPG" (without posts/) from backend
+    // Add "posts/" prefix if not already present
+    let fullImgPath = image.imgPath;
+    if (!fullImgPath.startsWith("posts/")) {
+      fullImgPath = "posts/" + fullImgPath;
+    }
+    const s3Url = `${s3BaseUrl}${fullImgPath}`;
     const urlImageTag = `<img src="${s3Url}">`;
 
     console.log(
       `[replaceImageFileNamesWithS3Urls] Trying to match pattern: <img>\\s*${escapedFileName}\\s*</img>`,
+    );
+    console.log(
+      `[replaceImageFileNamesWithS3Urls] imgPath: ${image.imgPath}, fullImgPath: ${fullImgPath}`,
     );
     console.log(
       `[replaceImageFileNamesWithS3Urls] Pattern matches:`,

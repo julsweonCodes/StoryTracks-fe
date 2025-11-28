@@ -80,12 +80,14 @@ export default function AiGenerator() {
   const handleAiSubmit = () => {
     setIsLoading(true);
     const earliestDate = Math.min(
-      ...images.map((image) => new Date(image.createDate).getTime()),
+      ...images.map((image) =>
+        new Date(image.createDate || new Date()).getTime(),
+      ),
     );
 
     const imgInfo: GenerateImageInfo = {
-      geoLat: images[0].lat.toString(),
-      geoLong: images[0].lon.toString(),
+      geoLat: images[0].lat?.toString() || "0",
+      geoLong: images[0].lon?.toString() || "0",
       imgDtm: new Date(earliestDate).toISOString(),
     };
 

@@ -1,6 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
+import type { AuthOptions } from "next-auth";
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -58,7 +59,7 @@ export const authOptions = {
             try {
               const errorData = JSON.parse(responseText);
               throw new Error(
-                errorData.data?.message || errorData.message || "Login failed"
+                errorData.data?.message || errorData.message || "Login failed",
               );
             } catch (parseError) {
               throw new Error(`Login failed: ${response.status}`);
@@ -96,7 +97,7 @@ export const authOptions = {
         } catch (error) {
           console.error("[AUTH] Authorization error:", error);
           throw new Error(
-            error instanceof Error ? error.message : "Authentication failed"
+            error instanceof Error ? error.message : "Authentication failed",
           );
         }
       },
@@ -120,7 +121,7 @@ export const authOptions = {
         token.birthYmd = user.birthYmd;
         token.profileImg = user.profileImg;
       }
-      
+
       // Update token when session is updated (from client-side update() call)
       if (trigger === "update" && session) {
         token.nickname = session.nickname;
@@ -128,7 +129,7 @@ export const authOptions = {
         token.blogName = session.blogName;
         token.profileImg = session.profileImg;
       }
-      
+
       return token;
     },
     async session({ session, token }: any) {

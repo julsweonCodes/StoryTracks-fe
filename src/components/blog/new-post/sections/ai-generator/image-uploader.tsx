@@ -227,6 +227,14 @@ export default function ImageUploader({
         disabled={!canAddMore || isLoading}
       />
 
+      {/* Save Button */}
+      <button
+        onClick={onUploadComplete}
+        className="flex h-[48px] w-full items-center justify-center rounded-lg bg-key-primary font-semibold text-white-primary transition-colors hover:bg-[#9b8fed]"
+      >
+        ✓ Save
+      </button>
+
       {/* Error Modal */}
       <ErrorModal
         isOpen={modal.isOpen}

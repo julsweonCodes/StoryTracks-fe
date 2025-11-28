@@ -8,7 +8,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 interface ContentData {
   title: string;
   description: string;
-  images: string[];
+  images: Array<{ url: string; isThumb: boolean }>;
 }
 
 export default function Preview() {
@@ -32,7 +32,12 @@ export default function Preview() {
   useEffect(() => {
     if (aiContent && images && aiContentIndex !== undefined) {
       const data = aiContent[aiContentIndex];
-      const imagesData = images?.map((image) => image.previewUrl) || [];
+      const imagesData = images
+        ?.map((image) => ({
+          url: image.previewUrl || "",
+          isThumb: image.active || false,
+        }))
+        .filter((img) => img.url) as Array<{ url: string; isThumb: boolean }>;
       setContentData({
         title: data.title,
         description: data.content,
@@ -86,20 +91,28 @@ export default function Preview() {
           </div>
           <div className="flex flex-col gap-5 pt-5">
             <div className="flex flex-col gap-3">
-              {contentData.images.map((src, index) => (
+              {contentData.images.map((image, index) => (
                 <div
                   key={index}
                   className={`relative ${index === selectIndex ? "border-2 border-[#5946D4]" : ""}`}
                   onClick={() => setSelectIndex(index)}
                 >
-                  <Image
-                    src={src}
-                    alt="preview"
-                    width={350}
-                    height={350}
-                    className="aspect-square w-full object-cover"
-                  />
-                  {index === selectIndex && (
+                  {image.url.startsWith("data:") ? (
+                    <img
+                      src={image.url}
+                      alt="preview"
+                      className="aspect-square w-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={image.url}
+                      alt="preview"
+                      width={350}
+                      height={350}
+                      className="aspect-square w-full object-cover"
+                    />
+                  )}
+                  {(index === selectIndex || image.isThumb) && (
                     <div className="text-white absolute left-2 top-2 rounded-md bg-[#5946D4] px-2 py-1 text-[12px] tracking-tight">
                       Featured Image
                     </div>

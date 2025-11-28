@@ -41,7 +41,10 @@ export default function Preview() {
   useEffect(() => {
     if (aiContent && images && aiContentIndex !== undefined) {
       const data = aiContent[aiContentIndex];
-      const imagesData = images?.map((image) => image.previewUrl) || [];
+      const imagesData =
+        (images
+          ?.map((image) => image.previewUrl)
+          .filter(Boolean) as string[]) || [];
       setContentData({
         title: data.title,
         description: data.content,

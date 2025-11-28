@@ -22,6 +22,8 @@ interface BlogDetail {
   rgstDtm: string; // ISO 8601 format from Java OffsetDateTime
   chngDtm: string | null; // ISO 8601 format from Java OffsetDateTime
   blogImgList: Image[];
+  userNickname?: string; // User who created the post
+  userId?: number; // User ID who created the post
 }
 
 const usePostsDetailQuery = (id?: string) => {

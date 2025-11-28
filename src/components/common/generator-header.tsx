@@ -22,6 +22,7 @@ export default function GeneratorHeader() {
     title,
     activeComponentKey,
     images,
+    isEdit,
   } = useFormContext();
   const router = useRouter();
   const { data: session } = useSession();
@@ -65,7 +66,20 @@ export default function GeneratorHeader() {
   const handlePublish = async () => {
     if (isLoading) return;
 
-    console.log("[GeneratorHeader] Publish button clicked");
+    console.log("[GeneratorHeader] Publish button clicked, isEdit:", isEdit);
+
+    // If in edit mode, dispatch a custom event for the edit page to handle
+    if (isEdit) {
+      console.log("[GeneratorHeader] In edit mode - dispatching save event");
+      const saveEvent = new CustomEvent("blog-save-requested", {
+        detail: { title, description, images },
+      });
+      window.dispatchEvent(saveEvent);
+      return;
+    }
+
+    // Original new post publish logic
+    console.log("[GeneratorHeader] In create mode - publishing new post");
     console.log("[GeneratorHeader] Title value:", title);
     console.log("[GeneratorHeader] Description value:", description.length);
     console.log("[GeneratorHeader] Images count:", images.length);
@@ -141,9 +155,15 @@ export default function GeneratorHeader() {
             s3FileNames.find((s3Name) => s3Name.includes(originalName)) ||
             originalName;
 
+          // Extract original filename without timestamp prefix
+          // S3 filename format: "1764252482248_DSC00348.JPG"
+          // We want to save: "DSC00348.JPG"
+          const extractedFileName =
+            s3FileName.split("_").slice(1).join("_") || originalName;
+
           return {
-            imgFileName: originalName,
-            imgPath: `posts/${s3FileName}`,
+            imgFileName: extractedFileName,
+            imgPath: s3FileName,
             geoLat: (img.lat || 0).toString(),
             geoLong: (img.lon || 0).toString(),
             imgDtm: img.createDate || new Date().toISOString(),

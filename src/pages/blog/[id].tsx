@@ -36,7 +36,8 @@ export default function Detail() {
 
   const handleSelect = (option: string) => {
     if (option === "Edit") {
-      console.log("handleSelect:", option);
+      console.log("handleSelect: Edit clicked");
+      router.push(`/blog/edit/${id}`);
     } else if (option === "Delete") {
       setIsDeleteModalOpen(true);
     }
@@ -107,7 +108,7 @@ export default function Detail() {
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-[13px] tracking-tight text-[#E6E6E6]">
-                  John Doe
+                  {data?.userNickname || "Anonymous"}
                 </span>
                 <span className="text-[12px] tracking-tight text-black-tertiary">
                   {formatLocalizedDateTime(data.rgstDtm)}

@@ -22,7 +22,7 @@ export interface ImageInfo {
   postId?: number;
   geoLat?: string; // Backend uses string
   geoLong?: string; // Backend uses string
-  imgPath?: string; // S3 path: "posts/1698765432000_filename.png"
+  imgPath?: string; // S3 path: "1698765432000_filename.png"
   imgFileName?: string; // From backend ImageResponse
   filePath?: string; // Full S3 URL (from backend)
   thumbYn?: boolean;
@@ -89,20 +89,100 @@ interface FormContextType {
   aiContentIndex?: number;
   setAiContentIndex: Dispatch<SetStateAction<number | undefined>>;
   resetWriteState: () => void;
+  isEdit: boolean;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
-export const FormProvider = ({ children }: { children: React.ReactNode }) => {
-  const [images, setImages] = useState<ImageInfo[]>([]);
-  const [description, setDescription] = useState<string>("");
-  const [title, setTitle] = useState<string>("");
+interface FormProviderProps {
+  children: React.ReactNode;
+  initialData?: PostDetailResponse;
+  isEdit?: boolean;
+}
+
+export const FormProvider = ({
+  children,
+  initialData,
+  isEdit = false,
+}: FormProviderProps) => {
+  const [images, setImages] = useState<ImageInfo[]>(() => {
+    if (isEdit && initialData?.blogImgList) {
+      const S3_BASE_URL =
+        "https://storytracks-ap-storage.s3.ap-southeast-2.amazonaws.com";
+      console.log(
+        "[FormContext] Initializing edit mode images. Total images:",
+        initialData.blogImgList.length,
+      );
+
+      // Find the thumbnail image (where thumbYn === true)
+      const thumbnailIndex = initialData.blogImgList.findIndex(
+        (img) => img.thumbYn === true,
+      );
+
+      return initialData.blogImgList.map((img, idx) => {
+        // Construct full S3 URL from imgPath
+        let fullImgPath = img.imgPath;
+        if (!fullImgPath.startsWith("posts/")) {
+          fullImgPath = "posts/" + fullImgPath;
+        }
+        const fullS3Url = `${S3_BASE_URL}/${fullImgPath}`;
+
+        // thumbYn is now a boolean from backend
+        const isThumbnail = img.thumbYn === true;
+
+        console.log(
+          `[FormContext] Image ${idx}: ${img.imgFileName} - thumbYn=${img.thumbYn}, active=${isThumbnail}`,
+        );
+
+        return {
+          id: img.imgPath,
+          imgId: img.imgId,
+          postId: img.postId,
+          fileName: img.imgFileName,
+          imgFileName: img.imgFileName,
+          imgPath: img.imgPath,
+          previewUrl: fullS3Url,
+          geoLat: img.geoLat,
+          geoLong: img.geoLong,
+          imgDtm: img.imgDtm,
+          thumbYn: img.thumbYn,
+          lat: parseFloat(img.geoLat),
+          lon: parseFloat(img.geoLong),
+          createDate: img.imgDtm,
+          active: isThumbnail,
+        };
+      });
+    }
+    return [];
+  });
+
+  const [description, setDescription] = useState<string>(
+    isEdit ? initialData?.ogText || "" : "",
+  );
+
+  const [title, setTitle] = useState<string>(
+    isEdit ? initialData?.title || "" : "",
+  );
+
   const [activeComponentKey, setActiveComponentKey] =
     useState<FormComponentKey>("write");
   const [statusInfo, setStatusInfo] = useState<StatusInfo>({ type: undefined });
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
-  const [aiContent, setAiContent] = useState<AiContentInfo[]>([]);
-  const [aiContentIndex, setAiContentIndex] = useState<number>();
+  const [aiContent, setAiContent] = useState<AiContentInfo[]>(
+    isEdit && initialData?.aiGenText
+      ? [{ title: initialData.title, content: initialData.aiGenText }]
+      : isEdit
+        ? [
+            {
+              title: initialData?.title || "",
+              content: initialData?.ogText || "",
+            },
+          ] // Use description as fallback in edit mode
+        : [],
+  );
+  const [aiContentIndex, setAiContentIndex] = useState<number | undefined>(
+    isEdit ? 0 : undefined,
+  );
 
   const removeImage = (id: string) => {
     setImages((prev) => prev.filter((image) => image.id !== id));
@@ -141,6 +221,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         aiContentIndex,
         setAiContentIndex,
         resetWriteState,
+        isEdit,
       }}
     >
       {children}

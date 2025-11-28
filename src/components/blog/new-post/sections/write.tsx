@@ -335,16 +335,44 @@ export default function Write() {
   };
 
   const deleteImage = (imageId: string) => {
+    const imageToDelete = images.find((img) => img.id === imageId);
     const updatedImages = images.filter((img) => img.id !== imageId);
     setImages(updatedImages);
+
     // Also remove image tags from description
-    const imageToDelete = images.find((img) => img.id === imageId);
     if (imageToDelete) {
+      let newDescription = description;
+
+      // Remove <img>filename</img> tag
       const displayName = imageToDelete.fileName || imageToDelete.imgFileName;
-      const imageTag = `<img>${displayName}</img>`;
-      const newDescription = description
-        .replace(imageTag, "")
-        .replace(/\n\n\n/g, "\n\n");
+      if (displayName) {
+        const imageTag = `<img>${displayName}</img>`;
+        newDescription = newDescription.replace(
+          new RegExp(`\\n?${imageTag}\\n?`, "g"),
+          "\n",
+        );
+      }
+
+      // Also remove <img-url>URL</img-url> tag if it exists
+      const s3Url = imageToDelete.imgPath || imageToDelete.previewUrl;
+      if (s3Url) {
+        const urlTag = `<img-url>${s3Url}</img-url>`;
+        newDescription = newDescription.replace(
+          new RegExp(`\\n?${urlTag}\\n?`, "g"),
+          "\n",
+        );
+        // Also try to match S3 URL pattern more loosely
+        newDescription = newDescription.replace(
+          new RegExp(
+            `<img-url>[^<]*${imageToDelete.imgPath?.split("/").pop() || ""}[^<]*</img-url>`,
+            "g",
+          ),
+          "",
+        );
+      }
+
+      // Clean up multiple newlines
+      newDescription = newDescription.replace(/\n\n\n+/g, "\n\n").trim();
       updateDescription(newDescription);
     }
   };
@@ -444,58 +472,66 @@ export default function Write() {
                 Embedded Images ({images.length})
               </h4>
               <div className="flex flex-wrap gap-2">
-                {images.map((image, index) => (
-                  <div key={image.id} className="group relative flex flex-col">
+                {images.map((image, index) => {
+                  console.log(
+                    `[Write] Rendering image ${index}: id=${image.id}, fileName=${image.fileName}, active=${image.active}`,
+                  );
+                  return (
                     <div
-                      className="relative h-[60px] w-[60px] cursor-pointer overflow-hidden rounded-t-lg border border-[#444444] transition-colors hover:border-key-primary"
-                      onClick={() =>
-                        insertImageTag(
-                          image.fileName || image.imgFileName || "",
-                        )
-                      }
-                      title="Click to insert image tag into description"
-                    >
-                      <Image
-                        src={image.previewUrl || "/placeholder.png"}
-                        alt={`Image ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                      {/* Delete Button - Top Right */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteImage(image.id || "");
-                        }}
-                        className="text-white absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[12px] font-bold transition-colors hover:bg-red-600"
-                        title="Delete image"
-                      >
-                        ×
-                      </button>
-                    </div>
-
-                    {/* Thumbnail Checkbox - Bottom */}
-                    <button
-                      onClick={() => setImageAsThumbnail(image)}
-                      className="flex h-6 w-full items-center justify-center rounded-b-lg border border-t-0 border-[#444444] bg-[#262626] transition-all hover:bg-[#323232]"
-                      title="Set as thumbnail"
+                      key={image.id}
+                      className="group relative flex flex-col"
                     >
                       <div
-                        className={`flex h-4 w-4 items-center justify-center rounded border-2 transition-all ${
-                          image.active
-                            ? "border-green-500 bg-green-500"
-                            : "border-[#7A7A7A]"
-                        }`}
+                        className="relative h-[60px] w-[60px] cursor-pointer overflow-hidden rounded-t-lg border border-[#444444] transition-colors hover:border-key-primary"
+                        onClick={() =>
+                          insertImageTag(
+                            image.fileName || image.imgFileName || "",
+                          )
+                        }
+                        title="Click to insert image tag into description"
                       >
-                        {image.active && (
-                          <span className="text-white text-xs font-bold">
-                            ✓
-                          </span>
-                        )}
+                        <Image
+                          src={image.previewUrl || "/placeholder.png"}
+                          alt={`Image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        {/* Delete Button - Top Right */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteImage(image.id || "");
+                          }}
+                          className="text-white absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[12px] font-bold transition-colors hover:bg-red-600"
+                          title="Delete image"
+                        >
+                          ×
+                        </button>
                       </div>
-                    </button>
-                  </div>
-                ))}
+
+                      {/* Thumbnail Checkbox - Bottom */}
+                      <button
+                        onClick={() => setImageAsThumbnail(image)}
+                        className="flex h-6 w-full items-center justify-center rounded-b-lg border border-t-0 border-[#444444] bg-[#262626] transition-all hover:bg-[#323232]"
+                        title="Set as thumbnail"
+                      >
+                        <div
+                          className={`flex h-4 w-4 items-center justify-center rounded border-2 transition-all ${
+                            image.active
+                              ? "border-green-500 bg-green-500"
+                              : "border-[#7A7A7A]"
+                          }`}
+                        >
+                          {image.active && (
+                            <span className="text-white text-xs font-bold">
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

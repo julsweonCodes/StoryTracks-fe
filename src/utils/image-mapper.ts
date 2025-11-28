@@ -28,7 +28,7 @@ export const convertImageResponseToImageInfo = (
     rgstDtm: imgResponse.rgstDtm,
     filePath: imgResponse.filePath,
     previewUrl: imgResponse.filePath, // Use S3 URL as preview
-    active: imgResponse.thumbYn,
+    active: imgResponse.thumbYn === true,
   };
 };
 
