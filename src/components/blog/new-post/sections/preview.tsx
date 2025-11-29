@@ -53,14 +53,49 @@ export default function Preview() {
 
   useEffect(() => {
     if (images && images.length > 0) {
+      console.log(
+        "[Preview] Thumbnail selection changed to index:",
+        selectIndex,
+      );
+
       setImages((prev) =>
-        prev.map((image, index) => ({
-          ...image,
-          active: index === selectIndex,
-        })),
+        prev.map((image, index) => {
+          const isActive = index === selectIndex;
+          if (isActive) {
+            console.log(
+              `[Preview] Setting image ${index} as featured (active)`,
+            );
+          }
+          return {
+            ...image,
+            active: isActive,
+          };
+        }),
       );
     }
   }, [selectIndex]);
+
+  /**
+   * Listen for changes in images array to validate thumbnail status
+   */
+  useEffect(() => {
+    const thumbnailCount = images.filter((img) => img.active).length;
+
+    if (thumbnailCount > 1) {
+      console.warn(
+        `[Preview] ⚠️  WARNING: Multiple thumbnails detected! Count: ${thumbnailCount}`,
+      );
+      console.warn(
+        "[Preview] Active images:",
+        images
+          .filter((img) => img.active)
+          .map((img, idx) => ({
+            fileName: img.fileName,
+            previewUrl: img.previewUrl,
+          })),
+      );
+    }
+  }, [images]);
 
   useEffect(() => {
     setValue(aiContent[aiContentIndex as number].title);

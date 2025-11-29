@@ -7,10 +7,12 @@ import {
 import Card from "@/components/common/card";
 import Drawer from "@/components/common/drawer";
 import Header from "@/components/common/header";
-import Search from "@/components/common/search";
 import SEOHeader from "@/components/common/seo-header";
 import Map from "@/components/map";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { IoAddCircle } from "react-icons/io5";
 
 const formatNumber = (num?: number): string => {
   return num?.toLocaleString() || "0";
@@ -297,7 +299,6 @@ export default function Home() {
     if (data) {
       processBlogs(data).then((processed) => {
         setProcessedData(processed);
-        // Check if we should show "Load More" button for initial posts
         setHasMoreInitialPages(
           processed.length > 0 && processed.length % 20 === 0,
         );
@@ -311,6 +312,9 @@ export default function Home() {
     setCurrentZoom(zoom);
   };
 
+  const router = useRouter();
+  const { data: session } = useSession();
+
   return (
     <div className="flex h-full w-full flex-col">
       <SEOHeader
@@ -320,7 +324,6 @@ export default function Home() {
       />
       <div className="z-20">
         <Header />
-        <Search />
       </div>
       <div className="relative flex h-full w-full flex-col overflow-visible">
         <div className="h-full w-full flex-1 overflow-hidden">
@@ -383,25 +386,54 @@ export default function Home() {
             }
           }}
         >
-          {(selectedClusterPosts.length > 0
-            ? selectedClusterPosts
-            : processedData
-          )?.map((post, index) => (
-            <Card
-              key={index}
-              id={post.postId}
-              title={post.title}
-              description={post.des}
-              src={post.src}
-              rgstDtm={post.rgstDtm}
-            />
-          ))}
+          {(() => {
+            const list =
+              selectedClusterPosts.length > 0
+                ? selectedClusterPosts
+                : processedData;
+
+            if (!list || list.length === 0) {
+              return (
+                <div className="flex h-56 w-full items-center justify-center">
+                  <div className="text-center text-gray-400">
+                    <p className="mb-2">No stories found.</p>
+                    <p className="text-sm">
+                      Try refreshing the feed or clicking on a cluster.
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            return list.map((post, index) => (
+              <Card
+                key={index}
+                id={post.postId}
+                title={post.title}
+                description={post.des}
+                src={post.src}
+                rgstDtm={post.rgstDtm}
+                ogText={post.ogText}
+                nickname={post.nickname}
+                profileImg={post.profileImg}
+              />
+            ));
+          })()}
           {(isLoadingMore || isLoadingInitialPosts) && (
             <div className="flex justify-center py-4">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-white-primary" />
             </div>
           )}
         </Drawer>
+        {session && (
+          <button
+            onClick={() => router.push("/blog/new")}
+            className="fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white-primary text-black-primary shadow-lg hover:shadow-xl hover:bg-opacity-90 transition-all"
+            title="Create New Post"
+          >
+            <IoAddCircle size={32} />
+          </button>
+        )}
       </div>
     </div>
   );

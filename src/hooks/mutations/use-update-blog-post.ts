@@ -42,6 +42,27 @@ const useUpdateBlogPost = (
       );
       console.log("[Update] postId:", payload.postId);
 
+      // Log thumbnail information
+      const thumbnailImages = payload.images.filter(
+        (img) => img.thumbYn === "Y",
+      );
+      console.log(
+        `[Update] Thumbnail validation: ${thumbnailImages.length} featured image(s)`,
+      );
+      if (thumbnailImages.length > 0) {
+        console.log("[Update] Featured image:", thumbnailImages[0].imgFileName);
+      }
+
+      // Log all images with their thumbYn status
+      console.log(
+        "[Update] Images to update:",
+        payload.images.map((img) => ({
+          fileName: img.imgFileName,
+          thumbYn: img.thumbYn,
+          path: img.imgPath,
+        })),
+      );
+
       // PUT request to update post
       console.log("[Update] Sending update request to backend...");
 

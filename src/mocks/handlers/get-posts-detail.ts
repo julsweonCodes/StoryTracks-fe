@@ -13,6 +13,9 @@ export const getPostsDetail = http.get(
         "5906ac361a137e2d286465cd6588ebb5ac3f5ae955001100bc41577c3d751764",
       rgstDtm: "2025-01-05 10:26:27",
       chngDtm: null,
+      userId: 1,
+      nickname: "Travel Blogger",
+      profileImg: "/profiles/user1.jpg",
       blogImgList: [
         {
           imgId: 1,

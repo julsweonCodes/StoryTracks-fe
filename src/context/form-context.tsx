@@ -119,6 +119,14 @@ export const FormProvider = ({
         (img) => img.thumbYn === true,
       );
 
+      console.log(
+        "[FormContext] Found thumbnail at index:",
+        thumbnailIndex,
+        "out of",
+        initialData.blogImgList.length,
+        "images",
+      );
+
       return initialData.blogImgList.map((img, idx) => {
         // Construct full S3 URL from imgPath
         let fullImgPath = img.imgPath;
@@ -127,8 +135,9 @@ export const FormProvider = ({
         }
         const fullS3Url = `${S3_BASE_URL}/${fullImgPath}`;
 
-        // thumbYn is now a boolean from backend
-        const isThumbnail = img.thumbYn === true;
+        // Only the first image with thumbYn === true should be marked as active/featured
+        // This handles cases where backend incorrectly returns multiple thumbnails
+        const isThumbnail = thumbnailIndex >= 0 && idx === thumbnailIndex;
 
         console.log(
           `[FormContext] Image ${idx}: ${img.imgFileName} - thumbYn=${img.thumbYn}, active=${isThumbnail}`,

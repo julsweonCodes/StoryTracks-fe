@@ -6,24 +6,13 @@ import MagicIcon from "@/components/icons/magic";
 import { useState, useRef, ChangeEvent, ReactNode } from "react";
 import ImageUploader from "./ai-generator/image-uploader";
 import Textarea from "@/components/common/textarea";
-import {
-  useGenerateMutation,
-  GenerateImageInfo,
-} from "@/hooks/mutations/use-generate-mutation";
 import Loading from "@/components/common/loading";
-import { FiCopy, FiCheck } from "react-icons/fi";
 import CameraIcon from "@/components/icons/camera";
 import TextCircleIcon from "@/components/icons/text-circle";
 import Image from "next/image";
 import { LuUnderline, LuEye } from "react-icons/lu";
 import { PiTextItalic } from "react-icons/pi";
-
-interface AiModalState {
-  isOpen: boolean;
-  content: string;
-  isLoading: boolean;
-  error?: string;
-}
+import AISummaryModal from "@/components/common/ai-summary-modal";
 
 export default function Write() {
   const {
@@ -36,11 +25,6 @@ export default function Write() {
     setTitle,
   } = useFormContext();
   const [showAiPrompt, setShowAiPrompt] = useState(true);
-  const [aiModal, setAiModal] = useState<AiModalState>({
-    isOpen: false,
-    content: "",
-    isLoading: false,
-  });
   const [copySuccess, setCopySuccess] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
@@ -50,76 +34,9 @@ export default function Write() {
     useState<ImageInfo | null>(null);
   const [locationInput, setLocationInput] = useState({ lat: "", lon: "" });
   const [locationError, setLocationError] = useState("");
+  const [isAISummaryModalOpen, setIsAISummaryModalOpen] = useState(false);
   const promptRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const { mutate } = useGenerateMutation({
-    onSuccess: (data) => {
-      setAiModal({
-        isOpen: true,
-        content: data.genRes1,
-        isLoading: false,
-      });
-    },
-    onError: (error) => {
-      setAiModal({
-        isOpen: true,
-        content: "",
-        isLoading: false,
-        error: "Failed to generate content. Please try again.",
-      });
-    },
-  });
-
-  const handleClosePrompt = () => {
-    setShowAiPrompt(false);
-  };
-
-  const handleOpenPrompt = () => {
-    setShowAiPrompt(true);
-  };
-
-  const handleGenerateAi = () => {
-    if (images.length === 0 || description.length === 0) return;
-
-    setAiModal({
-      isOpen: true,
-      content: "",
-      isLoading: true,
-    });
-
-    const earliestDate = Math.min(
-      ...images
-        .filter((img) => img.createDate)
-        .map((image) => new Date(image.createDate!).getTime()),
-    );
-
-    const imgInfo: GenerateImageInfo = {
-      geoLat: (images[0]?.lat || 0).toString(),
-      geoLong: (images[0]?.lon || 0).toString(),
-      imgDtm: new Date(earliestDate).toISOString(),
-    };
-
-    mutate({ ogText: description, imgInfo });
-  };
-
-  const handleCopyContent = async () => {
-    try {
-      await navigator.clipboard.writeText(aiModal.content);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setAiModal({
-      isOpen: false,
-      content: "",
-      isLoading: false,
-    });
-  };
 
   // Text formatting utilities - work with selected text
   const applyFormatting = (before: string, after: string = "") => {
@@ -566,7 +483,7 @@ export default function Write() {
 
         {!showAiPrompt && (
           <button
-            onClick={handleOpenPrompt}
+            onClick={() => setIsAISummaryModalOpen(true)}
             className="fixed bottom-8 right-8 flex h-[56px] w-[56px] items-center justify-center rounded-full bg-gradient-to-br from-green-300 via-blue-300 to-pink-300 shadow-lg transition-shadow hover:shadow-xl"
           >
             <MagicIcon color="#262626" size={24} />
@@ -584,7 +501,7 @@ export default function Write() {
                 <RiLightbulbFlashLine className="text-green-300" size={20} />
               </div>
               <button
-                onClick={handleClosePrompt}
+                onClick={() => setShowAiPrompt(false)}
                 className="flex-shrink-0 transition-transform hover:scale-110"
               >
                 <IoClose size={20} className="text-[#262626]" />
@@ -601,7 +518,7 @@ export default function Write() {
             <div className="flex gap-2">
               <button
                 className="flex h-[48px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#262626] text-white-primary transition-colors hover:bg-[#323232]"
-                onClick={handleGenerateAi}
+                onClick={() => setIsAISummaryModalOpen(true)}
                 disabled={images.length === 0 || description.length === 0}
               >
                 <MagicIcon color="#ffffff" />
@@ -611,67 +528,6 @@ export default function Write() {
           </div>
         )}
       </div>
-
-      {/* AI Results Modal */}
-      {aiModal.isOpen && (
-        <div className="bg-black fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 p-4">
-          <div className="relative flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-black-primary shadow-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-black-secondary px-6 py-4">
-              <h3 className="text-lg font-semibold text-white-primary">
-                AI Generated Summary
-              </h3>
-              <button
-                onClick={handleCloseModal}
-                className="text-[#A9A9A9] transition-colors hover:text-white-primary"
-              >
-                <IoClose size={24} />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              {aiModal.isLoading ? (
-                <div className="flex h-40 items-center justify-center">
-                  <Loading type="loading" />
-                </div>
-              ) : aiModal.error ? (
-                <div className="text-center text-red-400">
-                  <p>{aiModal.error}</p>
-                </div>
-              ) : (
-                <div className="prose prose-invert max-w-none">
-                  <p className="whitespace-pre-wrap text-[14px] leading-6 text-[#E0E0E0]">
-                    {aiModal.content}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            {!aiModal.isLoading && !aiModal.error && (
-              <div className="border-t border-black-secondary px-6 py-4">
-                <button
-                  onClick={handleCopyContent}
-                  className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-key-primary text-black-secondary transition-colors hover:bg-[#9b8fed]"
-                >
-                  {copySuccess ? (
-                    <>
-                      <FiCheck size={20} />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <FiCopy size={20} />
-                      Copy Content
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Preview Modal */}
       {showPreview && (
@@ -815,6 +671,16 @@ export default function Write() {
           </div>
         </div>
       )}
+
+      <AISummaryModal
+        open={isAISummaryModalOpen}
+        onClose={() => setIsAISummaryModalOpen(false)}
+        postData={{
+          title,
+          ogText: description,
+          blogImgList: images,
+        }}
+      />
     </>
   );
 }

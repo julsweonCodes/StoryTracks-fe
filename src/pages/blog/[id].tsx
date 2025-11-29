@@ -6,32 +6,71 @@ import EditIcon from "@/components/icons/edit";
 import Minimalistic from "@/components/icons/minimalistic";
 import TrashIcon from "@/components/icons/trash";
 import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
+import useDeleteBlogPost from "@/hooks/mutations/use-delete-blog-post";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { replaceImageFileNamesWithS3Urls } from "@/utils/replace-image-urls";
 import { formatLocalizedDateTime } from "@/utils/format-date";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { FiMoreVertical } from "react-icons/fi";
 
 export default function Detail() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { id } = router.query;
+  const { data: session } = useSession();
+  const { id, userId, nickname, profileImg } = router.query;
   const { data } = usePostsDetailQuery(id as string);
   const [isOpen, setIsOpen] = useState(false);
   const isNew = searchParams.get("new");
   const [htmlContent, setHtmlContent] = useState<string>();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Use user info from query params (passed from card), fallback to API data
+  const userNickname = (nickname as string) || data?.nickname || data?.userNickname;
+  const userProfileImg = (profileImg as string) || data?.profileImg || data?.userProfileImg;
+  const userIdFromQuery = userId;
+
+  const { mutate: deleteBlogPost, isLoading: isDeleting } = useDeleteBlogPost({
+    onSuccess: () => {
+      console.log("[Delete] Post deleted successfully, redirecting...");
+      setIsDeleteModalOpen(false);
+      router.push("/");
+    },
+    onError: (error: Error) => {
+      console.error("[Delete] Failed to delete post:", error);
+      setDeleteError(error.message);
+    },
+  });
 
   const handleDone = () => {
     setIsOpen(false);
   };
 
-  const handleDelete = () => {
-    setIsDeleteModalOpen(true);
-    router.push("/");
+  const handleDeleteConfirm = async () => {
+    try {
+      setDeleteError(null);
+
+      // @ts-ignore - session is available from useSession hook
+      if (!session?.user?.id) {
+        setDeleteError("User not authenticated");
+        return;
+      }
+
+      console.log("[Delete] Deleting post with ID:", id);
+      console.log("[Delete] User ID:", session.user.id);
+
+      deleteBlogPost({
+        postId: Number(id),
+        userId: Number(session.user.id),
+      });
+    } catch (error) {
+      console.error("[Delete] Error during deletion:", error);
+      setDeleteError("An unexpected error occurred. Please try again.");
+    }
   };
 
   const handleSelect = (option: string) => {
@@ -99,20 +138,38 @@ export default function Detail() {
             description={`Dive into ${data.title} and discover the story behind it. Read more inspiring blogs on Story Track, your platform for storytelling.`}
           />
           <div className="flex flex-col gap-4 pb-4">
-            <div>
-              <span className="text-[13px] tracking-tight text-black-tertiary">
-                Travel
-              </span>
-            </div>
             <h1 className="text-[32px] font-medium">{data.title}</h1>
             <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[13px] tracking-tight text-[#E6E6E6]">
-                  {data?.userNickname || "Anonymous"}
-                </span>
-                <span className="text-[12px] tracking-tight text-black-tertiary">
-                  {formatLocalizedDateTime(data.rgstDtm)}
-                </span>
+              <div className="flex items-center gap-3">
+                {/* Profile Image */}
+                {userProfileImg ? (
+                  <div className="relative h-[40px] w-[40px] overflow-hidden rounded-full bg-[#2a2a2a]">
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${userProfileImg}`}
+                      alt={userNickname || "User"}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#333333] text-[#999999]">
+                    👤
+                  </div>
+                )}
+                {/* User Info */}
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-medium tracking-tight text-[#E6E6E6]">
+                    {userNickname || "Anonymous"}
+                  </span>
+                  <span className="text-[12px] tracking-tight text-black-tertiary">
+                    {formatLocalizedDateTime(data.rgstDtm)}
+                  </span>
+                  {data?.title && (
+                    <span className="mt-1 text-[11px] tracking-tight text-[#999999]">
+                      {data.title}
+                    </span>
+                  )}
+                </div>
               </div>
               {/* <div className="relative" onClick={() => setIsDropDownOpen(true)}>
                 <FiMoreVertical size={24} />
@@ -127,7 +184,7 @@ export default function Detail() {
                     { icon: <TrashIcon />, text: "Delete" },
                   ].map((item, index) => (
                     <Dropdown.Option key={index} value={item.text}>
-                      <div className="text=[14px] flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary">
+                      <div className="text=[14px] flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary hover:bg-[#262626]">
                         {item.icon}
                         <span>{item.text}</span>
                       </div>
@@ -180,16 +237,26 @@ export default function Detail() {
                   Permanently delete this post? This action cannot be undone.
                 </p>
               </div>
+              {deleteError && (
+                <div className="mb-4 rounded-lg bg-red-500/20 p-3 text-sm text-red-400">
+                  {deleteError}
+                </div>
+              )}
               <div className="flex w-full flex-col gap-2">
                 <button
-                  className="h-[45px] w-full rounded-xl bg-key-primary"
-                  onClick={handleDelete}
+                  className="h-[45px] w-full rounded-xl bg-key-primary disabled:opacity-50"
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
                 >
-                  Delete
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </button>
                 <button
-                  className="h-[45px] w-full rounded-xl bg-[#333333] text-white-primary"
-                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="h-[45px] w-full rounded-xl bg-[#333333] text-white-primary disabled:opacity-50"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setDeleteError(null);
+                  }}
+                  disabled={isDeleting}
                 >
                   Cancel
                 </button>

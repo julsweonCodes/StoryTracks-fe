@@ -1,4 +1,4 @@
-import Card from "@/components/common/card";
+import UserBlogCard from "@/components/common/user-blog-card";
 import Header from "@/components/common/header";
 import Map from "@/components/map";
 import Modal from "@/components/common/modal";
@@ -323,17 +323,49 @@ export default function UserBlogHome() {
           // Process blogs
           const processedBlogs = await Promise.all(
             blogs.map(async (blog: any) => {
-              const thumbPath = blog.thumbHash?.thumbImgPath || "";
-              const fullSrc = `${process.env.NEXT_PUBLIC_S3_BASE_URL}${thumbPath}`;
+              // Try to get thumbnail from thumbHash first (if backend provides it)
+              let thumbPath = blog.thumbHash?.thumbImgPath || "";
+              let thumbLat = blog.thumbHash?.thumbGeoLat;
+              let thumbLng = blog.thumbHash?.thumbGeoLong;
 
-              if (thumbPath) {
-                console.log("Blog thumbnail:", {
+              // Fallback: Extract featured image from blogImgList if thumbHash is empty
+              if (
+                !thumbPath &&
+                blog.blogImgList &&
+                Array.isArray(blog.blogImgList)
+              ) {
+                // Find image with thumbYn === true or thumbYn === "Y"
+                const featuredImage = blog.blogImgList.find(
+                  (img: any) => img.thumbYn === true || img.thumbYn === "Y",
+                );
+
+                if (featuredImage) {
+                  thumbPath = featuredImage.imgPath || "";
+                  thumbLat = featuredImage.geoLat;
+                  thumbLng = featuredImage.geoLong;
+
+                  console.log("Blog thumbnail (from blogImgList):", {
+                    postId: blog.postId,
+                    thumbPath,
+                    thumbYn: featuredImage.thumbYn,
+                    hasGeo: !!(thumbLat || thumbLng),
+                  });
+                }
+              } else if (thumbPath) {
+                console.log("Blog thumbnail (from thumbHash):", {
                   postId: blog.postId,
                   thumbPath,
-                  fullSrc,
-                  hasGeo: !!blog.thumbHash?.thumbGeoLat,
+                  hasGeo: !!thumbLat,
                 });
               }
+
+              // Ensure thumbPath has posts/ prefix
+              let fullThumbPath = thumbPath;
+              if (thumbPath && !thumbPath.startsWith("posts/")) {
+                fullThumbPath = "posts/" + thumbPath;
+              }
+
+              const fullSrc = `${process.env.NEXT_PUBLIC_S3_BASE_URL}${fullThumbPath}`;
 
               return {
                 postId: blog.postId,
@@ -341,12 +373,8 @@ export default function UserBlogHome() {
                 src: fullSrc,
                 des: await markdownToPlainText(blog.aiGenText),
                 rgstDtm: blog.rgstDtm,
-                lat: blog.thumbHash?.thumbGeoLat
-                  ? parseFloat(blog.thumbHash.thumbGeoLat)
-                  : undefined,
-                lng: blog.thumbHash?.thumbGeoLong
-                  ? parseFloat(blog.thumbHash.thumbGeoLong)
-                  : undefined,
+                lat: thumbLat ? parseFloat(thumbLat) : undefined,
+                lng: thumbLng ? parseFloat(thumbLng) : undefined,
               };
             }),
           );
@@ -574,7 +602,7 @@ export default function UserBlogHome() {
                 <div className="grid grid-cols-2 gap-4">
                   {(viewMode === "all" ? userPosts : selectedClusterPosts).map(
                     (post) => (
-                      <Card
+                      <UserBlogCard
                         key={post.postId}
                         id={post.postId}
                         title={post.title}

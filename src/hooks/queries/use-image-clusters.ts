@@ -81,7 +81,12 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
 
           // Try to parse as JSON to provide better error
           try {
-            const errorJson = JSON.parse(errorText);
+            // Remove security prefix ")]}'\n" if present
+            let cleanText = errorText;
+            if (cleanText.startsWith(")]}'\n")) {
+              cleanText = cleanText.substring(5);
+            }
+            const errorJson = JSON.parse(cleanText);
             throw new Error(
               `Backend error: ${errorJson.message || errorJson.code}`,
             );
@@ -92,7 +97,17 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
           }
         }
 
-        const data = await response.json();
+        let responseText = await response.text();
+
+        // Remove security prefix ")]}'\n" if present (common in Google APIs)
+        if (responseText.startsWith(")]}'\n")) {
+          console.log(
+            "[useImageClusters] Removing security prefix from response",
+          );
+          responseText = responseText.substring(5);
+        }
+
+        const data = JSON.parse(responseText);
         console.log("[useImageClusters] Full response:", data);
 
         // Check if response indicates an error

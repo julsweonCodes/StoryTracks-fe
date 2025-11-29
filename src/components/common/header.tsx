@@ -35,6 +35,8 @@ export default function Header() {
       router.push("/");
     } else if (option === "My Blog") {
       router.push("/user-blog-home");
+    } else if (option === "New Post") {
+      router.push("/blog/new");
     } else if (option === "Profile") {
       router.push("/profile");
     }
@@ -125,6 +127,12 @@ export default function Header() {
                 <div className="flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary hover:bg-[#262626]">
                   <MdArticle size={18} />
                   <span>My Blog</span>
+                </div>
+              </Dropdown.Option>
+              <Dropdown.Option value="New Post">
+                <div className="flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary hover:bg-[#262626]">
+                  <MdArticle size={18} />
+                  <span>New Post</span>
                 </div>
               </Dropdown.Option>
               <Dropdown.Option value="Profile">

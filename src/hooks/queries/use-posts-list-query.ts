@@ -33,7 +33,11 @@ export interface ProcessedBlog {
   title: string;
   src: string;
   des: string;
+  ogText?: string;
   rgstDtm: string;
+  userId?: number;
+  nickname?: string;
+  profileImg?: string;
 }
 
 interface Blog {
@@ -50,6 +54,9 @@ interface Blog {
     thumbImgId: string;
     thumbGeoLat: string;
   };
+  userId?: number;
+  nickname?: string;
+  profileImg?: string;
 }
 
 const usePostsListQuery = () => {
@@ -76,13 +83,28 @@ const processBlogs = async (blogs?: Blog[]): Promise<ProcessedBlog[]> => {
   if (!blogs) return [];
 
   const processedBlogs = await Promise.all(
-    blogs.map(async (blog) => ({
-      postId: blog.postId,
-      title: blog.title,
-      src: `${process.env.NEXT_PUBLIC_S3_BASE_URL}${blog.thumbHash?.thumbImgPath || ""}`,
-      des: await markdownToPlainText(blog.aiGenText),
-      rgstDtm: blog.rgstDtm,
-    })),
+    blogs.map(async (blog) => {
+      // Get thumbnail path from thumbHash
+      let thumbPath = blog.thumbHash?.thumbImgPath || "";
+
+      // Ensure thumbPath has posts/ prefix
+      let fullThumbPath = thumbPath;
+      if (thumbPath && !thumbPath.startsWith("posts/")) {
+        fullThumbPath = "posts/" + thumbPath;
+      }
+
+      return {
+        postId: blog.postId,
+        title: blog.title,
+        src: `${process.env.NEXT_PUBLIC_S3_BASE_URL}${fullThumbPath}`,
+        des: await markdownToPlainText(blog.aiGenText),
+        ogText: blog.ogText || undefined,
+        rgstDtm: blog.rgstDtm,
+        userId: blog.userId,
+        nickname: blog.nickname,
+        profileImg: blog.profileImg,
+      };
+    }),
   );
 
   return processedBlogs;

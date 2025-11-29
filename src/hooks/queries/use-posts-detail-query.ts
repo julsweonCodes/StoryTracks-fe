@@ -7,10 +7,11 @@ interface Image {
   geoLat: string;
   geoLong: string;
   imgPath: string;
+  imgFileName: string;
   imgDtm: string;
   rgstDtm: string;
   thumbYn: string | null;
-  fileName: string;
+  filePath?: string;
 }
 
 interface BlogDetail {
@@ -22,8 +23,12 @@ interface BlogDetail {
   rgstDtm: string; // ISO 8601 format from Java OffsetDateTime
   chngDtm: string | null; // ISO 8601 format from Java OffsetDateTime
   blogImgList: Image[];
-  userNickname?: string; // User who created the post
   userId?: number; // User ID who created the post
+  nickname?: string; // User who created the post (use this instead of userNickname)
+  profileImg?: string; // Profile image of the user (use this instead of userProfileImg)
+  // Fallback fields for compatibility
+  userNickname?: string;
+  userProfileImg?: string;
 }
 
 const usePostsDetailQuery = (id?: string) => {
