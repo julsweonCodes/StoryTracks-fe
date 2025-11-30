@@ -428,7 +428,7 @@ export default function Home() {
         {session && (
           <button
             onClick={() => router.push("/blog/new")}
-            className="fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white-primary text-black-primary shadow-lg hover:shadow-xl hover:bg-opacity-90 transition-all"
+            className="fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white-primary text-black-primary shadow-lg transition-all hover:bg-opacity-90 hover:shadow-xl"
             title="Create New Post"
           >
             <IoAddCircle size={32} />

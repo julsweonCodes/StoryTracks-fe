@@ -38,10 +38,20 @@ export default function GeneratorHeader() {
       console.log("[GeneratorHeader] Blog post published successfully:", data);
       setIsLoading(false);
       // Pass user info in query params to avoid refetch
-      const userNickname = session?.user?.name || "Anonymous";
-      const userProfileImg = session?.user?.image || "";
+      // @ts-ignore - custom session fields from NextAuth config
+      const userNickname = session?.user?.nickname || "Anonymous";
+      // @ts-ignore - custom session fields from NextAuth config
+      const userProfileImg = session?.user?.profileImg || "";
       const userId = session?.user?.id || "";
-      router.push(`/blog/${data.postId}?new=true&userId=${userId}&nickname=${encodeURIComponent(userNickname)}&profileImg=${encodeURIComponent(userProfileImg)}`);
+      console.log("[GeneratorHeader] Session data:", {
+        userId,
+        userNickname,
+        userProfileImg,
+        sessionUserFull: session?.user,
+      });
+      const redirectUrl = `/blog/${data.postId}?new=true&userId=${userId}&nickname=${encodeURIComponent(userNickname)}&profileImg=${encodeURIComponent(userProfileImg)}`;
+      console.log("[GeneratorHeader] Redirecting to:", redirectUrl);
+      router.push(redirectUrl);
     },
     onError: (error) => {
       console.error("[GeneratorHeader] Failed to publish blog post:", error);

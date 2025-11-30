@@ -38,10 +38,14 @@ export default function BlogHeader() {
       console.log("[Header] Blog post published successfully:", data);
       setIsLoading(false);
       // Pass user info in query params to avoid refetch
-      const userNickname = session?.user?.name || "Anonymous";
-      const userProfileImg = session?.user?.image || "";
+      // @ts-ignore - custom session fields from NextAuth config
+      const userNickname = session?.user?.nickname || "Anonymous";
+      // @ts-ignore - custom session fields from NextAuth config
+      const userProfileImg = session?.user?.profileImg || "";
       const userId = session?.user?.id || "";
-      router.push(`/blog/${data.postId}?new=true&userId=${userId}&nickname=${encodeURIComponent(userNickname)}&profileImg=${encodeURIComponent(userProfileImg)}`);
+      router.push(
+        `/blog/${data.postId}?new=true&userId=${userId}&nickname=${encodeURIComponent(userNickname)}&profileImg=${encodeURIComponent(userProfileImg)}`,
+      );
     },
     onError: (error) => {
       console.error("[Header] Failed to publish blog post:", error);

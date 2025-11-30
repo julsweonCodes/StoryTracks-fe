@@ -53,7 +53,15 @@ export default function EditBlogPost() {
         description: "",
       });
       setTimeout(() => {
-        router.push(`/blog/${data.postId}`);
+        // Pass user info in query params to avoid refetch
+        // @ts-ignore - custom session fields from NextAuth config
+        const userNickname = session?.user?.nickname || "Anonymous";
+        // @ts-ignore - custom session fields from NextAuth config
+        const userProfileImg = session?.user?.profileImg || "";
+        const userId = session?.user?.id || "";
+        router.push(
+          `/blog/${data.postId}?userId=${userId}&nickname=${encodeURIComponent(userNickname)}&profileImg=${encodeURIComponent(userProfileImg)}`,
+        );
       }, 1000);
     },
     onError: (error) => {

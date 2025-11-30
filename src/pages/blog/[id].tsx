@@ -11,28 +11,39 @@ import { markdownToHtml } from "@/utils/markdown-to-html";
 import { replaceImageFileNamesWithS3Urls } from "@/utils/replace-image-urls";
 import { formatLocalizedDateTime } from "@/utils/format-date";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { FiMoreVertical } from "react-icons/fi";
 
 export default function Detail() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const { id, userId, nickname, profileImg } = router.query;
-  const { data } = usePostsDetailQuery(id as string);
-  const [isOpen, setIsOpen] = useState(false);
-  const isNew = searchParams.get("new");
   const [htmlContent, setHtmlContent] = useState<string>();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [userNickname, setUserNickname] = useState<string | null>(null);
+  const [userProfileImg, setUserProfileImg] = useState<string | null>(null);
 
-  // Use user info from query params (passed from card), fallback to API data
-  const userNickname = (nickname as string) || data?.nickname || data?.userNickname;
-  const userProfileImg = (profileImg as string) || data?.profileImg || data?.userProfileImg;
-  const userIdFromQuery = userId;
+  // Extract query params from router
+  const { id, nickname, profileImg } = router.query;
+  const { data } = usePostsDetailQuery(id as string);
+  const [isOpen, setIsOpen] = useState(false);
+  const isNew = router.query.new;
+
+  // Update user info when query params or API data changes
+  useEffect(() => {
+    // Use query params first, fallback to API data
+    const finalNickname =
+      (nickname as string) ||
+      data?.nickname ||
+      data?.userNickname ||
+      "Anonymous";
+    const finalProfileImg =
+      (profileImg as string) || data?.profileImg || data?.userProfileImg || "";
+
+    setUserNickname(finalNickname);
+    setUserProfileImg(finalProfileImg);
+  }, [nickname, profileImg, data]);
 
   const { mutate: deleteBlogPost, isLoading: isDeleting } = useDeleteBlogPost({
     onSuccess: () => {
@@ -171,27 +182,33 @@ export default function Detail() {
                   )}
                 </div>
               </div>
-              {/* <div className="relative" onClick={() => setIsDropDownOpen(true)}>
-                <FiMoreVertical size={24} />
-              </div> */}
-              <div className="relative flex h-full w-5 items-center">
-                <Dropdown onSelect={handleSelect}>
-                  {[
-                    {
-                      icon: <EditIcon />,
-                      text: "Edit",
-                    },
-                    { icon: <TrashIcon />, text: "Delete" },
-                  ].map((item, index) => (
-                    <Dropdown.Option key={index} value={item.text}>
-                      <div className="text=[14px] flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary hover:bg-[#262626]">
-                        {item.icon}
-                        <span>{item.text}</span>
-                      </div>
-                    </Dropdown.Option>
-                  ))}
-                </Dropdown>
-              </div>
+              {/* Only show edit/delete dropdown if current user is the post owner */}
+              {(() => {
+                const isOwner =
+                  session?.user?.id &&
+                  data?.userId &&
+                  Number(session.user.id) === data.userId;
+                return isOwner ? (
+                  <div className="relative flex h-full w-5 items-center">
+                    <Dropdown onSelect={handleSelect}>
+                      {[
+                        {
+                          icon: <EditIcon />,
+                          text: "Edit",
+                        },
+                        { icon: <TrashIcon />, text: "Delete" },
+                      ].map((item, index) => (
+                        <Dropdown.Option key={index} value={item.text}>
+                          <div className="text=[14px] flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary hover:bg-[#262626]">
+                            {item.icon}
+                            <span>{item.text}</span>
+                          </div>
+                        </Dropdown.Option>
+                      ))}
+                    </Dropdown>
+                  </div>
+                ) : null;
+              })()}
             </div>
           </div>
           <div className="flex flex-col gap-5 pt-4">

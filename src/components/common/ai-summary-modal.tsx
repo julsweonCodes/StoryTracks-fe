@@ -16,26 +16,28 @@ interface ImageResponse {
 }
 
 // Flexible image type that accepts both ImageResponse and partial ImageInfo
-type ImageLike = Partial<ImageResponse> | {
-  id?: string;
-  lat?: number;
-  lon?: number;
-  createDate?: string;
-  previewUrl?: string;
-  fileName?: string;
-  active?: boolean;
-  file?: File;
-  imgId?: number;
-  postId?: number;
-  geoLat?: string;
-  geoLong?: string;
-  imgPath?: string;
-  imgFileName?: string;
-  filePath?: string;
-  thumbYn?: boolean;
-  imgDtm?: string;
-  rgstDtm?: string;
-};
+type ImageLike =
+  | Partial<ImageResponse>
+  | {
+      id?: string;
+      lat?: number;
+      lon?: number;
+      createDate?: string;
+      previewUrl?: string;
+      fileName?: string;
+      active?: boolean;
+      file?: File;
+      imgId?: number;
+      postId?: number;
+      geoLat?: string;
+      geoLong?: string;
+      imgPath?: string;
+      imgFileName?: string;
+      filePath?: string;
+      thumbYn?: boolean;
+      imgDtm?: string;
+      rgstDtm?: string;
+    };
 
 interface AISummaryModalProps {
   open: boolean;
@@ -102,10 +104,10 @@ export default function AISummaryModal({
 
       const result = await response.json();
       console.log("[AISummaryModal] API Response:", result);
-      
+
       // Handle nested response format { data: { aiGenText: "..." } }
       let summary = "";
-      
+
       if (result.data?.aiGenText && typeof result.data.aiGenText === "string") {
         summary = result.data.aiGenText;
       } else if (result.aiGenText && typeof result.aiGenText === "string") {
@@ -119,7 +121,7 @@ export default function AISummaryModal({
       } else if (typeof result === "string") {
         summary = result;
       }
-      
+
       setGeneratedSummary(summary);
       setHasGenerated(true);
     } catch (err) {
@@ -168,7 +170,7 @@ export default function AISummaryModal({
             onChange={(e) => setAiGuide(e.target.value)}
             placeholder="e.g., Write in a professional tone, Add emojis, Mimic a travel blogger's voice, Keep it casual and friendly..."
             disabled={isLoading}
-            className="w-full resize-none rounded-lg border border-[#404040] bg-[#2a2a2a] p-3 text-white-primary focus:border-white-primary focus:outline-none disabled:opacity-50 h-[120px]"
+            className="h-[120px] w-full resize-none rounded-lg border border-[#404040] bg-[#2a2a2a] p-3 text-white-primary focus:border-white-primary focus:outline-none disabled:opacity-50"
           />
         </div>
 
@@ -198,7 +200,7 @@ export default function AISummaryModal({
                 )}
               </button>
             </div>
-            <div className="rounded-lg border border-[#404040] bg-[#2a2a2a] p-3 text-white-primary max-h-[200px] overflow-y-auto">
+            <div className="max-h-[200px] overflow-y-auto rounded-lg border border-[#404040] bg-[#2a2a2a] p-3 text-white-primary">
               <div className="whitespace-pre-wrap text-sm text-[#E6E6E6]">
                 {generatedSummary}
               </div>
