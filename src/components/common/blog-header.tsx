@@ -37,7 +37,11 @@ export default function BlogHeader() {
     onSuccess: (data) => {
       console.log("[Header] Blog post published successfully:", data);
       setIsLoading(false);
-      router.push(`/blog/${data.postId}?new=true`);
+      // Pass user info in query params to avoid refetch
+      const userNickname = session?.user?.name || "Anonymous";
+      const userProfileImg = session?.user?.image || "";
+      const userId = session?.user?.id || "";
+      router.push(`/blog/${data.postId}?new=true&userId=${userId}&nickname=${encodeURIComponent(userNickname)}&profileImg=${encodeURIComponent(userProfileImg)}`);
     },
     onError: (error) => {
       console.error("[Header] Failed to publish blog post:", error);
