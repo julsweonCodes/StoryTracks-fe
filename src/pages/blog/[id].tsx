@@ -20,6 +20,7 @@ export default function Detail() {
   const { data: session } = useSession();
   const [htmlContent, setHtmlContent] = useState<string>();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteSuccessOpen, setIsDeleteSuccessOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [userNickname, setUserNickname] = useState<string | null>(null);
   const [userProfileImg, setUserProfileImg] = useState<string | null>(null);
@@ -45,11 +46,31 @@ export default function Detail() {
     setUserProfileImg(finalProfileImg);
   }, [nickname, profileImg, data]);
 
+  // Detect where user came from based on referrer
+  const getRedirectPath = () => {
+    const referrer = document.referrer;
+    console.log("[Delete] Document referrer:", referrer);
+    
+    // If came from user-blog-home
+    if (referrer.includes("/user-blog-home") || referrer.includes("user-blog")) {
+      return "/user-blog-home";
+    }
+    // Default to home/main feed
+    return "/";
+  };
+
   const { mutate: deleteBlogPost, isLoading: isDeleting } = useDeleteBlogPost({
     onSuccess: () => {
-      console.log("[Delete] Post deleted successfully, redirecting...");
+      console.log("[Delete] Post deleted successfully");
       setIsDeleteModalOpen(false);
-      router.push("/");
+      setIsDeleteSuccessOpen(true);
+      
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        const redirectPath = getRedirectPath();
+        console.log("[Delete] Redirecting to:", redirectPath);
+        router.push(redirectPath);
+      }, 2000);
     },
     onError: (error: Error) => {
       console.error("[Delete] Failed to delete post:", error);
@@ -278,6 +299,31 @@ export default function Detail() {
                   Cancel
                 </button>
               </div>
+            </div>
+          </Modal>
+          {/* Delete Success Modal */}
+          <Modal open={isDeleteSuccessOpen} onClose={() => setIsDeleteSuccessOpen(false)}>
+            <div className="flex w-full flex-col items-center justify-between gap-4">
+              <div className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#333333]">
+                <Minimalistic />
+              </div>
+              <div className="flex flex-col items-center justify-center tracking-tight">
+                <h1 className="leading-5 text-white-primary">
+                  Post Deleted!
+                </h1>
+                <p className="text-[14px] text-[#B0B0B0]">
+                  Your post has been permanently deleted
+                </p>
+              </div>
+              <button
+                className="h-[45px] w-full rounded-xl bg-key-primary"
+                onClick={() => {
+                  const redirectPath = getRedirectPath();
+                  router.push(redirectPath);
+                }}
+              >
+                Done
+              </button>
             </div>
           </Modal>
         </div>
