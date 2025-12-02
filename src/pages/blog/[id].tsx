@@ -5,8 +5,10 @@ import SEOHeader from "@/components/common/seo-header";
 import EditIcon from "@/components/icons/edit";
 import Minimalistic from "@/components/icons/minimalistic";
 import TrashIcon from "@/components/icons/trash";
+import HeartIcon from "@/components/icons/heart";
 import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
 import useDeleteBlogPost from "@/hooks/mutations/use-delete-blog-post";
+import useLikePost from "@/hooks/mutations/use-like-post";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { replaceImageFileNamesWithS3Urls } from "@/utils/replace-image-urls";
 import { formatLocalizedDateTime } from "@/utils/format-date";
@@ -14,21 +16,40 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
 
 export default function Detail() {
   const router = useRouter();
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [htmlContent, setHtmlContent] = useState<string>();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [userNickname, setUserNickname] = useState<string | null>(null);
   const [userProfileImg, setUserProfileImg] = useState<string | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
 
   // Extract query params from router
   const { id, nickname, profileImg } = router.query;
   const { data } = usePostsDetailQuery(id as string);
   const [isOpen, setIsOpen] = useState(false);
   const isNew = router.query.new;
+
+  // Like mutation
+  const { mutate: toggleLike, isLoading: isLiking } = useLikePost({
+    onSuccess: () => {
+      // Invalidate and refetch the post detail to get updated like status
+      queryClient.invalidateQueries(["blog-detail", id]);
+      // Invalidate feed lists so like status updates when user navigates back
+      queryClient.invalidateQueries(["blog-list"]);
+      // Optimistically toggle the UI
+      setIsLiked(!isLiked);
+    },
+    onError: (error: Error) => {
+      console.error("[Like] Failed to like/unlike post:", error);
+    },
+  });
 
   // Update user info when query params or API data changes
   useEffect(() => {
@@ -43,7 +64,27 @@ export default function Detail() {
 
     setUserNickname(finalNickname);
     setUserProfileImg(finalProfileImg);
+
+    // Update isLiked state from API data
+    if (data?.isLiked !== undefined) {
+      setIsLiked(data.isLiked);
+    }
   }, [nickname, profileImg, data]);
+
+  // Handle like button click
+  const handleLikeClick = () => {
+    // Check if user is logged in
+    if (!session) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    // Toggle like/unlike
+    toggleLike({
+      postId: Number(id),
+      isCurrentlyLiked: isLiked,
+    });
+  };
 
   const { mutate: deleteBlogPost, isLoading: isDeleting } = useDeleteBlogPost({
     onSuccess: () => {
@@ -167,40 +208,55 @@ export default function Detail() {
                   <span className="text-[12px] tracking-tight text-black-tertiary">
                     {formatLocalizedDateTime(data.rgstDtm)}
                   </span>
-                  {data?.title && (
+                  {data?.blogName && (
                     <span className="mt-1 text-[11px] tracking-tight text-[#999999]">
-                      {data.title}
+                      {data.blogName}
                     </span>
                   )}
                 </div>
               </div>
-              {/* Only show edit/delete dropdown if current user is the post owner */}
-              {(() => {
-                const isOwner =
-                  session?.user?.id &&
-                  data?.userId &&
-                  Number(session.user.id) === data.userId;
-                return isOwner ? (
-                  <div className="relative flex h-full w-5 items-center">
-                    <Dropdown onSelect={handleSelect}>
-                      {[
-                        {
-                          icon: <EditIcon />,
-                          text: "Edit",
-                        },
-                        { icon: <TrashIcon />, text: "Delete" },
-                      ].map((item, index) => (
-                        <Dropdown.Option key={index} value={item.text}>
-                          <div className="text=[14px] flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary hover:bg-[#262626]">
-                            {item.icon}
-                            <span>{item.text}</span>
-                          </div>
-                        </Dropdown.Option>
-                      ))}
-                    </Dropdown>
-                  </div>
-                ) : null;
-              })()}
+              <div className="flex items-center gap-3">
+                {/* Like Button */}
+                <button
+                  onClick={handleLikeClick}
+                  disabled={isLiking}
+                  className={`flex items-center justify-center transition-all ${
+                    isLiked
+                      ? "text-red-500 hover:text-red-600"
+                      : "text-gray-400 hover:text-red-500"
+                  } disabled:opacity-50`}
+                  aria-label={isLiked ? "Unlike post" : "Like post"}
+                >
+                  <HeartIcon filled={isLiked} size={24} />
+                </button>
+                {/* Only show edit/delete dropdown if current user is the post owner */}
+                {(() => {
+                  const isOwner =
+                    session?.user?.id &&
+                    data?.userId &&
+                    Number(session.user.id) === data.userId;
+                  return isOwner ? (
+                    <div className="relative flex h-full w-5 items-center">
+                      <Dropdown onSelect={handleSelect}>
+                        {[
+                          {
+                            icon: <EditIcon />,
+                            text: "Edit",
+                          },
+                          { icon: <TrashIcon />, text: "Delete" },
+                        ].map((item, index) => (
+                          <Dropdown.Option key={index} value={item.text}>
+                            <div className="text=[14px] flex h-[38px] w-full items-center gap-2 px-3 tracking-tight text-white-primary hover:bg-[#262626]">
+                              {item.icon}
+                              <span>{item.text}</span>
+                            </div>
+                          </Dropdown.Option>
+                        ))}
+                      </Dropdown>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-5 pt-4">
@@ -266,6 +322,37 @@ export default function Detail() {
                     setDeleteError(null);
                   }}
                   disabled={isDeleting}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Modal>
+          {/* Login Prompt Modal */}
+          <Modal
+            open={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+          >
+            <div className="flex w-full flex-col items-center justify-between gap-4">
+              <div className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#333333]">
+                <HeartIcon filled={false} size={24} className="text-red-500" />
+              </div>
+              <div className="mb-5 flex flex-col items-center justify-center tracking-tight">
+                <h1 className="leading-5 text-white-primary">Login Required</h1>
+                <p className="text-center text-[14px] text-[#B0B0B0]">
+                  You need to be logged in to like posts
+                </p>
+              </div>
+              <div className="flex w-full flex-col gap-2">
+                <button
+                  className="h-[45px] w-full rounded-xl bg-key-primary"
+                  onClick={() => router.push("/login")}
+                >
+                  Go to Login
+                </button>
+                <button
+                  className="h-[45px] w-full rounded-xl bg-[#333333] text-white-primary"
+                  onClick={() => setIsLoginModalOpen(false)}
                 >
                   Cancel
                 </button>

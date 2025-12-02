@@ -39,6 +39,7 @@ export interface ProcessedBlog {
   userId?: number;
   nickname?: string;
   profileImg?: string;
+  isLiked?: boolean;
 }
 
 interface Blog {
@@ -58,6 +59,7 @@ interface Blog {
   userId?: number;
   nickname?: string;
   profileImg?: string;
+  isLiked?: boolean;
 }
 
 const usePostsListQuery = () => {
@@ -106,6 +108,7 @@ const processBlogs = async (blogs?: Blog[]): Promise<ProcessedBlog[]> => {
         userId: blog.userId,
         nickname: blog.nickname,
         profileImg: blog.profileImg,
+        isLiked: blog.isLiked,
       };
     }),
   );

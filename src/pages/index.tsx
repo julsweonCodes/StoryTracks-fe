@@ -8,7 +8,9 @@ import Card from "@/components/common/card";
 import Drawer from "@/components/common/drawer";
 import Header from "@/components/common/header";
 import SEOHeader from "@/components/common/seo-header";
+import Modal from "@/components/common/modal";
 import Map from "@/components/map";
+import axios from "axios";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -20,6 +22,7 @@ const formatNumber = (num?: number): string => {
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [selectedClusterPosts, setSelectedClusterPosts] = useState<
     ProcessedBlog[]
   >([]);
@@ -136,12 +139,8 @@ export default function Home() {
     try {
       setIsRefreshing(true);
       const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed?page=0`;
-      const response = await fetch(endpoint);
-      if (!response.ok) {
-        throw new Error(`Failed to refresh feed: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await axios.get(endpoint);
+      const data = response.data;
       const newPosts = data.data?.content || data.content || data || [];
 
       if (newPosts && newPosts.length > 0) {
@@ -167,15 +166,10 @@ export default function Home() {
   ) => {
     try {
       setIsLoadingMore(true);
-      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed/marker?lat=${lat}&lng=${lng}&level=${level}&page=${page}`;
+      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/marker?lat=${lat}&lng=${lng}&level=${level}&page=${page}`;
 
-      const response = await fetch(endpoint);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch posts: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await axios.get(endpoint);
+      const data = response.data;
 
       // Extract content from wrapped paginated response
       const newPosts = data.data?.content || data.content || data || [];
@@ -232,19 +226,17 @@ export default function Home() {
         setCurrentPage(0);
         setHasMorePages(true);
 
-        // API: /posts/feed/marker?lat={lat}&lng={lng}&level={level}&page={page}
-        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed/marker?lat=${cluster.cluster_lat}&lng=${cluster.cluster_long}&level=${cluster.cluster_level}&page=0`;
+        // API: /posts/marker?lat={lat}&lng={lng}&level={level}&page={page}
+        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/marker?lat=${cluster.cluster_lat}&lng=${cluster.cluster_long}&level=${cluster.cluster_level}&page=0`;
 
-        const response = await fetch(endpoint);
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch posts: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const response = await axios.get(endpoint);
 
         // Extract content from wrapped paginated response (data.data.content)
-        const clusterPosts = data.data?.content || data.content || data || [];
+        const clusterPosts =
+          response.data.data?.content ||
+          response.data.content ||
+          response.data ||
+          [];
 
         if (clusterPosts && clusterPosts.length > 0) {
           const processed = await processBlogs(clusterPosts);
@@ -263,6 +255,44 @@ export default function Home() {
     }
   };
 
+  // Refetch cluster posts with updated like status
+  const refetchClusterPosts = async () => {
+    if (!selectedClusterInfo) return;
+
+    try {
+      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/marker?lat=${selectedClusterInfo.lat}&lng=${selectedClusterInfo.lng}&level=${selectedClusterInfo.level}&page=0`;
+
+      const response = await axios.get(endpoint);
+      const clusterPosts =
+        response.data.data?.content ||
+        response.data.content ||
+        response.data ||
+        [];
+
+      if (clusterPosts && clusterPosts.length > 0) {
+        const processed = await processBlogs(clusterPosts);
+        setSelectedClusterPosts(processed);
+      }
+    } catch (error) {
+      console.error("Error refetching cluster posts:", error);
+    }
+  };
+
+  // Refetch cluster posts when coming back from detail page
+  useEffect(() => {
+    const handleRouteChange = () => {
+      // If we have selected cluster and drawer is open, refetch
+      if (selectedClusterInfo && isOpen) {
+        refetchClusterPosts();
+      }
+    };
+
+    router.events?.on("routeChangeComplete", handleRouteChange);
+    return () => {
+      router.events?.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [selectedClusterInfo, isOpen]);
+
   // Load more initial posts (when showing all posts, not from a cluster)
   const loadMoreInitialPosts = async (pageNum: number) => {
     try {
@@ -270,12 +300,8 @@ export default function Home() {
       // Use the same usePostsListQuery hook's endpoint pattern
       const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed?page=${pageNum}`;
 
-      const response = await fetch(endpoint);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch posts: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await axios.get(endpoint);
+      const data = response.data;
       const newPosts = data.data?.content || data.content || data || [];
 
       if (newPosts && newPosts.length > 0) {
@@ -416,6 +442,8 @@ export default function Home() {
                 ogText={post.ogText}
                 nickname={post.nickname}
                 profileImg={post.profileImg}
+                isLiked={post.isLiked}
+                onLoginRequired={() => setIsLoginModalOpen(true)}
               />
             ));
           })()}
@@ -434,6 +462,25 @@ export default function Home() {
             <IoAddCircle size={32} />
           </button>
         )}
+        <Modal
+          open={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
+        >
+          <div className="flex flex-col items-center gap-4 p-6">
+            <h2 className="text-xl font-bold text-white-primary">
+              Login Required
+            </h2>
+            <p className="text-center text-gray-400">
+              Please log in to like posts.
+            </p>
+            <button
+              onClick={() => router.push("/login")}
+              className="rounded-lg bg-white-primary px-6 py-2 text-black-primary transition-all hover:bg-opacity-90"
+            >
+              Go to Login
+            </button>
+          </div>
+        </Modal>
       </div>
     </div>
   );

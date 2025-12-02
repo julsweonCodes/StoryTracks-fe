@@ -1,6 +1,11 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { formatLocalizedDateTime } from "@/utils/format-date";
+import HeartIcon from "@/components/icons/heart";
+import useLikePost from "@/hooks/mutations/use-like-post";
+import { useSession } from "next-auth/react";
+import { useQueryClient } from "react-query";
+import { useState, useEffect } from "react";
 
 interface Props {
   id: number;
@@ -12,6 +17,8 @@ interface Props {
   userId?: number;
   nickname?: string;
   profileImg?: string;
+  isLiked?: boolean;
+  onLoginRequired?: () => void;
 }
 
 export default function Card({
@@ -24,8 +31,30 @@ export default function Card({
   userId,
   nickname,
   profileImg,
+  isLiked = false,
+  onLoginRequired,
 }: Props) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const queryClient = useQueryClient();
+  const [localIsLiked, setLocalIsLiked] = useState(isLiked);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalIsLiked(isLiked);
+  }, [isLiked]);
+
+  const { mutate: toggleLike, isLoading: isLiking } = useLikePost({
+    onSuccess: () => {
+      queryClient.invalidateQueries(["blog-list"]);
+      queryClient.invalidateQueries(["blog-detail", id]);
+    },
+    onError: (error: Error) => {
+      console.error("[Like] Failed to like/unlike post:", error);
+      // Revert optimistic update on error
+      setLocalIsLiked(!localIsLiked);
+    },
+  });
 
   const handleClick = () => {
     router.push({
@@ -35,6 +64,22 @@ export default function Card({
         nickname: nickname,
         profileImg: profileImg,
       },
+    });
+  };
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+
+    if (!session) {
+      onLoginRequired?.();
+      return;
+    }
+
+    // Optimistic update
+    setLocalIsLiked(!localIsLiked);
+    toggleLike({
+      postId: id,
+      isCurrentlyLiked: localIsLiked,
     });
   };
 
@@ -59,10 +104,12 @@ export default function Card({
       </div>
 
       {/* Content - Right Side */}
-      <div className="flex flex-1 flex-col justify-between">
+      <div className="flex flex-1 flex-col justify-between overflow-hidden">
         {/* Title */}
-        <div>
-          <h3 className="text-[16px] font-bold text-white-primary">{title}</h3>
+        <div className="overflow-hidden">
+          <h3 className="truncate text-[16px] font-bold text-white-primary">
+            {title}
+          </h3>
 
           {/* OG Text Preview */}
           {ogText && (
@@ -73,28 +120,42 @@ export default function Card({
         </div>
 
         {/* User Info & Date - Bottom */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             {profileImg && (
               <Image
                 src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${profileImg}`}
                 width={32}
                 height={32}
                 alt={nickname || "user"}
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 flex-shrink-0 rounded-full"
                 style={{
                   objectFit: "cover",
                   objectPosition: "center",
                 }}
               />
             )}
-            <span className="text-[13px] font-medium text-white-primary">
+            <span className="truncate text-[13px] font-medium text-white-primary">
               {nickname || "Anonymous"}
             </span>
           </div>
-          <span className="text-[12px] text-gray-500">
-            {formatLocalizedDateTime(rgstDtm)}
-          </span>
+          <div className="flex flex-shrink-0 items-center gap-3">
+            <span className="text-[12px] text-gray-500">
+              {formatLocalizedDateTime(rgstDtm)}
+            </span>
+            <button
+              onClick={handleLikeClick}
+              disabled={isLiking}
+              className={`transition-all ${
+                localIsLiked
+                  ? "text-red-500 hover:text-red-600"
+                  : "text-gray-400 hover:text-red-500"
+              } disabled:opacity-50`}
+              aria-label={localIsLiked ? "Unlike post" : "Like post"}
+            >
+              <HeartIcon filled={localIsLiked} size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

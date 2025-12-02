@@ -27,6 +27,8 @@ interface BlogDetail {
   userId?: number; // User ID who created the post
   nickname?: string; // User who created the post (use this instead of userNickname)
   profileImg?: string; // Profile image of the user (use this instead of userProfileImg)
+  blogName?: string; // Blog name of the user
+  isLiked?: boolean; // Whether current user has liked this post
   // Fallback fields for compatibility
   userNickname?: string;
   userProfileImg?: string;

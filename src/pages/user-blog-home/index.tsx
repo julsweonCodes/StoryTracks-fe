@@ -2,6 +2,7 @@ import UserBlogCard from "@/components/common/user-blog-card";
 import Header from "@/components/common/header";
 import Map from "@/components/map";
 import Modal from "@/components/common/modal";
+import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Avatar, { AvatarFullConfig, genConfig } from "react-nice-avatar";
@@ -21,6 +22,7 @@ interface ProcessedBlog {
   rgstDtm: string;
   lat?: number;
   lng?: number;
+  isLiked?: boolean;
 }
 
 const formatNumber = (num?: number): string => {
@@ -164,6 +166,8 @@ export default function UserBlogHome() {
     useState<ImageCluster | null>(null);
   const [viewMode, setViewMode] = useState<"all" | "marker">("all"); // Toggle between all posts and marker posts
   const [selectedClusterCity, setSelectedClusterCity] = useState<string>("");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Fetch image clusters from backend
   const {
@@ -243,18 +247,12 @@ export default function UserBlogHome() {
           setConfig(genConfig(session.user.nickname || "User"));
         } else {
           // Fetch profile data from the general profile endpoint
-          const profileResponse = await fetch(
+          const profileResponse = await axios.get(
             `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/profile`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
           );
 
-          if (profileResponse.ok) {
-            const userData = await profileResponse.json();
+          if (profileResponse.status === 200) {
+            const userData = profileResponse.data;
             const user = userData.data;
             setBlogName(user.blogName || "");
             setUserNickname(user.nickname || "");
@@ -284,21 +282,13 @@ export default function UserBlogHome() {
         if (!id) return;
 
         const endpoint = isViewingOwnBlog
-          ? `/user-blog/${id}/my-blog-home`
-          : `/user-blog/${id}/blog-home`;
+          ? `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${id}/my-blog-home`
+          : `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${id}/blog-home`;
 
-        const postsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}${endpoint}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
+        const postsResponse = await axios.get(endpoint);
 
-        if (postsResponse.ok) {
-          const postsData = await postsResponse.json();
+        if (postsResponse.status === 200) {
+          const postsData = postsResponse.data;
 
           // Extract posts from response based on endpoint
           let blogs = [];
@@ -375,6 +365,7 @@ export default function UserBlogHome() {
                 rgstDtm: blog.rgstDtm,
                 lat: thumbLat ? parseFloat(thumbLat) : undefined,
                 lng: thumbLng ? parseFloat(thumbLng) : undefined,
+                isLiked: blog.isLiked,
               };
             }),
           );
@@ -405,6 +396,7 @@ export default function UserBlogHome() {
     session,
     userNumId,
     router.query.id,
+    refetchTrigger,
   ]);
 
   // Update map center to focus on the latest post
@@ -419,6 +411,22 @@ export default function UserBlogHome() {
       }
     }
   }, [userPosts]);
+
+  // Refetch user posts when returning from detail page to update like status
+  useEffect(() => {
+    const handleRouteChange = (url: string) => {
+      // Only refetch if we're on the user-blog-home page (not navigating away)
+      if (url.includes("/user-blog-home")) {
+        // Trigger refetch by incrementing trigger
+        setRefetchTrigger((prev) => prev + 1);
+      }
+    };
+
+    router.events?.on("routeChangeComplete", handleRouteChange);
+    return () => {
+      router.events?.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [router.events]);
 
   // Fetch image markers/clusters once when userId is set
   useEffect(() => {
@@ -611,6 +619,8 @@ export default function UserBlogHome() {
                         rgstDtm={post.rgstDtm}
                         nickname={userNickname}
                         profileImg={profileImg || undefined}
+                        isLiked={post.isLiked}
+                        onLoginRequired={() => setIsLoginModalOpen(true)}
                       />
                     ),
                   )}
@@ -672,6 +682,22 @@ export default function UserBlogHome() {
           </div>
         </div>
       )}
+      <Modal open={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)}>
+        <div className="flex flex-col items-center gap-4 p-6">
+          <h2 className="text-xl font-bold text-white-primary">
+            Login Required
+          </h2>
+          <p className="text-center text-gray-400">
+            Please log in to like posts.
+          </p>
+          <button
+            onClick={() => router.push("/login")}
+            className="rounded-lg bg-white-primary px-6 py-2 text-black-primary transition-all hover:bg-opacity-90"
+          >
+            Go to Login
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
