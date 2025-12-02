@@ -51,8 +51,10 @@ const usePublishBlogPost = (
 
       console.log("[Publish] Blog post created successfully:", response.data);
 
+      // Backend returns: { code: "200", data: 57, message: "Post created", success: true }
+      // The postId is directly in data field as a number
       return {
-        postId: response.data.postId || response.data.data?.postId,
+        postId: response.data.data,
       };
     },
     ...options,
