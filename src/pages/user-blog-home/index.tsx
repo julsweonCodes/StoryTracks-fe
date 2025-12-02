@@ -609,6 +609,8 @@ export default function UserBlogHome() {
                         description={post.des}
                         src={post.src}
                         rgstDtm={post.rgstDtm}
+                        nickname={userNickname}
+                        profileImg={profileImg || undefined}
                       />
                     ),
                   )}

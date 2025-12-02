@@ -8,6 +8,8 @@ interface Props {
   description: string;
   src: string;
   rgstDtm: string;
+  nickname?: string;
+  profileImg?: string;
 }
 
 export default function UserBlogCard({
@@ -16,11 +18,19 @@ export default function UserBlogCard({
   description,
   src,
   rgstDtm,
+  nickname,
+  profileImg,
 }: Props) {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/blog/${id}`);
+    router.push({
+      pathname: `/blog/${id}`,
+      query: {
+        nickname: nickname,
+        profileImg: profileImg,
+      },
+    });
   };
 
   return (

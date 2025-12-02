@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import axios from "axios";
 
 export interface ImageCluster {
   cluster_level: number | null;
@@ -61,53 +62,11 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
         console.log("[useImageClusters] userId:", options.userId);
 
         // Fetch from backend - /image-markers endpoint handles all clustering
-        const response = await fetch(endpoint, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axios.get(endpoint);
 
         console.log("[useImageClusters] Response status:", response.status);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(
-            "[useImageClusters] Response status:",
-            response.status,
-            response.statusText,
-          );
-          console.error("[useImageClusters] Response body:", errorText);
-
-          // Try to parse as JSON to provide better error
-          try {
-            // Remove security prefix ")]}'\n" if present
-            let cleanText = errorText;
-            if (cleanText.startsWith(")]}'\n")) {
-              cleanText = cleanText.substring(5);
-            }
-            const errorJson = JSON.parse(cleanText);
-            throw new Error(
-              `Backend error: ${errorJson.message || errorJson.code}`,
-            );
-          } catch (parseErr) {
-            throw new Error(
-              `Failed to fetch image markers: ${response.status} ${response.statusText}`,
-            );
-          }
-        }
-
-        let responseText = await response.text();
-
-        // Remove security prefix ")]}'\n" if present (common in Google APIs)
-        if (responseText.startsWith(")]}'\n")) {
-          console.log(
-            "[useImageClusters] Removing security prefix from response",
-          );
-          responseText = responseText.substring(5);
-        }
-
-        const data = JSON.parse(responseText);
+        const data = response.data;
         console.log("[useImageClusters] Full response:", data);
 
         // Check if response indicates an error

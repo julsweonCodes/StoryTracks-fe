@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import axios from "axios";
 import { DefaultResponse } from "../utils/fetcher";
 
 interface Image {
@@ -34,10 +35,12 @@ interface BlogDetail {
 const usePostsDetailQuery = (id?: string) => {
   return useQuery<BlogDetail>({
     queryKey: ["blog-detail", id],
-    queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/posts/${id}`)
-        .then((res) => res.json())
-        .then((response: DefaultResponse<BlogDetail>) => response.data),
+    queryFn: async () => {
+      const response = await axios.get<DefaultResponse<BlogDetail>>(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${id}`,
+      );
+      return response.data.data;
+    },
     enabled: !!id,
   });
 };

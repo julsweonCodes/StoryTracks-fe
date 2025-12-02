@@ -5,9 +5,6 @@ import axios from "axios";
  * Automatically attaches JWT token from localStorage to all API requests
  */
 export const setupAxiosInterceptor = () => {
-  // Set default headers
-  axios.defaults.headers.common["Content-Type"] = "application/json";
-
   // Request interceptor: Attach JWT token to all requests
   axios.interceptors.request.use(
     (config) => {
@@ -26,12 +23,17 @@ export const setupAxiosInterceptor = () => {
         console.log("[AXIOS Request] No token found in localStorage");
       }
 
-      // Ensure Content-Type is set for JSON requests
-      if (
-        config.data &&
-        typeof config.data === "object" &&
-        !(config.data instanceof FormData)
-      ) {
+      // Set Content-Type ONLY for non-FormData requests
+      // For FormData, browser will automatically set multipart/form-data with boundary
+      if (config.data instanceof FormData) {
+        // CRITICAL: Delete Content-Type header to let browser set it automatically
+        // Browser will add: Content-Type: multipart/form-data; boundary=...
+        delete config.headers["Content-Type"];
+        console.log(
+          "[AXIOS Request] FormData detected - Content-Type deleted, browser will set multipart/form-data",
+        );
+      } else if (config.data && typeof config.data === "object") {
+        // Set JSON Content-Type for object data
         config.headers["Content-Type"] = "application/json";
       }
 
@@ -42,10 +44,25 @@ export const setupAxiosInterceptor = () => {
           return acc;
         }, {}),
       );
-      console.log(
-        "[AXIOS Request] Data:",
-        JSON.stringify(config.data).substring(0, 200),
-      );
+
+      if (config.data) {
+        if (config.data instanceof FormData) {
+          // Don't try to stringify FormData - it will show as {}
+          console.log(
+            "[AXIOS Request] Data: FormData with",
+            config.data.has("files") ? "files attached" : "unknown entries",
+          );
+        } else {
+          try {
+            const dataStr = JSON.stringify(config.data);
+            console.log("[AXIOS Request] Data:", dataStr.substring(0, 200));
+          } catch (err) {
+            console.log("[AXIOS Request] Data: [Unable to stringify]");
+          }
+        }
+      } else {
+        console.log("[AXIOS Request] Data: No body");
+      }
 
       return config;
     },
