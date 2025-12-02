@@ -18,7 +18,7 @@ export const authOptions: AuthOptions = {
 
         if (!credentials?.userId || !credentials?.password) {
           console.error("[AUTH] Missing userId or password");
-          throw new Error("Invalid credentials");
+          return null;
         }
 
         try {
@@ -27,7 +27,7 @@ export const authOptions: AuthOptions = {
 
           if (!BASE_URL) {
             console.error("[AUTH] BASE_URL not configured");
-            throw new Error("Base URL not configured");
+            return null;
           }
 
           const loginUrl = `${BASE_URL}/users/login`;
@@ -56,24 +56,19 @@ export const authOptions: AuthOptions = {
 
           if (!response.ok) {
             console.error("[AUTH] Login failed with status:", response.status);
-            try {
-              const errorData = JSON.parse(responseText);
-              throw new Error(
-                errorData.data?.message || errorData.message || "Login failed",
-              );
-            } catch (parseError) {
-              throw new Error(`Login failed: ${response.status}`);
-            }
+            return null;
           }
 
           const loginData = JSON.parse(responseText);
           console.log("[AUTH] Login successful, user data:", {
-            id: loginData.data?.id,
-            userId: loginData.data?.userId,
-            email: loginData.data?.email,
+            id: loginData.data?.user?.id,
+            userId: loginData.data?.user?.userId,
+            email: loginData.data?.user?.email,
+            hasToken: !!loginData.data?.token,
           });
 
-          const userData = loginData.data;
+          const userData = loginData.data.user;
+          const token = loginData.data.token;
 
           // Return user object with all necessary fields
           const user = {
@@ -85,6 +80,8 @@ export const authOptions: AuthOptions = {
             blogName: userData.blogName || "",
             birthYmd: userData.birthYmd || "",
             profileImg: userData.profileImg || "",
+            // Include JWT token if returned by backend
+            token: token || "",
           };
 
           console.log("[AUTH] Returning user object:", {
@@ -96,9 +93,7 @@ export const authOptions: AuthOptions = {
           return user;
         } catch (error) {
           console.error("[AUTH] Authorization error:", error);
-          throw new Error(
-            error instanceof Error ? error.message : "Authentication failed",
-          );
+          return null;
         }
       },
     }),
@@ -112,6 +107,11 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user, trigger, session }: any) {
       // Add user data to token on initial login
       if (user) {
+        console.log("[JWT_CALLBACK] User object received:", {
+          id: user.id,
+          userId: user.userId,
+          token: user.token ? "***" : "NO TOKEN",
+        });
         token.id = user.id;
         token.userId = user.userId;
         token.email = user.email;
@@ -120,6 +120,12 @@ export const authOptions: AuthOptions = {
         token.blogName = user.blogName;
         token.birthYmd = user.birthYmd;
         token.profileImg = user.profileImg;
+        // Store JWT token from backend
+        token.jwt = user.token || user.jwt || "";
+        console.log(
+          "[JWT_CALLBACK] Token set in JWT callback:",
+          token.jwt ? "***" : "EMPTY",
+        );
       }
 
       // Update token when session is updated (from client-side update() call)
@@ -143,6 +149,8 @@ export const authOptions: AuthOptions = {
         session.user.birthYmd = token.birthYmd as string;
         session.user.profileImg = token.profileImg as string;
       }
+      // Expose the JWT token in session for API requests
+      session.token = token.jwt || token.access_token || "";
       return session;
     },
   },

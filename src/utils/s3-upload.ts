@@ -3,7 +3,10 @@
  * Handles uploading images to AWS S3 and returns file names
  */
 
+import axios from "axios";
+
 const S3_UPLOAD_ENDPOINT = `${process.env.NEXT_PUBLIC_BASE_URL}/s3/upload/blog-images`;
+const S3_PROFILE_UPLOAD_ENDPOINT = `${process.env.NEXT_PUBLIC_BASE_URL}/s3/upload/profile`;
 
 export interface S3UploadResponse {
   success: boolean;
@@ -41,22 +44,51 @@ export const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
   });
 
   try {
-    const response = await fetch(S3_UPLOAD_ENDPOINT, {
-      method: "POST",
-      body: formData,
-    });
+    const response = await axios.post<S3UploadResponse>(
+      S3_UPLOAD_ENDPOINT,
+      formData,
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to upload images to S3");
-    }
+    console.log("[S3] Upload successful, file names:", response.data.data);
 
-    const data = (await response.json()) as S3UploadResponse;
-    console.log("[S3] Upload successful, file names:", data.data);
-
-    return data.data; // Returns array of S3 file names
+    return response.data.data; // Returns array of S3 file names
   } catch (error) {
     console.error("[S3] Upload failed:", error);
+    throw error;
+  }
+};
+
+/**
+ * Upload profile image to S3
+ * @param file - File object to upload
+ * @returns Promise<string> - S3 file name
+ */
+export const uploadProfileImageToS3 = async (file: File): Promise<string> => {
+  if (!file) {
+    throw new Error("No file provided");
+  }
+
+  console.log("[S3] Uploading profile image to S3...");
+
+  const formData = new FormData();
+  const sanitizedFileName = sanitizeFileName(file.name);
+  const sanitizedFile = new File([file], sanitizedFileName, {
+    type: file.type,
+  });
+  formData.append("file", sanitizedFile);
+
+  try {
+    const response = await axios.post<{ data: string }>(
+      S3_PROFILE_UPLOAD_ENDPOINT,
+      formData,
+    );
+
+    const fileName = response.data.data;
+    console.log("[S3] Profile upload successful, file name:", fileName);
+
+    return fileName;
+  } catch (error) {
+    console.error("[S3] Profile upload failed:", error);
     throw error;
   }
 };

@@ -1,4 +1,5 @@
 import { useMutation, UseMutationOptions } from "react-query";
+import axios from "axios";
 import { ImageInfo } from "@/context/form-context";
 
 interface PublishBlogPostResponse {
@@ -15,7 +16,6 @@ interface ImageMetadata {
 }
 
 interface PublishBlogPostPayload {
-  userId: number; // User ID
   title: string;
   ogText: string; // Original user description
   aiGenText: string; // AI generated content
@@ -25,6 +25,7 @@ interface PublishBlogPostPayload {
 /**
  * Step 1: Upload images to S3
  * Step 2: Create blog post with S3 image references
+ * Uses JWT from Authorization header instead of userId
  */
 const usePublishBlogPost = (
   options: UseMutationOptions<PublishBlogPostResponse, Error, unknown>,
@@ -34,45 +35,24 @@ const usePublishBlogPost = (
     mutationFn: async (payload: PublishBlogPostPayload) => {
       console.log("[Publish] Starting blog post publication...");
       console.log("[Publish] Payload:", JSON.stringify(payload, null, 2));
-      console.log(
-        "[Publish] userId:",
-        payload.userId,
-        "type:",
-        typeof payload.userId,
-      );
 
       // Step 2: Create blog post with S3 image references
       console.log("[Publish] Creating blog post with S3 images...");
 
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/posts/create`,
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: payload.userId,
-            title: payload.title,
-            ogText: payload.ogText,
-            aiGenText: payload.aiGenText,
-            images: payload.images,
-          }),
+          title: payload.title,
+          ogText: payload.ogText,
+          aiGenText: payload.aiGenText,
+          images: payload.images,
         },
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("[Publish] Backend error:", errorData);
-        // Show generic error message to user, don't expose backend details
-        throw new Error("Failed to create blog post. Please try again.");
-      }
-
-      const data = await response.json();
-      console.log("[Publish] Blog post created successfully:", data);
+      console.log("[Publish] Blog post created successfully:", response.data);
 
       return {
-        postId: data.postId || data.data?.postId,
+        postId: response.data.postId || response.data.data?.postId,
       };
     },
     ...options,

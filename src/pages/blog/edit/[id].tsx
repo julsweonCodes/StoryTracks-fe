@@ -379,17 +379,11 @@ function EditPageContent({
         "[EditBlogPost] ✓ Validation passed: Exactly 1 thumbnail found",
       );
 
-      const userId =
-        typeof session.user.id === "string"
-          ? parseInt(session.user.id)
-          : session.user.id;
-
       const aiGenText =
         aiContent && aiContent.length > 0 ? aiContent[0].content : "";
 
       const payload = {
         postId: postId,
-        userId: userId,
         title: title,
         ogText: description,
         aiGenText: aiGenText,

@@ -127,13 +127,8 @@ export default function BlogHeader() {
         });
 
       // Step 3: Call publish mutation to create blog post
-      const userId =
-        typeof session.user.id === "string"
-          ? parseInt(session.user.id)
-          : session.user.id;
-
+      // JWT auth is handled by Authorization header in usePublishBlogPost hook
       publishBlogPost({
-        userId: userId, // Get user ID from session (numeric id, not userId string)
         title: title, // Use page title, not AI generated title
         ogText: description, // Save description as-is with <img>imgFileName</img> tags (original file names only)
         aiGenText: "", // Empty for now (AI content is handled separately)

@@ -186,19 +186,8 @@ export default function GeneratorHeader() {
         });
 
       // Step 4: Call publish mutation
-      const userId =
-        typeof session.user.id === "string"
-          ? parseInt(session.user.id)
-          : session.user.id;
-      console.log(
-        "[GeneratorHeader] Parsed userId:",
-        userId,
-        "type:",
-        typeof userId,
-      );
-
+      // JWT auth is handled by Authorization header in usePublishBlogPost hook
       publishBlogPost({
-        userId: userId,
         title: title,
         ogText: description,
         aiGenText: "",

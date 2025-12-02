@@ -34,9 +34,29 @@ export default function LoginPage() {
 
       if (!result?.ok) {
         console.error("[LOGIN_PAGE] Login failed, error:", result?.error);
-        setError(result?.error || "Login failed");
-        alert("Login Error: " + (result?.error || "Login failed"));
+        const errorMsg =
+          result?.error || "Invalid credentials. Please try again.";
+        setError(errorMsg);
+        alert("Login Error: " + errorMsg);
         return;
+      }
+
+      // Get the session to retrieve the JWT token
+      const { getSession } = await import("next-auth/react");
+      const session = await getSession();
+
+      console.log("[LOGIN_PAGE] Session after signIn:", session);
+      console.log("[LOGIN_PAGE] session.token:", session?.token);
+
+      if (session?.token) {
+        console.log("[LOGIN_PAGE] Storing JWT token in localStorage");
+        localStorage.setItem("token", session.token);
+        console.log(
+          "[LOGIN_PAGE] Token stored in localStorage, value:",
+          localStorage.getItem("token"),
+        );
+      } else {
+        console.warn("[LOGIN_PAGE] No token found in session!");
       }
 
       console.log("[LOGIN_PAGE] Login successful, redirecting to home");
@@ -46,6 +66,7 @@ export default function LoginPage() {
       const errorMessage = "An error occurred during login. Please try again.";
       alert("Login Error: " + errorMessage);
       console.error("[LOGIN_PAGE] Error:", err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

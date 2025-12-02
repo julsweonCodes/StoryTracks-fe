@@ -7,6 +7,8 @@ import {
   QueryClientProvider,
 } from "react-query";
 import { AuthProvider } from "@/providers/auth-provider";
+import { useEffect } from "react";
+import { setupAxiosInterceptor } from "@/lib/axios-config";
 
 if (
   process.env.NODE_ENV === "development" &&
@@ -26,6 +28,11 @@ const queryClientConfig: QueryClientConfig = {
 const queryClient = new QueryClient(queryClientConfig);
 
 export default function App({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    // Setup axios interceptor on app mount
+    setupAxiosInterceptor();
+  }, []);
+
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>

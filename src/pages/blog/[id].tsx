@@ -65,18 +65,10 @@ export default function Detail() {
     try {
       setDeleteError(null);
 
-      // @ts-ignore - session is available from useSession hook
-      if (!session?.user?.id) {
-        setDeleteError("User not authenticated");
-        return;
-      }
-
       console.log("[Delete] Deleting post with ID:", id);
-      console.log("[Delete] User ID:", session.user.id);
 
       deleteBlogPost({
         postId: Number(id),
-        userId: Number(session.user.id),
       });
     } catch (error) {
       console.error("[Delete] Error during deletion:", error);

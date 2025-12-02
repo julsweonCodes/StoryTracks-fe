@@ -1,4 +1,5 @@
 import { useMutation, UseMutationOptions } from "react-query";
+import axios from "axios";
 
 interface UpdateBlogPostResponse {
   postId: number;
@@ -15,7 +16,6 @@ interface ImageMetadata {
 
 interface UpdateBlogPostPayload {
   postId: number; // ID of post to update
-  userId: number; // User ID (for authorization)
   title: string;
   ogText: string; // Original user description
   aiGenText: string; // AI generated content
@@ -25,6 +25,7 @@ interface UpdateBlogPostPayload {
 /**
  * Hook to update an existing blog post
  * Requires user to be the owner of the post
+ * Uses JWT from Authorization header for authentication
  */
 const useUpdateBlogPost = (
   options: UseMutationOptions<UpdateBlogPostResponse, Error, unknown>,
@@ -34,12 +35,6 @@ const useUpdateBlogPost = (
     mutationFn: async (payload: UpdateBlogPostPayload) => {
       console.log("[Update] Starting blog post update...");
       console.log("[Update] Payload:", JSON.stringify(payload, null, 2));
-      console.log(
-        "[Update] userId:",
-        payload.userId,
-        "type:",
-        typeof payload.userId,
-      );
       console.log("[Update] postId:", payload.postId);
 
       // Log thumbnail information
@@ -63,39 +58,43 @@ const useUpdateBlogPost = (
         })),
       );
 
-      // PUT request to update post
+      // PUT request to update post (JWT token automatically added by axios interceptor)
       console.log("[Update] Sending update request to backend...");
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${payload.postId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: payload.userId,
-            title: payload.title,
-            ogText: payload.ogText,
-            aiGenText: payload.aiGenText,
-            images: payload.images,
-          }),
-        },
+      const updateUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${payload.postId}`;
+      const updatePayload = {
+        title: payload.title,
+        ogText: payload.ogText,
+        aiGenText: payload.aiGenText,
+        images: payload.images,
+      };
+
+      console.log("[Update] Request URL:", updateUrl);
+      console.log(
+        "[Update] Request Payload:",
+        JSON.stringify(updatePayload, null, 2),
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("[Update] Backend error:", errorData);
-        // Show generic error message to user, don't expose backend details
-        throw new Error("Failed to update blog post. Please try again.");
+      try {
+        const response = await axios.put(updateUrl, updatePayload);
+
+        console.log("[Update] Blog post updated successfully:", response.data);
+
+        return {
+          postId:
+            response.data.postId ||
+            response.data.data?.postId ||
+            payload.postId,
+        };
+      } catch (error: any) {
+        console.error("[Update] Error details:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+        });
+        throw error;
       }
-
-      const data = await response.json();
-      console.log("[Update] Blog post updated successfully:", data);
-
-      return {
-        postId: data.postId || data.data?.postId || payload.postId,
-      };
     },
     ...options,
   });

@@ -19,11 +19,13 @@ export default function Header() {
   const isLoggedIn = status === "authenticated";
 
   const handleLogout = async () => {
+    // Remove all stored user data
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userId");
     localStorage.removeItem("nickname");
     localStorage.removeItem("userProfileImg");
+    localStorage.removeItem("token"); // Remove JWT token
 
     await signOut({ redirect: false });
     alert("You have successfully logged out from your account");
