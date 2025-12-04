@@ -39,7 +39,9 @@ export interface ProcessedBlog {
   userId?: number;
   nickname?: string;
   profileImg?: string;
+  blogName?: string;
   isLiked?: boolean;
+  isFollowing?: boolean;
 }
 
 interface Blog {
@@ -59,17 +61,20 @@ interface Blog {
   userId?: number;
   nickname?: string;
   profileImg?: string;
+  blogName?: string;
   isLiked?: boolean;
+  isFollowed?: boolean;
 }
 
 const usePostsListQuery = () => {
   return useQuery<Blog[]>({
     queryKey: ["blog-list"],
     queryFn: async () => {
-      const response = await axios.get<PaginatedBlogResponse>(
+      const response = await axios.get<any>(
         `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed`,
       );
-      return response.data.content;
+      // Backend wraps paginated response in { success, code, message, data: { content: [] } }
+      return response.data.data.content;
     },
   });
 };
@@ -108,7 +113,9 @@ const processBlogs = async (blogs?: Blog[]): Promise<ProcessedBlog[]> => {
         userId: blog.userId,
         nickname: blog.nickname,
         profileImg: blog.profileImg,
+        blogName: blog.blogName,
         isLiked: blog.isLiked,
+        isFollowing: blog.isFollowed, // Backend returns isFollowed, map to isFollowing for frontend
       };
     }),
   );

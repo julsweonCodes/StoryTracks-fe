@@ -29,6 +29,7 @@ interface BlogDetail {
   profileImg?: string; // Profile image of the user (use this instead of userProfileImg)
   blogName?: string; // Blog name of the user
   isLiked?: boolean; // Whether current user has liked this post
+  isFollowed?: boolean; // Whether current user is following this post author
   // Fallback fields for compatibility
   userNickname?: string;
   userProfileImg?: string;

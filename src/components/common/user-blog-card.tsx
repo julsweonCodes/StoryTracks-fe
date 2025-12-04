@@ -15,7 +15,9 @@ interface Props {
   rgstDtm: string;
   nickname?: string;
   profileImg?: string;
+  blogName?: string;
   isLiked?: boolean;
+  isFollowing?: boolean;
   onLoginRequired?: () => void;
 }
 
@@ -27,7 +29,9 @@ export default function UserBlogCard({
   rgstDtm,
   nickname,
   profileImg,
+  blogName,
   isLiked = false,
+  isFollowing = false,
   onLoginRequired,
 }: Props) {
   const router = useRouter();
@@ -112,9 +116,25 @@ export default function UserBlogCard({
           </button>
         </div>
         <p className="line-clamp-2 text-[14px] text-[#717375]">{description}</p>
-        <p className="mt-2 text-[12px] text-gray-500">
-          {formatLocalizedDateTime(rgstDtm)}
-        </p>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <p className="text-[12px] text-gray-500">
+            {formatLocalizedDateTime(rgstDtm)}
+          </p>
+          {(blogName || isFollowing) && (
+            <div className="flex items-center gap-2">
+              {blogName && (
+                <span className="truncate text-[11px] text-[#999999]">
+                  {blogName}
+                </span>
+              )}
+              {isFollowing && (
+                <span className="flex-shrink-0 rounded-md bg-gray-700 px-2 py-0.5 text-[10px] text-gray-300">
+                  Following
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

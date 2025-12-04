@@ -440,9 +440,12 @@ export default function Home() {
                 src={post.src}
                 rgstDtm={post.rgstDtm}
                 ogText={post.ogText}
+                userId={post.userId}
                 nickname={post.nickname}
                 profileImg={post.profileImg}
+                blogName={post.blogName}
                 isLiked={post.isLiked}
+                isFollowing={post.isFollowing}
                 onLoginRequired={() => setIsLoginModalOpen(true)}
               />
             ));

@@ -619,7 +619,9 @@ export default function UserBlogHome() {
                         rgstDtm={post.rgstDtm}
                         nickname={userNickname}
                         profileImg={profileImg || undefined}
+                        blogName={post.blogName}
                         isLiked={post.isLiked}
+                        isFollowing={post.isFollowing}
                         onLoginRequired={() => setIsLoginModalOpen(true)}
                       />
                     ),

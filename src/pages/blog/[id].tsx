@@ -9,6 +9,7 @@ import HeartIcon from "@/components/icons/heart";
 import usePostsDetailQuery from "@/hooks/queries/use-posts-detail-query";
 import useDeleteBlogPost from "@/hooks/mutations/use-delete-blog-post";
 import useLikePost from "@/hooks/mutations/use-like-post";
+import useFollowUser from "@/hooks/mutations/use-follow-user";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { replaceImageFileNamesWithS3Urls } from "@/utils/replace-image-urls";
 import { formatLocalizedDateTime } from "@/utils/format-date";
@@ -29,6 +30,7 @@ export default function Detail() {
   const [userNickname, setUserNickname] = useState<string | null>(null);
   const [userProfileImg, setUserProfileImg] = useState<string | null>(null);
   const [isLiked, setIsLiked] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   // Extract query params from router
   const { id, nickname, profileImg } = router.query;
@@ -51,6 +53,19 @@ export default function Detail() {
     },
   });
 
+  // Follow mutation
+  const { mutate: toggleFollow, isLoading: isFollowingLoading } = useFollowUser({
+    onSuccess: () => {
+      // Invalidate and refetch the post detail to get updated follow status
+      queryClient.invalidateQueries(["blog-detail", id]);
+      // Optimistically toggle the UI
+      setIsFollowing(!isFollowing);
+    },
+    onError: (error: Error) => {
+      console.error("[Follow] Failed to follow/unfollow user:", error);
+    },
+  });
+
   // Update user info when query params or API data changes
   useEffect(() => {
     // Use query params first, fallback to API data
@@ -69,6 +84,11 @@ export default function Detail() {
     if (data?.isLiked !== undefined) {
       setIsLiked(data.isLiked);
     }
+
+    // Update isFollowing state from API data
+    if (data?.isFollowed !== undefined) {
+      setIsFollowing(data.isFollowed);
+    }
   }, [nickname, profileImg, data]);
 
   // Handle like button click
@@ -84,6 +104,28 @@ export default function Detail() {
       postId: Number(id),
       isCurrentlyLiked: isLiked,
     });
+  };
+
+  // Handle follow button click
+  const handleFollowClick = () => {
+    // Check if user is logged in
+    if (!session) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    // Don't allow following yourself
+    if (data?.userId && session?.user?.id && Number(session.user.id) === data.userId) {
+      return;
+    }
+
+    // Toggle follow/unfollow
+    if (data?.userId) {
+      toggleFollow({
+        userId: data.userId,
+        isCurrentlyFollowing: isFollowing,
+      });
+    }
   };
 
   const { mutate: deleteBlogPost, isLoading: isDeleting } = useDeleteBlogPost({
@@ -214,6 +256,26 @@ export default function Detail() {
                     </span>
                   )}
                 </div>
+                {/* Follow Button - Only show if not viewing own post */}
+                {(() => {
+                  const isOwnPost =
+                    session?.user?.id &&
+                    data?.userId &&
+                    Number(session.user.id) === data.userId;
+                  return !isOwnPost && session ? (
+                    <button
+                      onClick={handleFollowClick}
+                      disabled={isFollowingLoading}
+                      className={`ml-3 rounded-lg px-4 py-1.5 text-[12px] font-medium transition-all ${
+                        isFollowing
+                          ? "border border-gray-600 bg-transparent text-gray-300 hover:border-gray-500 hover:bg-gray-800"
+                          : "bg-white-primary text-black-primary hover:bg-opacity-90"
+                      } disabled:opacity-50`}
+                    >
+                      {isFollowing ? "Following" : "Follow"}
+                    </button>
+                  ) : null;
+                })()}
               </div>
               <div className="flex items-center gap-3">
                 {/* Like Button */}

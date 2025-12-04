@@ -17,7 +17,9 @@ interface Props {
   userId?: number;
   nickname?: string;
   profileImg?: string;
+  blogName?: string;
   isLiked?: boolean;
+  isFollowing?: boolean;
   onLoginRequired?: () => void;
 }
 
@@ -31,7 +33,9 @@ export default function Card({
   userId,
   nickname,
   profileImg,
+  blogName,
   isLiked = false,
+  isFollowing = false,
   onLoginRequired,
 }: Props) {
   const router = useRouter();
@@ -121,23 +125,37 @@ export default function Card({
 
         {/* User Info & Date - Bottom */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            {profileImg && (
-              <Image
-                src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${profileImg}`}
-                width={32}
-                height={32}
-                alt={nickname || "user"}
-                className="h-8 w-8 flex-shrink-0 rounded-full"
-                style={{
-                  objectFit: "cover",
-                  objectPosition: "center",
-                }}
-              />
-            )}
-            <span className="truncate text-[13px] font-medium text-white-primary">
-              {nickname || "Anonymous"}
-            </span>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              {profileImg && (
+                <Image
+                  src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${profileImg}`}
+                  width={32}
+                  height={32}
+                  alt={nickname || "user"}
+                  className="h-8 w-8 flex-shrink-0 rounded-full"
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "center",
+                  }}
+                />
+              )}
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-[13px] font-medium text-white-primary">
+                  {nickname || "Anonymous"}
+                </span>
+                {blogName && (
+                  <span className="truncate text-[11px] text-[#999999]">
+                    {blogName}
+                  </span>
+                )}
+              </div>
+              {isFollowing && (
+                <span className="ml-2 flex-shrink-0 rounded-md bg-gray-700 px-2 py-0.5 text-[10px] text-gray-300">
+                  Following
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
             <span className="text-[12px] text-gray-500">
