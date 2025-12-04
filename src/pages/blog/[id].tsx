@@ -227,35 +227,44 @@ export default function Detail() {
             <h1 className="text-[32px] font-medium">{data.title}</h1>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {/* Profile Image */}
-                {userProfileImg ? (
-                  <div className="relative h-[40px] w-[40px] overflow-hidden rounded-full bg-[#2a2a2a]">
-                    <Image
-                      src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${userProfileImg}`}
-                      alt={userNickname || "User"}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#333333] text-[#999999]">
-                    👤
-                  </div>
-                )}
-                {/* User Info */}
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-medium tracking-tight text-[#E6E6E6]">
-                    {userNickname || "Anonymous"}
-                  </span>
-                  <span className="text-[12px] tracking-tight text-black-tertiary">
-                    {formatLocalizedDateTime(data.rgstDtm)}
-                  </span>
-                  {data?.blogName && (
-                    <span className="mt-1 text-[11px] tracking-tight text-[#999999]">
-                      {data.blogName}
-                    </span>
+                {/* Profile Image and User Info - Clickable */}
+                <button
+                  onClick={() => {
+                    if (data?.userId) {
+                      router.push(`/user-blog-home?id=${data.userId}`);
+                    }
+                  }}
+                  className="flex items-center gap-3 transition-opacity hover:opacity-80"
+                >
+                  {userProfileImg ? (
+                    <div className="relative h-[40px] w-[40px] overflow-hidden rounded-full bg-[#2a2a2a]">
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${userProfileImg}`}
+                        alt={userNickname || "User"}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#333333] text-[#999999]">
+                      👤
+                    </div>
                   )}
-                </div>
+                  {/* User Info */}
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-medium tracking-tight text-[#E6E6E6]">
+                      {userNickname || "Anonymous"}
+                    </span>
+                    <span className="text-[12px] tracking-tight text-black-tertiary">
+                      {formatLocalizedDateTime(data.rgstDtm)}
+                    </span>
+                    {data?.blogName && (
+                      <span className="mt-1 text-[11px] tracking-tight text-[#999999]">
+                        {data.blogName}
+                      </span>
+                    )}
+                  </div>
+                </button>
                 {/* Follow Button - Only show if not viewing own post */}
                 {(() => {
                   const isOwnPost =

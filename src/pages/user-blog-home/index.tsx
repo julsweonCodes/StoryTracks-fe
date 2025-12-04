@@ -13,6 +13,14 @@ import {
   useImageClusters,
   type ImageCluster,
 } from "@/hooks/queries/use-image-clusters";
+import {
+  useFollowerCount,
+  useFollowingCount,
+  useMyFollowerCount,
+  useMyFollowingCount,
+  useMyFollowers,
+  useMyFollowing,
+} from "@/hooks/queries/use-follow-stats";
 
 interface ProcessedBlog {
   postId: number;
@@ -22,7 +30,22 @@ interface ProcessedBlog {
   rgstDtm: string;
   lat?: number;
   lng?: number;
+  blogName?: string;
   isLiked?: boolean;
+  isFollowing?: boolean;
+}
+
+interface UserResponse {
+  id: number;
+  userId: string;
+  nickname: string;
+  email: string;
+  blogName: string;
+  bio: string;
+  birthYmd: string;
+  profileImg: string;
+  rgstDtm: string;
+  chngDtm: string;
 }
 
 const formatNumber = (num?: number): string => {
@@ -167,6 +190,8 @@ export default function UserBlogHome() {
   const [viewMode, setViewMode] = useState<"all" | "marker">("all"); // Toggle between all posts and marker posts
   const [selectedClusterCity, setSelectedClusterCity] = useState<string>("");
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Fetch image clusters from backend
@@ -178,6 +203,22 @@ export default function UserBlogHome() {
     userId: userNumId || 0,
     enabled: userNumId !== null && userNumId > 0,
   });
+
+  // Fetch follower/following stats
+  const { data: followerCount } = useFollowerCount(
+    !isViewingOwnBlog ? userId : undefined,
+  );
+  const { data: followingCount } = useFollowingCount(
+    !isViewingOwnBlog ? userId : undefined,
+  );
+  const { data: myFollowerCount } = useMyFollowerCount(isViewingOwnBlog);
+  const { data: myFollowingCount } = useMyFollowingCount(isViewingOwnBlog);
+  const { data: myFollowers } = useMyFollowers(
+    isViewingOwnBlog && showFollowersModal,
+  );
+  const { data: myFollowing } = useMyFollowing(
+    isViewingOwnBlog && showFollowingModal,
+  );
 
   // Log when clusters change
   useEffect(() => {
@@ -197,6 +238,7 @@ export default function UserBlogHome() {
     // Fall back to session userId (for viewing own blog from dropdown menu)
     const queryId = router.query.id as string;
     const sessionId = session?.user?.userId || "";
+    const sessionNumericId = session?.user?.id;
     const idToUse = queryId || sessionId;
 
     console.log("[UserBlogHome] Session status:", status);
@@ -219,96 +261,74 @@ export default function UserBlogHome() {
       return;
     }
 
-    const viewing = isLoggedIn && session?.user?.userId === idToUse;
+    // Check if viewing own blog by comparing numeric IDs
+    const viewing = isLoggedIn && sessionNumericId && queryId 
+      ? String(sessionNumericId) === queryId 
+      : isLoggedIn && !queryId; // No query means viewing own blog from menu
+    
     setIsViewingOwnBlog(viewing);
     setUserId(idToUse);
-
-    // If viewing own blog, get numeric ID from session
-    if (viewing && session?.user?.id) {
-      setUserNumId(Number(session.user.id));
-    }
-  }, [router, router.query, session, isLoggedIn, status]);
+  }, [router, router.query, router.query.id, session, isLoggedIn, status]);
 
   // Fetch user blog data and posts from backend
   useEffect(() => {
     if (!userId) return;
+
+    console.log("[UserBlogHome] Fetch Effect Triggered:", {
+      userId,
+      isViewingOwnBlog,
+    });
 
     const fetchUserBlogData = async () => {
       try {
         setBlogLoading(true);
         setLoading(true);
 
-        // If viewing own blog, use session data for profile
+        // Determine which endpoint to use and what ID to use
+        let endpoint: string;
+        let fetchedNumericId: number | null = null;
+
         if (isViewingOwnBlog && isLoggedIn && session?.user) {
+          // For own blog, use session numeric ID
+          fetchedNumericId = Number(session.user.id);
+          endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${fetchedNumericId}/my-blog-home`;
+          
+          // Set profile from session
           setBlogName(session.user.blogName || "");
           setUserNickname(session.user.nickname || "");
           setUserBio(session.user.bio || "");
           setProfileImg(session.user.profileImg || null);
           setConfig(genConfig(session.user.nickname || "User"));
         } else {
-          // Fetch profile data from the general profile endpoint
-          const profileResponse = await axios.get(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/profile`,
-          );
-
-          if (profileResponse.status === 200) {
-            const userData = profileResponse.data;
-            const user = userData.data;
-            setBlogName(user.blogName || "");
-            setUserNickname(user.nickname || "");
-            setUserBio(user.bio || "");
-            setProfileImg(user.profileImg || null);
-            setLastLoginDtm(user.lastLoginDtm);
-            setConfig(genConfig(user.nickname || "User"));
-
-            // Store numeric ID for posts endpoint
-            if (user.id) {
-              setUserNumId(user.id);
-            }
-          }
+          // For other users' blogs, userId from query is the numeric ID
+          fetchedNumericId = Number(userId);
+          endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${fetchedNumericId}/blog-home`;
         }
 
-        setBlogLoading(false);
+        console.log("[UserBlogHome] Fetching from endpoint:", endpoint);
 
-        // Fetch posts using numeric ID
-        const numericId = isViewingOwnBlog ? userNumId : null;
+        const response = await axios.get(endpoint);
 
-        if (!numericId && isViewingOwnBlog) {
-          // Wait for userNumId to be set
-          return;
-        }
+        if (response.status === 200) {
+          const data = response.data.data;
 
-        const id = isViewingOwnBlog ? userNumId : router.query.id;
-        if (!id) return;
-
-        const endpoint = isViewingOwnBlog
-          ? `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${id}/my-blog-home`
-          : `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${id}/blog-home`;
-
-        const postsResponse = await axios.get(endpoint);
-
-        if (postsResponse.status === 200) {
-          const postsData = postsResponse.data;
-
-          // Extract posts from response based on endpoint
-          let blogs = [];
-          if (isViewingOwnBlog) {
-            // MyBlogResponse: { totalPages, currentPage, posts }
-            blogs = postsData.data?.posts || [];
-          } else {
-            // UserBlogHomeResponse: { id, nickname, blogName, bio, profileImg, lastLoginDtm, totalPages, currentPage, posts }
-            blogs = postsData.data?.posts || [];
-
-            // If viewing other's blog, also extract profile info from response
-            if (postsData.data) {
-              setBlogName(postsData.data.blogName || "");
-              setUserNickname(postsData.data.nickname || "");
-              setUserBio(postsData.data.bio || "");
-              setProfileImg(postsData.data.profileImg || null);
-              setLastLoginDtm(postsData.data.lastLoginDtm);
-              setConfig(genConfig(postsData.data.nickname || "User"));
-            }
+          // For other users' blogs, extract profile info from response
+          if (!isViewingOwnBlog && data) {
+            setBlogName(data.blogName || "");
+            setUserNickname(data.nickname || "");
+            setUserBio(data.bio || "");
+            setProfileImg(data.profileImg || null);
+            setLastLoginDtm(data.lastLoginDtm);
+            setConfig(genConfig(data.nickname || "User"));
           }
+
+          // Store numeric ID
+          if (fetchedNumericId) {
+            setUserNumId(fetchedNumericId);
+          }
+
+          // Extract posts from response
+          const blogs = data?.posts || [];
 
           // Process blogs
           const processedBlogs = await Promise.all(
@@ -333,20 +353,7 @@ export default function UserBlogHome() {
                   thumbPath = featuredImage.imgPath || "";
                   thumbLat = featuredImage.geoLat;
                   thumbLng = featuredImage.geoLong;
-
-                  console.log("Blog thumbnail (from blogImgList):", {
-                    postId: blog.postId,
-                    thumbPath,
-                    thumbYn: featuredImage.thumbYn,
-                    hasGeo: !!(thumbLat || thumbLng),
-                  });
                 }
-              } else if (thumbPath) {
-                console.log("Blog thumbnail (from thumbHash):", {
-                  postId: blog.postId,
-                  thumbPath,
-                  hasGeo: !!thumbLat,
-                });
               }
 
               // Ensure thumbPath has posts/ prefix
@@ -380,24 +387,17 @@ export default function UserBlogHome() {
           setUserPosts(sortedPosts);
         }
 
+        setBlogLoading(false);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching user blog data:", err);
-        setLoading(false);
+        console.error("Error fetching user blog:", err);
         setBlogLoading(false);
+        setLoading(false);
       }
     };
 
     fetchUserBlogData();
-  }, [
-    userId,
-    isViewingOwnBlog,
-    isLoggedIn,
-    session,
-    userNumId,
-    router.query.id,
-    refetchTrigger,
-  ]);
+  }, [userId, isViewingOwnBlog, isLoggedIn, session, refetchTrigger]);
 
   // Update map center to focus on the latest post
   useEffect(() => {
@@ -499,6 +499,47 @@ export default function UserBlogHome() {
                     </span>
                     <span>•</span>
                     <span>{getLastActiveTime(lastLoginDtm)}</span>
+                  </div>
+
+                  {/* Follower/Following Counts */}
+                  <div className="mt-2 flex items-center gap-4 text-[13px]">
+                    {isViewingOwnBlog ? (
+                      <>
+                        <button
+                          onClick={() => setShowFollowersModal(true)}
+                          className="transition-colors hover:text-white-primary"
+                        >
+                          <span className="font-semibold text-white-primary">
+                            {formatNumber(myFollowerCount || 0)}
+                          </span>{" "}
+                          <span className="text-gray-400">followers</span>
+                        </button>
+                        <button
+                          onClick={() => setShowFollowingModal(true)}
+                          className="transition-colors hover:text-white-primary"
+                        >
+                          <span className="font-semibold text-white-primary">
+                            {formatNumber(myFollowingCount || 0)}
+                          </span>{" "}
+                          <span className="text-gray-400">following</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <span className="font-semibold text-white-primary">
+                            {formatNumber(followerCount || 0)}
+                          </span>{" "}
+                          <span className="text-gray-400">followers</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-white-primary">
+                            {formatNumber(followingCount || 0)}
+                          </span>{" "}
+                          <span className="text-gray-400">following</span>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Bio */}
@@ -698,6 +739,118 @@ export default function UserBlogHome() {
           >
             Go to Login
           </button>
+        </div>
+      </Modal>
+
+      {/* Followers Modal */}
+      <Modal
+        open={showFollowersModal}
+        onClose={() => setShowFollowersModal(false)}
+      >
+        <div className="flex max-h-[500px] w-full max-w-md flex-col">
+          <div className="border-b border-gray-700 p-4">
+            <h2 className="text-xl font-bold text-white-primary">Followers</h2>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            {!myFollowers || myFollowers.length === 0 ? (
+              <p className="py-8 text-center text-gray-400">
+                No followers yet
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {myFollowers.map((user) => (
+                  <button
+                    key={user.id}
+                    onClick={() => {
+                      setShowFollowersModal(false);
+                      router.push(`/user-blog-home?id=${user.id}`);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-800"
+                  >
+                    <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full bg-gray-700">
+                      {user.profileImg ? (
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${user.profileImg}`}
+                          alt={user.nickname}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-gray-400">
+                          👤
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold text-white-primary">
+                        {user.nickname}
+                      </div>
+                      {user.blogName && (
+                        <div className="text-sm text-gray-400">
+                          {user.blogName}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Following Modal */}
+      <Modal
+        open={showFollowingModal}
+        onClose={() => setShowFollowingModal(false)}
+      >
+        <div className="flex max-h-[500px] w-full max-w-md flex-col">
+          <div className="border-b border-gray-700 p-4">
+            <h2 className="text-xl font-bold text-white-primary">Following</h2>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            {!myFollowing || myFollowing.length === 0 ? (
+              <p className="py-8 text-center text-gray-400">
+                Not following anyone yet
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {myFollowing.map((user) => (
+                  <button
+                    key={user.id}
+                    onClick={() => {
+                      setShowFollowingModal(false);
+                      router.push(`/user-blog-home?id=${user.id}`);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-800"
+                  >
+                    <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full bg-gray-700">
+                      {user.profileImg ? (
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${user.profileImg}`}
+                          alt={user.nickname}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-gray-400">
+                          👤
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold text-white-primary">
+                        {user.nickname}
+                      </div>
+                      {user.blogName && (
+                        <div className="text-sm text-gray-400">
+                          {user.blogName}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </Modal>
     </div>
