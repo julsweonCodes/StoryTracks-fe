@@ -52,12 +52,12 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
         setError(null);
 
         // Format: http://localhost:8080/api/v1/google/user-blog/{userId}/image-markers
-        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/google/user-blog/${options.userId}/image-markers`;
+        const endpoint = `/api/backend/google/user-blog/${options.userId}/image-markers`;
 
         console.log("[useImageClusters] Fetching from:", endpoint);
         console.log(
-          "[useImageClusters] NEXT_PUBLIC_BASE_URL:",
-          process.env.NEXT_PUBLIC_BASE_URL,
+          "[useImageClusters] Using API proxy endpoint:",
+          endpoint,
         );
         console.log("[useImageClusters] userId:", options.userId);
 

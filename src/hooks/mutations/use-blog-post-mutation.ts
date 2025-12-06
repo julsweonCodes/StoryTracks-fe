@@ -60,7 +60,7 @@ const useBlogPostMutation = (
       formData.append("blogPost", jsonBlob);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/blog/save`,
+        `/api/backend/blog/save`,
         {
           method: "POST",
           body: formData,

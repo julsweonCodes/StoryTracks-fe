@@ -3,6 +3,10 @@ import axios from "axios";
 /**
  * Configure axios with global JWT interceptor
  * Automatically attaches JWT token from localStorage to all API requests
+ * 
+ * NOTE: All requests now go through the Next.js API proxy at /api/backend/*
+ * The proxy forwards requests to the backend server (NEXT_PUBLIC_BACKEND_URL)
+ * This eliminates CORS issues and keeps the backend URL server-side only.
  */
 export const setupAxiosInterceptor = () => {
   // Request interceptor: Attach JWT token to all requests

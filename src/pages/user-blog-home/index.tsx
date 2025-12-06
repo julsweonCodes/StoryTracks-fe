@@ -292,7 +292,7 @@ export default function UserBlogHome() {
         if (isViewingOwnBlog && isLoggedIn && session?.user) {
           // For own blog, use session numeric ID
           fetchedNumericId = Number(session.user.id);
-          endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${fetchedNumericId}/my-blog-home`;
+          endpoint = `/api/backend/user-blog/${fetchedNumericId}/my-blog-home`;
 
           // Set profile from session
           setBlogName(session.user.blogName || "");
@@ -303,7 +303,7 @@ export default function UserBlogHome() {
         } else {
           // For other users' blogs, userId from query is the numeric ID
           fetchedNumericId = Number(userId);
-          endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${fetchedNumericId}/blog-home`;
+          endpoint = `/api/backend/user-blog/${fetchedNumericId}/blog-home`;
         }
 
         console.log("[UserBlogHome] Fetching from endpoint:", endpoint);

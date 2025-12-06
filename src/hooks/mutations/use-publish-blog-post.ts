@@ -40,7 +40,7 @@ const usePublishBlogPost = (
       console.log("[Publish] Creating blog post with S3 images...");
 
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/posts/create`,
+        `/api/backend/posts/create`,
         {
           title: payload.title,
           ogText: payload.ogText,

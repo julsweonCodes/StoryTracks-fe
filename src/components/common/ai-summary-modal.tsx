@@ -88,7 +88,7 @@ export default function AISummaryModal({
       console.log("[AISummaryModal] Sending payload:", payload);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/ai/generate`,
+        `/api/backend/ai/generate`,
         {
           method: "POST",
           headers: {

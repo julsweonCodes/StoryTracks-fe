@@ -22,15 +22,15 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-          console.log("[AUTH] BASE_URL:", BASE_URL);
-
-          if (!BASE_URL) {
-            console.error("[AUTH] BASE_URL not configured");
+          // Note: authorize() runs server-side, so we call backend directly
+          // (not through the Next.js proxy which is for client-side calls)
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+          if (!backendUrl) {
+            console.error("[AUTH] NEXT_PUBLIC_BACKEND_URL not configured");
             return null;
           }
 
-          const loginUrl = `${BASE_URL}/users/login`;
+          const loginUrl = `${backendUrl}/users/login`;
           console.log("[AUTH] Making request to:", loginUrl);
 
           const requestBody = {

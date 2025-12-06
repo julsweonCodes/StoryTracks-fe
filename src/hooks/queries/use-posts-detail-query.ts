@@ -40,7 +40,7 @@ const usePostsDetailQuery = (id?: string) => {
     queryKey: ["blog-detail", id],
     queryFn: async () => {
       const response = await axios.get<DefaultResponse<BlogDetail>>(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${id}`,
+        `/api/backend/posts/${id}`,
       );
       return response.data.data;
     },

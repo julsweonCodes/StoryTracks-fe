@@ -31,10 +31,10 @@ const useLikePost = (
       // If not liked, send POST to like
       const response = isCurrentlyLiked
         ? await axios.delete(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${postId}/like`,
+            `/api/backend/posts/${postId}/like`,
           )
         : await axios.post(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${postId}/like`,
+            `/api/backend/posts/${postId}/like`,
           );
 
       console.log(

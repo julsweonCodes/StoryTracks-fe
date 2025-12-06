@@ -25,7 +25,7 @@ const useDeleteBlogPost = (
 
       // DELETE request (JWT token automatically added by axios interceptor)
       const response = await axios.delete(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${payload.postId}`,
+        `/api/backend/posts/${payload.postId}`,
       );
 
       console.log("[Delete] Blog post deleted successfully:", response.data);

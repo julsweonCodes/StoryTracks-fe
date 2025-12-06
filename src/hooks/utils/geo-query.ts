@@ -41,7 +41,7 @@ export const fetchPostsByGeoLocation = async (
     const lngMax = params.lng + gridSize / 2;
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${params.userId}/posts/by-location?` +
+      `/api/backend/user-blog/${params.userId}/posts/by-location?` +
         new URLSearchParams({
           latMin: latMin.toString(),
           latMax: latMax.toString(),
@@ -92,7 +92,7 @@ export const precomputeMarkerCounts = async (
 > => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${userId}/posts/marker-counts?zoomLevel=${zoomLevel}`,
+      `/api/backend/user-blog/${userId}/posts/marker-counts?zoomLevel=${zoomLevel}`,
       {
         method: "GET",
         headers: {

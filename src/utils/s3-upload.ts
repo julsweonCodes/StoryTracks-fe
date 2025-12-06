@@ -5,8 +5,8 @@
 
 import axios from "axios";
 
-const S3_UPLOAD_ENDPOINT = `${process.env.NEXT_PUBLIC_BASE_URL}/s3/upload/blog-images`;
-const S3_PROFILE_UPLOAD_ENDPOINT = `${process.env.NEXT_PUBLIC_BASE_URL}/s3/upload/profile`;
+const S3_UPLOAD_ENDPOINT = `/api/backend/s3/upload/blog-images`;
+const S3_PROFILE_UPLOAD_ENDPOINT = `/api/backend/s3/upload/profile`;
 
 export interface S3UploadResponse {
   success: boolean;

@@ -99,7 +99,7 @@ export default function Home() {
     const fetchClusters = async () => {
       try {
         // Fetch image clusters from backend
-        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/google/clusters`;
+        const endpoint = `/api/backend/google/clusters`;
 
         const response = await fetch(endpoint);
         if (!response.ok) {
@@ -138,7 +138,7 @@ export default function Home() {
   const handleRefreshFeed = async () => {
     try {
       setIsRefreshing(true);
-      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed?page=0`;
+      const endpoint = `/api/backend/posts/feed?page=0`;
       const response = await axios.get(endpoint);
       const data = response.data;
       const newPosts = data.data?.content || data.content || data || [];
@@ -166,7 +166,7 @@ export default function Home() {
   ) => {
     try {
       setIsLoadingMore(true);
-      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/marker?lat=${lat}&lng=${lng}&level=${level}&page=${page}`;
+      const endpoint = `/api/backend/posts/marker?lat=${lat}&lng=${lng}&level=${level}&page=${page}`;
 
       const response = await axios.get(endpoint);
       const data = response.data;
@@ -227,7 +227,7 @@ export default function Home() {
         setHasMorePages(true);
 
         // API: /posts/marker?lat={lat}&lng={lng}&level={level}&page={page}
-        const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/marker?lat=${cluster.cluster_lat}&lng=${cluster.cluster_long}&level=${cluster.cluster_level}&page=0`;
+        const endpoint = `/api/backend/posts/marker?lat=${cluster.cluster_lat}&lng=${cluster.cluster_long}&level=${cluster.cluster_level}&page=0`;
 
         const response = await axios.get(endpoint);
 
@@ -260,7 +260,7 @@ export default function Home() {
     if (!selectedClusterInfo) return;
 
     try {
-      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/marker?lat=${selectedClusterInfo.lat}&lng=${selectedClusterInfo.lng}&level=${selectedClusterInfo.level}&page=0`;
+      const endpoint = `/api/backend/posts/marker?lat=${selectedClusterInfo.lat}&lng=${selectedClusterInfo.lng}&level=${selectedClusterInfo.level}&page=0`;
 
       const response = await axios.get(endpoint);
       const clusterPosts =
@@ -298,7 +298,7 @@ export default function Home() {
     try {
       setIsLoadingInitialPosts(true);
       // Use the same usePostsListQuery hook's endpoint pattern
-      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed?page=${pageNum}`;
+      const endpoint = `/api/backend/posts/feed?page=${pageNum}`;
 
       const response = await axios.get(endpoint);
       const data = response.data;

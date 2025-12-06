@@ -22,7 +22,8 @@ export default async function handler(
     const userId = token.id;
 
     // Fetch fresh user data from backend
-    const backendUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    // Note: This is a server-side API route, so we call backend directly
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backendUrl) {
       return res.status(500).json({ error: "Backend URL not configured" });
     }

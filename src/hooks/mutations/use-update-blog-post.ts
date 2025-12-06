@@ -61,7 +61,7 @@ const useUpdateBlogPost = (
       // PUT request to update post (JWT token automatically added by axios interceptor)
       console.log("[Update] Sending update request to backend...");
 
-      const updateUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/posts/${payload.postId}`;
+      const updateUrl = `/api/backend/posts/${payload.postId}`;
       const updatePayload = {
         title: payload.title,
         ogText: payload.ogText,

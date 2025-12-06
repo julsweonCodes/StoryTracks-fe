@@ -20,7 +20,7 @@ export const useFollowerCount = (userId?: string) => {
     ["follower-count", userId],
     async () => {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/followers/count`,
+        `/api/backend/users/${userId}/followers/count`,
       );
       return response.data.data;
     },
@@ -36,7 +36,7 @@ export const useFollowingCount = (userId?: string) => {
     ["following-count", userId],
     async () => {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/following/count`,
+        `/api/backend/users/${userId}/following/count`,
       );
       return response.data.data;
     },
@@ -52,7 +52,7 @@ export const useMyFollowerCount = (enabled: boolean = false) => {
     ["my-follower-count"],
     async () => {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/followers/count`,
+        `/api/backend/users/followers/count`,
       );
       return response.data.data;
     },
@@ -68,7 +68,7 @@ export const useMyFollowingCount = (enabled: boolean = false) => {
     ["my-following-count"],
     async () => {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/following/count`,
+        `/api/backend/users/following/count`,
       );
       return response.data.data;
     },
@@ -84,7 +84,7 @@ export const useMyFollowers = (enabled: boolean = false) => {
     ["my-followers"],
     async () => {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/followers`,
+        `/api/backend/users/followers`,
       );
       return response.data.data;
     },
@@ -100,7 +100,7 @@ export const useMyFollowing = (enabled: boolean = false) => {
     ["my-following"],
     async () => {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/following`,
+        `/api/backend/users/following`,
       );
       return response.data.data;
     },

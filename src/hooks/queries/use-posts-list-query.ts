@@ -71,7 +71,7 @@ const usePostsListQuery = () => {
     queryKey: ["blog-list"],
     queryFn: async () => {
       const response = await axios.get<any>(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/posts/feed`,
+        `/api/backend/posts/feed`,
       );
       // Backend wraps paginated response in { success, code, message, data: { content: [] } }
       return response.data.data.content;

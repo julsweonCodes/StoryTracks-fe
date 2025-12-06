@@ -112,7 +112,7 @@ export default function ProfilePage() {
         formData.append("file", selectedImageFile);
 
         const uploadResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/s3/upload/profile`,
+          `/api/backend/s3/upload/profile`,
           {
             method: "POST",
             body: formData,
@@ -155,7 +155,7 @@ export default function ProfilePage() {
       const jsonBody = JSON.stringify(requestBody);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${numericId}/profile`,
+        `/api/backend/users/${numericId}/profile`,
         {
           method: "PUT",
           headers: {
@@ -176,7 +176,7 @@ export default function ProfilePage() {
 
       // Fetch fresh user data from backend to ensure we have the latest
       const userResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${numericId}/profile`,
+        `/api/backend/users/${numericId}/profile`,
         {
           method: "GET",
           headers: {

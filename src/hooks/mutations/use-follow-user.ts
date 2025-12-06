@@ -16,7 +16,7 @@ const useFollowUser = (
 ) => {
   return useMutation({
     mutationFn: async ({ userId, isCurrentlyFollowing }: FollowUserParams) => {
-      const endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/follow`;
+      const endpoint = `/api/backend/users/${userId}/follow`;
 
       if (isCurrentlyFollowing) {
         // Unfollow

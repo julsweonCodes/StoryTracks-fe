@@ -201,7 +201,7 @@ export default function SignUpPage() {
       console.log("This is signup Request obj: ", jsonObj);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/register`,
+        `/api/backend/users/register`,
         {
           method: "POST",
           headers: {

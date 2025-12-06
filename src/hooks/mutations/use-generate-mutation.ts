@@ -26,7 +26,7 @@ const useGenerateMutation = (
     mutationKey: "generate",
     mutationFn: async (data: GenerateMutation) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/blog/generate`,
+        `/api/backend/blog/generate`,
         {
           method: "POST",
           headers: {
