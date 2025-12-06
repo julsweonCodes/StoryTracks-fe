@@ -262,10 +262,11 @@ export default function UserBlogHome() {
     }
 
     // Check if viewing own blog by comparing numeric IDs
-    const viewing = isLoggedIn && sessionNumericId && queryId 
-      ? String(sessionNumericId) === queryId 
-      : isLoggedIn && !queryId; // No query means viewing own blog from menu
-    
+    const viewing =
+      isLoggedIn && sessionNumericId && queryId
+        ? String(sessionNumericId) === queryId
+        : isLoggedIn && !queryId; // No query means viewing own blog from menu
+
     setIsViewingOwnBlog(viewing);
     setUserId(idToUse);
   }, [router, router.query, router.query.id, session, isLoggedIn, status]);
@@ -292,7 +293,7 @@ export default function UserBlogHome() {
           // For own blog, use session numeric ID
           fetchedNumericId = Number(session.user.id);
           endpoint = `${process.env.NEXT_PUBLIC_BASE_URL}/user-blog/${fetchedNumericId}/my-blog-home`;
-          
+
           // Set profile from session
           setBlogName(session.user.blogName || "");
           setUserNickname(session.user.nickname || "");
@@ -753,9 +754,7 @@ export default function UserBlogHome() {
           </div>
           <div className="flex-1 overflow-y-auto p-4">
             {!myFollowers || myFollowers.length === 0 ? (
-              <p className="py-8 text-center text-gray-400">
-                No followers yet
-              </p>
+              <p className="py-8 text-center text-gray-400">No followers yet</p>
             ) : (
               <div className="space-y-3">
                 {myFollowers.map((user) => (

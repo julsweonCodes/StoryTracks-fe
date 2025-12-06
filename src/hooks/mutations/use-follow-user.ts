@@ -12,7 +12,7 @@ interface FollowUserParams {
  * DELETE /api/v1/users/{userId}/follow - Unfollow user
  */
 const useFollowUser = (
-  options?: UseMutationOptions<void, Error, FollowUserParams>
+  options?: UseMutationOptions<void, Error, FollowUserParams>,
 ) => {
   return useMutation({
     mutationFn: async ({ userId, isCurrentlyFollowing }: FollowUserParams) => {

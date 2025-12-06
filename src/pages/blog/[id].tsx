@@ -54,17 +54,19 @@ export default function Detail() {
   });
 
   // Follow mutation
-  const { mutate: toggleFollow, isLoading: isFollowingLoading } = useFollowUser({
-    onSuccess: () => {
-      // Invalidate and refetch the post detail to get updated follow status
-      queryClient.invalidateQueries(["blog-detail", id]);
-      // Optimistically toggle the UI
-      setIsFollowing(!isFollowing);
+  const { mutate: toggleFollow, isLoading: isFollowingLoading } = useFollowUser(
+    {
+      onSuccess: () => {
+        // Invalidate and refetch the post detail to get updated follow status
+        queryClient.invalidateQueries(["blog-detail", id]);
+        // Optimistically toggle the UI
+        setIsFollowing(!isFollowing);
+      },
+      onError: (error: Error) => {
+        console.error("[Follow] Failed to follow/unfollow user:", error);
+      },
     },
-    onError: (error: Error) => {
-      console.error("[Follow] Failed to follow/unfollow user:", error);
-    },
-  });
+  );
 
   // Update user info when query params or API data changes
   useEffect(() => {
@@ -115,7 +117,11 @@ export default function Detail() {
     }
 
     // Don't allow following yourself
-    if (data?.userId && session?.user?.id && Number(session.user.id) === data.userId) {
+    if (
+      data?.userId &&
+      session?.user?.id &&
+      Number(session.user.id) === data.userId
+    ) {
       return;
     }
 
