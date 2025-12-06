@@ -23,7 +23,7 @@ const SUPPORTED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
  */
 async function handleRequest(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
   const method = request.method;
 
@@ -45,6 +45,9 @@ async function handleRequest(
         { status: 500 }
       );
     }
+
+    // Await params in Next.js 15+
+    const params = await context.params;
 
     // Build the target URL from the path segments
     // Example: [...path] = ['posts', 'feed'] -> '/posts/feed'
@@ -145,35 +148,35 @@ async function handleRequest(
 // Export handlers for all supported HTTP methods
 export async function GET(
   request: NextRequest,
-  context: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
   return handleRequest(request, context);
 }
 
 export async function POST(
   request: NextRequest,
-  context: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
   return handleRequest(request, context);
 }
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
   return handleRequest(request, context);
 }
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
   return handleRequest(request, context);
 }
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
   return handleRequest(request, context);
 }
