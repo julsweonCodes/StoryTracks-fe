@@ -25,6 +25,9 @@ async function handleRequest(
     }
   });
 
+  // Set Origin header to match allowed CORS origin
+  headers.set("Origin", "https://story-tracks.vercel.app");
+
   const response = await fetch(targetUrl, {
     method: request.method,
     headers,
