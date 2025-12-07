@@ -115,7 +115,7 @@ export default function ProfilePage() {
         const uploadResponse = await fetch(`/api/backend/s3/upload/profile`, {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${session?.token}`,
+            Authorization: `Bearer ${session?.token}`,
           },
           body: formData,
         });

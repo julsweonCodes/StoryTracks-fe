@@ -15,8 +15,8 @@ interface Props {
 }
 
 const MarkerTooltip = ({ position, posts, count, onMarkerClick }: Props) => {
-  // Show up to 4 thumbnails
-  const displayPosts = useMemo(() => posts.slice(0, 4), [posts]);
+  // Show only the first thumbnail
+  const firstPost = useMemo(() => posts[0], [posts]);
 
   return position ? (
     <OverlayViewF
@@ -30,44 +30,21 @@ const MarkerTooltip = ({ position, posts, count, onMarkerClick }: Props) => {
           onMarkerClick?.();
         }}
       >
-        {/* Hover Tooltip - Shows 4 thumbnails */}
-        <div className="absolute bottom-full z-50 mb-2 hidden group-hover:block">
-          <div className="rounded-lg border-2 border-key-primary bg-gray-500 bg-opacity-40 p-4 shadow-lg">
-            {/* Thumbnail Grid - 1:1 ratio for each */}
-            <div className="grid grid-cols-2 gap-3">
-              {displayPosts.map((post, idx) =>
-                // Only render if src is available
-                post.src ? (
-                  <div
-                    key={`thumbnail-${post.postId}-${idx}`}
-                    className="group/thumbnail relative h-16 w-16 flex-shrink-0 overflow-hidden rounded"
-                  >
-                    <img
-                      src={post.src}
-                      alt={post.title}
-                      className="h-full w-full object-cover"
-                      onError={() => {
-                        console.error("Image failed to load:", post.src);
-                      }}
-                    />
-                    <div className="from-black absolute inset-0 flex items-end bg-gradient-to-t to-transparent p-1 opacity-0 transition-opacity group-hover/thumbnail:opacity-100">
-                      <p className="line-clamp-1 text-xs font-semibold text-white-primary">
-                        {post.title}
-                      </p>
-                    </div>
-                  </div>
-                ) : null,
-              )}
+        {/* Hover Tooltip - Shows single 1:1 image */}
+        {firstPost?.src && (
+          <div className="absolute bottom-full z-50 mb-2 hidden group-hover:block">
+            <div className="h-32 w-32 overflow-hidden rounded-lg shadow-lg">
+              <img
+                src={firstPost.src}
+                alt={firstPost.title}
+                className="h-full w-full object-cover"
+                onError={() => {
+                  console.error("Image failed to load:", firstPost.src);
+                }}
+              />
             </div>
-
-            {/* Show more indicator */}
-            {posts.length > 4 && (
-              <p className="mt-3 text-center text-xs text-gray-300">
-                +{posts.length - 4} more
-              </p>
-            )}
           </div>
-        </div>
+        )}
 
         {/* Marker Badge */}
         <div className="flex items-center justify-center gap-1 transition-all">

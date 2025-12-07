@@ -35,7 +35,29 @@ const ClusterMarker = memo(({ cluster, onClusterClick }: Props) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Determine if this cluster is clickable (level 3)
+  const isClickable = cluster.cluster_level === 3;
+
+  // Get color based on cluster level
+  const getClusterColor = () => {
+    if (isLoading) {
+      return isClickable
+        ? "rgba(89, 70, 212, 0.5)" // Purple loading for clickable
+        : "rgba(156, 163, 175, 0.5)"; // Gray loading for non-clickable
+    }
+
+    switch (cluster.cluster_level) {
+      case 3: // Neighborhood-level - Clickable
+        return "rgba(89, 70, 212, 0.9)"; // Purple
+      case 1: // City-level
+      case 2: // District-level
+      default:
+        return "rgba(156, 163, 175, 0.7)"; // Gray
+    }
+  };
+
   const handleClick = () => {
+    if (!isClickable) return; // Prevent clicking on non-level-1 clusters
     setIsLoading(true);
     onClusterClick?.(cluster);
     setTimeout(() => setIsLoading(false), 1000);
@@ -50,21 +72,26 @@ const ClusterMarker = memo(({ cluster, onClusterClick }: Props) => {
     >
       <div
         onClick={handleClick}
-        className="relative flex -translate-x-1/2 -translate-y-1/2 transform cursor-pointer items-center justify-center"
+        className={`relative flex -translate-x-1/2 -translate-y-1/2 transform items-center justify-center transition-transform ${
+          isClickable
+            ? "cursor-pointer hover:scale-110"
+            : "cursor-not-allowed opacity-60"
+        }`}
         style={{
           width: markerSize,
           height: markerSize,
         }}
-        title={`${cluster.image_count} images - Level ${cluster.cluster_level}`}
+        title={`${cluster.image_count} images - Level ${cluster.cluster_level}${isClickable ? " (Click to view)" : " (Not clickable)"}`}
       >
         {/* Circle background */}
         <div
-          className="absolute inset-0 rounded-full border-4 border-white-primary transition-opacity"
+          className="absolute inset-0 rounded-full border-4 border-white-primary transition-all"
           style={{
-            backgroundColor: isLoading
-              ? "rgba(89, 70, 212, 0.5)"
-              : "rgba(89, 70, 212, 0.8)",
-            borderColor: "#FFFFFF",
+            backgroundColor: getClusterColor(),
+            borderColor: isClickable ? "#FFFFFF" : "#CCCCCC",
+            boxShadow: isClickable
+              ? "0 4px 12px rgba(89, 70, 212, 0.4)"
+              : "none",
           }}
         />
 

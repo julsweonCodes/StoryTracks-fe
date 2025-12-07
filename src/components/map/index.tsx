@@ -299,8 +299,8 @@ export default function Map({
         <BiSolidNavigation className="text-black-primary" size={26} />
       </button>
 
-      {/* Always show individual post markers */}
-      {markers.length > 0
+      {/* Individual post markers - only show when NOT using backend clusters */}
+      {!useBackendClusters && markers.length > 0
         ? markers.map((marker, index) => {
             // Skip rendering if no src available
             if (!marker.src) return null;
@@ -325,15 +325,17 @@ export default function Map({
           })
         : null}
 
-      {/* Backend Image Clusters (overlay on top of markers) */}
+      {/* Backend Image Clusters (overlay on top of markers) - Only show level 3 */}
       {useBackendClusters && imageClusters.length > 0
-        ? imageClusters.map((cluster, index) => (
-            <ClusterMarker
-              key={`backend-cluster-${cluster.cluster_lat}-${cluster.cluster_long}-${index}`}
-              cluster={cluster}
-              onClusterClick={onClusterClick}
-            />
-          ))
+        ? imageClusters
+            .filter((cluster) => cluster.cluster_level === 3)
+            .map((cluster, index) => (
+              <ClusterMarker
+                key={`backend-cluster-${cluster.cluster_lat}-${cluster.cluster_long}-${index}`}
+                cluster={cluster}
+                onClusterClick={onClusterClick}
+              />
+            ))
         : null}
 
       {/* Frontend Post Clusters (when not using backend clusters) */}

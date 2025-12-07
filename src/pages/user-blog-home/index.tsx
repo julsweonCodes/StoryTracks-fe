@@ -92,72 +92,64 @@ const mapToLatLng = (blogs: ProcessedBlog[]) => {
   );
 };
 
-// Helper function to estimate city name from coordinates
-// Uses a simple lookup table for common coordinates
-const estimateCityFromCoords = (lat: number, lng: number): string => {
-  // Common coordinate ranges for major cities
-  const cities = [
-    { name: "Seoul", latMin: 37.4, latMax: 37.7, lngMin: 126.7, lngMax: 127.2 },
-    {
-      name: "Vancouver",
-      latMin: 49.2,
-      latMax: 49.35,
-      lngMin: -123.25,
-      lngMax: -123.0,
-    },
-    {
-      name: "Toronto",
-      latMin: 43.6,
-      latMax: 43.85,
-      lngMin: -79.5,
-      lngMax: -79.0,
-    },
-    {
-      name: "New York",
-      latMin: 40.5,
-      latMax: 40.95,
-      lngMin: -74.3,
-      lngMax: -73.7,
-    },
-    {
-      name: "Los Angeles",
-      latMin: 33.8,
-      latMax: 34.35,
-      lngMin: -118.7,
-      lngMax: -117.8,
-    },
-    {
-      name: "San Francisco",
-      latMin: 37.7,
-      latMax: 37.85,
-      lngMin: -122.5,
-      lngMax: -122.3,
-    },
-    { name: "London", latMin: 51.3, latMax: 51.7, lngMin: -0.35, lngMax: 0.05 },
-    { name: "Paris", latMin: 48.8, latMax: 49.0, lngMin: 2.2, lngMax: 2.5 },
-    {
-      name: "Tokyo",
-      latMin: 35.5,
-      latMax: 35.75,
-      lngMin: 139.6,
-      lngMax: 139.9,
-    },
-  ];
+// Helper function to get city name from coordinates using Google Maps Geocoding API
+const getCityFromCoords = async (lat: number, lng: number): Promise<string> => {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.warn("[getCityFromCoords] Google Maps API key not found");
+      return `Area (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+    }
 
-  const matchedCity = cities.find(
-    (city) =>
-      lat >= city.latMin &&
-      lat <= city.latMax &&
-      lng >= city.lngMin &&
-      lng <= city.lngMax,
-  );
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`,
+    );
 
-  if (matchedCity) {
-    return matchedCity.name;
+    if (!response.ok) {
+      throw new Error("Geocoding API request failed");
+    }
+
+    const data = await response.json();
+
+    if (data.status === "OK" && data.results && data.results.length > 0) {
+      // Try to find locality (city) in address components
+      for (const result of data.results) {
+        const cityComponent = result.address_components?.find(
+          (component: any) => component.types.includes("locality"),
+        );
+
+        if (cityComponent) {
+          return cityComponent.long_name;
+        }
+      }
+
+      // Fallback: try sublocality or administrative_area_level_3
+      for (const result of data.results) {
+        const sublocalityComponent = result.address_components?.find(
+          (component: any) =>
+            component.types.includes("sublocality") ||
+            component.types.includes("administrative_area_level_3"),
+        );
+
+        if (sublocalityComponent) {
+          return sublocalityComponent.long_name;
+        }
+      }
+
+      // Last fallback: use formatted_address first part
+      const firstResult = data.results[0];
+      if (firstResult.formatted_address) {
+        const firstPart = firstResult.formatted_address.split(",")[0];
+        return firstPart;
+      }
+    }
+
+    // If geocoding fails, return coordinate-based description
+    return `Area (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+  } catch (error) {
+    console.error("[getCityFromCoords] Error:", error);
+    return `Area (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
   }
-
-  // If no match, return generic area description based on coordinates
-  return `Area (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
 };
 
 export default function UserBlogHome() {
@@ -573,27 +565,224 @@ export default function UserBlogHome() {
                 zoom={9}
                 center={mapCenter}
                 useBackendClusters={true}
-                onClusterClick={(cluster) => {
-                  // Only allow click on city-level clusters (level 1)
-                  if (cluster.cluster_level === 1) {
-                    setSelectedImageCluster(cluster);
-                    setViewMode("marker");
+                onClusterClick={async (cluster) => {
+                  console.log("[UserBlogHome] Cluster clicked:", cluster);
+
+                  // Only allow click on neighborhood-level clusters (level 3)
+                  if (cluster.cluster_level === 3) {
+                    try {
+                      setClusterLoading(true);
+                      setSelectedClusterPosts([]); // Clear previous posts to prevent duplicate keys
+
+                      const lat = Number(cluster.cluster_lat);
+                      const lng = Number(cluster.cluster_long);
+                      const level = cluster.cluster_level;
+
+                      // Determine which API endpoint to call
+                      let apiUrl: string;
+
+                      if (isViewingOwnBlog) {
+                        // Call my-blog endpoint
+                        apiUrl = `/api/backend/user-blog/marker-my?lat=${lat}&lng=${lng}&level=${level}`;
+                      } else {
+                        // Call user/{userId} endpoint
+                        apiUrl = `/api/backend/user-blog/${userNumId}/marker?lat=${lat}&lng=${lng}&level=${level}`;
+                      }
+
+                      console.log("[UserBlogHome] Calling API:", apiUrl);
+                      console.log(
+                        "[UserBlogHome] Auth token:",
+                        session?.token ? "Present" : "Missing",
+                      );
+
+                      const response = await fetch(apiUrl, {
+                        headers: {
+                          Authorization: `Bearer ${session?.token}`,
+                          "Content-Type": "application/json",
+                        },
+                      });
+
+                      console.log(
+                        "[UserBlogHome] Response status:",
+                        response.status,
+                      );
+
+                      if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(
+                          "[UserBlogHome] Response error:",
+                          errorText,
+                        );
+                        throw new Error(
+                          `Failed to fetch posts: ${response.status}`,
+                        );
+                      }
+
+                      const result = await response.json();
+                      console.log("[UserBlogHome] API response:", result);
+                      const fetchedPosts = result.data || [];
+
+                      // Deduplicate posts by postId (backend sometimes returns duplicates)
+                      const uniquePosts = fetchedPosts.filter(
+                        (post: any, index: number, self: any[]) =>
+                          index ===
+                          self.findIndex((p: any) => p.postId === post.postId),
+                      );
+
+                      console.log(
+                        "[UserBlogHome] Posts before dedup:",
+                        fetchedPosts.length,
+                      );
+                      console.log(
+                        "[UserBlogHome] Posts after dedup:",
+                        uniquePosts.length,
+                      );
+
+                      // Process fetched posts to match ProcessedBlog format
+                      const processedPosts: ProcessedBlog[] = await Promise.all(
+                        uniquePosts.map(async (post: any) => {
+                          // Build full S3 URL for thumbnail
+                          let thumbPath = post.thumbHash?.thumbImgPath || "";
+                          if (thumbPath && !thumbPath.startsWith("posts/")) {
+                            thumbPath = "posts/" + thumbPath;
+                          }
+                          const fullSrc = thumbPath
+                            ? `${process.env.NEXT_PUBLIC_S3_BASE_URL}${thumbPath}`
+                            : "";
+
+                          return {
+                            postId: post.postId,
+                            title: post.title,
+                            src: fullSrc,
+                            des: await markdownToPlainText(
+                              post.ogText || post.aiGenText || "",
+                            ),
+                            rgstDtm: post.rgstDtm,
+                            lat: parseFloat(post.thumbHash?.thumbGeoLat || "0"),
+                            lng: parseFloat(
+                              post.thumbHash?.thumbGeoLong || "0",
+                            ),
+                            blogName: post.blogName,
+                            isLiked: post.isLiked,
+                            isFollowing: post.isFollowed,
+                          };
+                        }),
+                      );
+
+                      console.log(
+                        "[UserBlogHome] Processed posts:",
+                        processedPosts.length,
+                      );
+
+                      // Get city name from coordinates using Google Maps Geocoding
+                      const cityName = await getCityFromCoords(lat, lng);
+
+                      // Update state with fetched posts
+                      setSelectedImageCluster(cluster);
+                      setSelectedClusterPosts(processedPosts);
+                      setSelectedClusterCity(cityName);
+                      setViewMode("marker");
+                    } catch (error) {
+                      console.error(
+                        "[UserBlogHome] Error fetching posts by cluster:",
+                        error,
+                      );
+                    } finally {
+                      setClusterLoading(false);
+                    }
+                  } else {
+                    console.log(
+                      "[UserBlogHome] Cluster level is not 3, ignoring click",
+                    );
                   }
                 }}
                 onMarkerClick={async (lat, lng, posts) => {
-                  // Fallback: Use local posts from current userPosts
-                  // This works if all posts are already loaded
-                  const matchedPosts = userPosts.filter((post) =>
-                    posts.some((p: any) => p.postId === post.postId),
-                  );
+                  try {
+                    setClusterLoading(true);
+                    setSelectedClusterPosts([]); // Clear previous posts to prevent duplicate keys
 
-                  // Estimate city name from coordinates
-                  const cityName = estimateCityFromCoords(lat, lng);
+                    // Determine which API endpoint to call
+                    let apiUrl: string;
+                    const clusterLevel = 1; // Using level 1 for marker clicks
 
-                  // Fetch posts in marker area and toggle view
-                  setSelectedClusterPosts(matchedPosts);
-                  setSelectedClusterCity(cityName);
-                  setViewMode("marker");
+                    if (isViewingOwnBlog) {
+                      // Call my-blog endpoint
+                      apiUrl = `/api/backend/user-blog/marker-my?lat=${lat}&lng=${lng}&level=${clusterLevel}`;
+                    } else {
+                      // Call user/{userId} endpoint
+                      apiUrl = `/api/backend/user-blog/${userNumId}/marker?lat=${lat}&lng=${lng}&level=${clusterLevel}`;
+                    }
+
+                    const response = await fetch(apiUrl, {
+                      headers: {
+                        Authorization: `Bearer ${session?.token}`,
+                        "Content-Type": "application/json",
+                      },
+                    });
+
+                    if (!response.ok) {
+                      throw new Error("Failed to fetch posts by marker");
+                    }
+
+                    const result = await response.json();
+                    const fetchedPosts = result.data || [];
+
+                    // Deduplicate posts by postId (backend sometimes returns duplicates)
+                    const uniquePosts = fetchedPosts.filter(
+                      (post: any, index: number, self: any[]) =>
+                        index ===
+                        self.findIndex((p: any) => p.postId === post.postId),
+                    );
+
+                    // Process fetched posts to match ProcessedBlog format
+                    const processedPosts: ProcessedBlog[] = await Promise.all(
+                      uniquePosts.map(async (post: any) => {
+                        // Build full S3 URL for thumbnail
+                        let thumbPath = post.thumbHash?.thumbImgPath || "";
+                        if (thumbPath && !thumbPath.startsWith("posts/")) {
+                          thumbPath = "posts/" + thumbPath;
+                        }
+                        const fullSrc = thumbPath
+                          ? `${process.env.NEXT_PUBLIC_S3_BASE_URL}${thumbPath}`
+                          : "";
+
+                        return {
+                          postId: post.postId,
+                          title: post.title,
+                          src: fullSrc,
+                          des: await markdownToPlainText(
+                            post.ogText || post.aiGenText || "",
+                          ),
+                          rgstDtm: post.rgstDtm,
+                          lat: parseFloat(post.thumbHash?.thumbGeoLat || "0"),
+                          lng: parseFloat(post.thumbHash?.thumbGeoLong || "0"),
+                          blogName: post.blogName,
+                          isLiked: post.isLiked,
+                          isFollowing: post.isFollowed,
+                        };
+                      }),
+                    );
+
+                    // Get city name from coordinates using Google Maps Geocoding
+                    const cityName = await getCityFromCoords(lat, lng);
+
+                    // Update state with fetched posts
+                    setSelectedClusterPosts(processedPosts);
+                    setSelectedClusterCity(cityName);
+                    setViewMode("marker");
+                  } catch (error) {
+                    console.error("Error fetching posts by marker:", error);
+                    // Fallback to local filtering
+                    const matchedPosts = userPosts.filter((post) =>
+                      posts.some((p: any) => p.postId === post.postId),
+                    );
+                    const cityName = await getCityFromCoords(lat, lng);
+                    setSelectedClusterPosts(matchedPosts);
+                    setSelectedClusterCity(cityName);
+                    setViewMode("marker");
+                  } finally {
+                    setClusterLoading(false);
+                  }
                 }}
               />
             </div>
@@ -651,9 +840,9 @@ export default function UserBlogHome() {
               ) : (
                 <div className="grid grid-cols-2 gap-4">
                   {(viewMode === "all" ? userPosts : selectedClusterPosts).map(
-                    (post) => (
+                    (post, index) => (
                       <UserBlogCard
-                        key={post.postId}
+                        key={`${viewMode}-${post.postId}-${index}`}
                         id={post.postId}
                         title={post.title}
                         description={post.des}
@@ -671,58 +860,6 @@ export default function UserBlogHome() {
                 </div>
               )}
             </div>
-
-            {/* Image Cluster Info Overlay - Position fixed over the map */}
-            {selectedImageCluster && viewMode === "marker" && (
-              <div className="pointer-events-none fixed inset-0 z-40 flex items-start justify-end pr-6 pt-24">
-                <div className="pointer-events-auto w-80 rounded-lg bg-black-secondary p-6 shadow-xl">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-white-primary">
-                      Cluster Details
-                    </h3>
-                    <button
-                      onClick={() => {
-                        setSelectedImageCluster(null);
-                        setViewMode("all");
-                        setSelectedClusterPosts([]);
-                      }}
-                      className="text-gray-400 transition-colors hover:text-white-primary"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  {/* Thumbnail */}
-                  {selectedImageCluster.thumb_img_path && (
-                    <div className="relative mb-4 h-32 w-full overflow-hidden rounded-lg">
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_S3_BASE_URL}${selectedImageCluster.thumb_img_path}`}
-                        alt="Cluster thumbnail"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                  {/* Cluster Info */}
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Total Images:</span>
-                      <span className="font-bold text-white-primary">
-                        {selectedImageCluster.image_count}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Coordinates:</span>
-                      <span className="text-xs font-bold text-white-primary">
-                        {selectedImageCluster.cluster_lat.toFixed(4)},
-                        {selectedImageCluster.cluster_long.toFixed(4)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

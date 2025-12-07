@@ -257,7 +257,7 @@ export default function Detail() {
                     </div>
                   )}
                   {/* User Info */}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col items-start">
                     <span className="text-[13px] font-medium tracking-tight text-[#E6E6E6]">
                       {userNickname || "Anonymous"}
                     </span>

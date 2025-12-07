@@ -107,12 +107,13 @@ export default function UploadImage() {
       const fileArray = Array.from(files);
       const validFiles: ImageInfo[] = [];
       const invalidFiles: string[] = [];
+      const unsupportedFormats: string[] = [];
 
       for (const file of fileArray) {
         console.log(file);
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
-        if (!["jpg", "jpeg", "png", "heic"].includes(fileExtension || "")) {
-          invalidFiles.push(file.name);
+        if (!["jpg", "jpeg", "png"].includes(fileExtension || "")) {
+          unsupportedFormats.push(file.name);
           continue;
         }
 
@@ -138,9 +139,19 @@ export default function UploadImage() {
         console.log("file", file);
       }
 
+      if (unsupportedFormats.length > 0) {
+        alert(
+          `The following files are not supported. Only JPEG, JPG, and PNG formats are allowed:\n${unsupportedFormats.join("\n")}`,
+        );
+        if (validFiles.length === 0) {
+          setStatusInfo({ type: undefined });
+          return;
+        }
+      }
+
       if (invalidFiles.length > 0) {
         alert(
-          `The following files were skipped due to invalid format or missing metadata:\n${invalidFiles.join("\n")}`,
+          `The following files were skipped due to missing metadata (date/location):\n${invalidFiles.join("\n")}`,
         );
       }
 
@@ -214,7 +225,7 @@ export default function UploadImage() {
                     id="file-upload"
                     type="file"
                     multiple
-                    accept="jpeg, jpg, png"
+                    accept="image/jpeg,image/jpg,image/png"
                     className="hidden"
                     onChange={handleFileChange}
                   />
@@ -245,15 +256,13 @@ export default function UploadImage() {
           >
             <GallerySendIcon />
             <h6 className="text-[13px] font-semibold">Click to upload</h6>
-            <span className="text-[12px]">
-              SVG, PNG, or JPG (max. 800x400px)
-            </span>
+            <span className="text-[12px]">JPEG, JPG, or PNG only</span>
           </label>
           <input
             id="file-upload"
             type="file"
             multiple
-            accept="image/*, .heic"
+            accept="image/jpeg,image/jpg,image/png"
             className="hidden"
             onChange={handleFileChange}
           />
