@@ -7,14 +7,14 @@ const BACKEND_URL = process.env.BACKEND_URL;
 
 async function handleRequest(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   try {
     if (!BACKEND_URL) {
       console.error("[Proxy] BACKEND_URL not configured");
       return NextResponse.json(
         { error: "Backend URL not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -36,7 +36,10 @@ async function handleRequest(
     headers.set("Origin", "https://story-tracks.vercel.app");
 
     console.log(`[Proxy] Forwarding to backend...`);
-    console.log(`[Proxy] Request headers:`, Object.fromEntries(headers.entries()));
+    console.log(
+      `[Proxy] Request headers:`,
+      Object.fromEntries(headers.entries()),
+    );
 
     const response = await fetch(targetUrl, {
       method: request.method,
@@ -46,8 +49,11 @@ async function handleRequest(
     } as RequestInit);
 
     console.log(`[Proxy] Backend responded: ${response.status}`);
-    console.log(`[Proxy] Response headers:`, Object.fromEntries(response.headers.entries()));
-    
+    console.log(
+      `[Proxy] Response headers:`,
+      Object.fromEntries(response.headers.entries()),
+    );
+
     // Log response body for debugging (only for errors)
     if (response.status >= 400) {
       const clonedResponse = response.clone();
@@ -72,42 +78,42 @@ async function handleRequest(
         error: "Proxy error",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return handleRequest(request, context);
 }
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return handleRequest(request, context);
 }
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return handleRequest(request, context);
 }
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return handleRequest(request, context);
 }
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return handleRequest(request, context);
 }

@@ -10,12 +10,6 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any) {
-        console.log("[AUTH] authorize() called");
-        console.log("[AUTH] credentials received:", {
-          userId: credentials?.userId,
-          hasPassword: !!credentials?.password,
-        });
-
         if (!credentials?.userId || !credentials?.password) {
           console.error("[AUTH] Missing userId or password");
           return null;
@@ -24,23 +18,18 @@ export const authOptions: AuthOptions = {
         try {
           // Note: authorize() runs server-side, so we call backend directly
           // (not through the Next.js proxy which is for client-side calls)
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+          const backendUrl = process.env.BACKEND_URL;
           if (!backendUrl) {
-            console.error("[AUTH] NEXT_PUBLIC_BACKEND_URL not configured");
+            console.error("[AUTH] BACKEND_URL not configured");
             return null;
           }
 
           const loginUrl = `${backendUrl}/users/login`;
-          console.log("[AUTH] Making request to:", loginUrl);
 
           const requestBody = {
             userId: credentials.userId,
             pwd: credentials.password,
           };
-          console.log("[AUTH] Request body:", {
-            userId: credentials.userId,
-            pwd: "***",
-          });
 
           const response = await fetch(loginUrl, {
             method: "POST",
@@ -50,22 +39,12 @@ export const authOptions: AuthOptions = {
             body: JSON.stringify(requestBody),
           });
 
-          console.log("[AUTH] Response status:", response.status);
-          const responseText = await response.text();
-          console.log("[AUTH] Response body:", responseText);
-
           if (!response.ok) {
             console.error("[AUTH] Login failed with status:", response.status);
             return null;
           }
 
-          const loginData = JSON.parse(responseText);
-          console.log("[AUTH] Login successful, user data:", {
-            id: loginData.data?.user?.id,
-            userId: loginData.data?.user?.userId,
-            email: loginData.data?.user?.email,
-            hasToken: !!loginData.data?.token,
-          });
+          const loginData = await response.json();
 
           const userData = loginData.data.user;
           const token = loginData.data.token;
@@ -84,12 +63,6 @@ export const authOptions: AuthOptions = {
             token: token || "",
           };
 
-          console.log("[AUTH] Returning user object:", {
-            id: user.id,
-            userId: user.userId,
-            email: user.email,
-          });
-
           return user;
         } catch (error) {
           console.error("[AUTH] Authorization error:", error);
@@ -107,11 +80,6 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user, trigger, session }: any) {
       // Add user data to token on initial login
       if (user) {
-        console.log("[JWT_CALLBACK] User object received:", {
-          id: user.id,
-          userId: user.userId,
-          token: user.token ? "***" : "NO TOKEN",
-        });
         token.id = user.id;
         token.userId = user.userId;
         token.email = user.email;
@@ -122,10 +90,6 @@ export const authOptions: AuthOptions = {
         token.profileImg = user.profileImg;
         // Store JWT token from backend
         token.jwt = user.token || user.jwt || "";
-        console.log(
-          "[JWT_CALLBACK] Token set in JWT callback:",
-          token.jwt ? "***" : "EMPTY",
-        );
       }
 
       // Update token when session is updated (from client-side update() call)
