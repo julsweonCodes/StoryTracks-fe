@@ -114,6 +114,9 @@ export default function ProfilePage() {
         // Use proxy endpoint to avoid HTTPS mixed content errors
         const uploadResponse = await fetch(`/api/backend/s3/upload/profile`, {
           method: "POST",
+          headers: {
+            "Authorization": `Bearer ${session?.token}`,
+          },
           body: formData,
         });
 
