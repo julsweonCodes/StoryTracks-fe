@@ -112,13 +112,10 @@ export default function ProfilePage() {
         formData.append("file", selectedImageFile);
 
         // Use proxy endpoint to avoid HTTPS mixed content errors
-        const uploadResponse = await fetch(
-          `/api/backend/s3/upload/profile`,
-          {
-            method: "POST",
-            body: formData,
-          },
-        );
+        const uploadResponse = await fetch(`/api/backend/s3/upload/profile`, {
+          method: "POST",
+          body: formData,
+        });
 
         if (!uploadResponse.ok) {
           const errorData = await uploadResponse.json();
@@ -155,16 +152,14 @@ export default function ProfilePage() {
 
       const jsonBody = JSON.stringify(requestBody);
 
-      const response = await fetch(
-        `/api/backend/users/${numericId}/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: jsonBody,
+      const response = await fetch(`/api/backend/users/${numericId}/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.token}`,
         },
-      );
+        body: jsonBody,
+      });
 
       const responseData = await response.json();
 
@@ -182,6 +177,7 @@ export default function ProfilePage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.token}`,
           },
         },
       );
