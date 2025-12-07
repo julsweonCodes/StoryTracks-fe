@@ -36,6 +36,7 @@ async function handleRequest(
     headers.set("Origin", "https://story-tracks.vercel.app");
 
     console.log(`[Proxy] Forwarding to backend...`);
+    console.log(`[Proxy] Request headers:`, Object.fromEntries(headers.entries()));
 
     const response = await fetch(targetUrl, {
       method: request.method,
@@ -45,6 +46,14 @@ async function handleRequest(
     } as RequestInit);
 
     console.log(`[Proxy] Backend responded: ${response.status}`);
+    console.log(`[Proxy] Response headers:`, Object.fromEntries(response.headers.entries()));
+    
+    // Log response body for debugging (only for errors)
+    if (response.status >= 400) {
+      const clonedResponse = response.clone();
+      const text = await clonedResponse.text();
+      console.log(`[Proxy] Error response body:`, text.substring(0, 500));
+    }
 
     const responseHeaders = new Headers();
     response.headers.forEach((value, key) => {
