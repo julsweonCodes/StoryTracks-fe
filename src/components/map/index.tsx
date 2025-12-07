@@ -50,6 +50,7 @@ interface Props {
   onClusterLevelChange?: (level: 1 | 2 | 3) => void;
   useBackendClusters?: boolean;
   mapRef?: React.MutableRefObject<google.maps.Map | null>;
+  filterLevel3Only?: boolean; // Only show level 3 clusters (for user-blog pages)
 }
 
 export default function Map({
@@ -65,6 +66,7 @@ export default function Map({
   onClusterLevelChange,
   useBackendClusters = false,
   mapRef: externalMapRef,
+  filterLevel3Only = false,
 }: Props) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -325,17 +327,19 @@ export default function Map({
           })
         : null}
 
-      {/* Backend Image Clusters (overlay on top of markers) - Only show level 3 */}
+      {/* Backend Image Clusters (overlay on top of markers) - Only show level 3 if filterLevel3Only is true */}
       {useBackendClusters && imageClusters.length > 0
-        ? imageClusters
-            .filter((cluster) => cluster.cluster_level === 3)
-            .map((cluster, index) => (
-              <ClusterMarker
-                key={`backend-cluster-${cluster.cluster_lat}-${cluster.cluster_long}-${index}`}
-                cluster={cluster}
-                onClusterClick={onClusterClick}
-              />
-            ))
+        ? (filterLevel3Only 
+            ? imageClusters.filter((cluster) => cluster.cluster_level === 3)
+            : imageClusters
+          ).map((cluster, index) => (
+            <ClusterMarker
+              key={`backend-cluster-${cluster.cluster_lat}-${cluster.cluster_long}-${index}`}
+              cluster={cluster}
+              onClusterClick={onClusterClick}
+              onlyLevel3Clickable={filterLevel3Only}
+            />
+          ))
         : null}
 
       {/* Frontend Post Clusters (when not using backend clusters) */}

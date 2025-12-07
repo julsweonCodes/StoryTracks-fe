@@ -5,6 +5,7 @@ import { ImageCluster } from "@/hooks/queries/use-image-clusters";
 interface Props {
   cluster: ImageCluster;
   onClusterClick?: (cluster: ImageCluster) => void;
+  onlyLevel3Clickable?: boolean; // If true, only level 3 is clickable (for user-blog)
 }
 
 /**
@@ -19,7 +20,7 @@ const calculateMarkerSize = (imageCount: number): number => {
   return Math.min(baseSize + scaleFactor, maxSize);
 };
 
-const ClusterMarker = memo(({ cluster, onClusterClick }: Props) => {
+const ClusterMarker = memo(({ cluster, onClusterClick, onlyLevel3Clickable = false }: Props) => {
   // Validate coordinates
   const lat = Number(cluster.cluster_lat);
   const lng = Number(cluster.cluster_long);
@@ -35,8 +36,10 @@ const ClusterMarker = memo(({ cluster, onClusterClick }: Props) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // Determine if this cluster is clickable (level 3)
-  const isClickable = cluster.cluster_level === 3;
+  // Determine if this cluster is clickable
+  // If onlyLevel3Clickable is true, only level 3 is clickable (user-blog)
+  // Otherwise, all levels are clickable (main feed)
+  const isClickable = onlyLevel3Clickable ? cluster.cluster_level === 3 : true;
 
   // Get color based on cluster level
   const getClusterColor = () => {

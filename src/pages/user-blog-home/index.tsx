@@ -565,6 +565,7 @@ export default function UserBlogHome() {
                 zoom={9}
                 center={mapCenter}
                 useBackendClusters={true}
+                filterLevel3Only={true}
                 onClusterClick={async (cluster) => {
                   console.log("[UserBlogHome] Cluster clicked:", cluster);
 
