@@ -111,8 +111,10 @@ export default function ProfilePage() {
         const formData = new FormData();
         formData.append("file", selectedImageFile);
 
+        // Use direct backend URL for large file uploads (bypasses proxy)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
         const uploadResponse = await fetch(
-          `/api/backend/s3/upload/profile`,
+          `${backendUrl}/s3/upload/profile`,
           {
             method: "POST",
             body: formData,
