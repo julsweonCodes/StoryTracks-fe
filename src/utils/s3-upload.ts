@@ -2,18 +2,15 @@
  * S3 Image Upload Service
  * Handles uploading images to AWS S3 and returns file names
  * 
- * NOTE: S3 uploads use direct backend URLs (not proxy) because:
- * 1. File uploads can be very large (up to 20MB)
- * 2. Vercel has body size limits for serverless functions
- * 3. Direct upload is more efficient for large files
+ * NOTE: Uses Next.js API proxy to avoid HTTPS mixed content errors.
+ * Vercel (HTTPS) → Next.js proxy → EC2 backend (HTTP)
  */
 
 import axios from "axios";
 
-// Use direct backend URL for S3 uploads (bypassing proxy)
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-const S3_UPLOAD_ENDPOINT = `${BACKEND_URL}/s3/upload/blog-images`;
-const S3_PROFILE_UPLOAD_ENDPOINT = `${BACKEND_URL}/s3/upload/profile`;
+// Use proxy endpoints for S3 uploads
+const S3_UPLOAD_ENDPOINT = `/api/backend/s3/upload/blog-images`;
+const S3_PROFILE_UPLOAD_ENDPOINT = `/api/backend/s3/upload/profile`;
 
 export interface S3UploadResponse {
   success: boolean;
