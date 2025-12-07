@@ -35,9 +35,11 @@ export default function LoginPage() {
       if (!result?.ok) {
         console.error("[LOGIN_PAGE] Login failed, error:", result?.error);
         const errorMsg =
-          result?.error || "Invalid credentials. Please try again.";
+          result?.error === "CredentialsSignin"
+            ? "Invalid User ID or password"
+            : result?.error || "Login failed. Please try again.";
         setError(errorMsg);
-        alert("Login Error: " + errorMsg);
+        alert(errorMsg);
         return;
       }
 

@@ -11,8 +11,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials: any) {
         if (!credentials?.userId || !credentials?.password) {
-          console.error("[AUTH] Missing userId or password");
-          return null;
+          throw new Error("Please enter both User ID and password");
         }
 
         try {
@@ -20,8 +19,7 @@ export const authOptions: AuthOptions = {
           // (not through the Next.js proxy which is for client-side calls)
           const backendUrl = process.env.BACKEND_URL;
           if (!backendUrl) {
-            console.error("[AUTH] BACKEND_URL not configured");
-            return null;
+            throw new Error("Server configuration error");
           }
 
           const loginUrl = `${backendUrl}/users/login`;
@@ -40,8 +38,12 @@ export const authOptions: AuthOptions = {
           });
 
           if (!response.ok) {
-            console.error("[AUTH] Login failed with status:", response.status);
-            return null;
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage =
+              errorData.message ||
+              errorData.data?.message ||
+              "Invalid credentials";
+            throw new Error(errorMessage);
           }
 
           const loginData = await response.json();
@@ -66,7 +68,7 @@ export const authOptions: AuthOptions = {
           return user;
         } catch (error) {
           console.error("[AUTH] Authorization error:", error);
-          return null;
+          throw error;
         }
       },
     }),
