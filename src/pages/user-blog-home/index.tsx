@@ -233,22 +233,12 @@ export default function UserBlogHome() {
     const sessionNumericId = session?.user?.id;
     const idToUse = queryId || sessionId;
 
-    console.log("[UserBlogHome] Session status:", status);
-    console.log("[UserBlogHome] Session data:", {
-      userId: session?.user?.userId,
-      id: session?.user?.id,
-    });
-    console.log("[UserBlogHome] Query ID:", queryId);
-    console.log("[UserBlogHome] idToUse:", idToUse);
-
     // Don't redirect if status is still loading
     if (status === "loading") {
-      console.log("[UserBlogHome] Session still loading, waiting...");
       return;
     }
 
     if (!idToUse) {
-      console.log("[UserBlogHome] No user ID found, redirecting to login");
       router.push("/login");
       return;
     }
@@ -266,11 +256,6 @@ export default function UserBlogHome() {
   // Fetch user blog data and posts from backend
   useEffect(() => {
     if (!userId) return;
-
-    console.log("[UserBlogHome] Fetch Effect Triggered:", {
-      userId,
-      isViewingOwnBlog,
-    });
 
     const fetchUserBlogData = async () => {
       try {
@@ -297,8 +282,6 @@ export default function UserBlogHome() {
           fetchedNumericId = Number(userId);
           endpoint = `/api/backend/user-blog/${fetchedNumericId}/blog-home`;
         }
-
-        console.log("[UserBlogHome] Fetching from endpoint:", endpoint);
 
         const response = await axios.get(endpoint);
 
@@ -423,20 +406,7 @@ export default function UserBlogHome() {
 
   // Fetch image markers/clusters once when userId is set
   useEffect(() => {
-    console.log(
-      "%c[UserBlogHome] Image Markers Fetch",
-      "background: #9C27B0; color: white; padding: 5px 10px; border-radius: 3px;",
-      {
-        userNumId,
-        will_fetch: !!(userNumId && userNumId > 0),
-      },
-    );
-
     if (userNumId && userNumId > 0) {
-      console.log(
-        `%c[UserBlogHome] Calling fetchClusters()`,
-        "background: #673AB7; color: white; padding: 3px 8px; border-radius: 3px;",
-      );
       fetchClusters();
     }
   }, [userNumId, fetchClusters]);
@@ -591,10 +561,6 @@ export default function UserBlogHome() {
                       }
 
                       console.log("[UserBlogHome] Calling API:", apiUrl);
-                      console.log(
-                        "[UserBlogHome] Auth token:",
-                        session?.token ? "Present" : "Missing",
-                      );
 
                       const response = await fetch(apiUrl, {
                         headers: {
@@ -602,11 +568,6 @@ export default function UserBlogHome() {
                           "Content-Type": "application/json",
                         },
                       });
-
-                      console.log(
-                        "[UserBlogHome] Response status:",
-                        response.status,
-                      );
 
                       if (!response.ok) {
                         const errorText = await response.text();
@@ -628,15 +589,6 @@ export default function UserBlogHome() {
                         (post: any, index: number, self: any[]) =>
                           index ===
                           self.findIndex((p: any) => p.postId === post.postId),
-                      );
-
-                      console.log(
-                        "[UserBlogHome] Posts before dedup:",
-                        fetchedPosts.length,
-                      );
-                      console.log(
-                        "[UserBlogHome] Posts after dedup:",
-                        uniquePosts.length,
                       );
 
                       // Process fetched posts to match ProcessedBlog format
@@ -670,11 +622,6 @@ export default function UserBlogHome() {
                         }),
                       );
 
-                      console.log(
-                        "[UserBlogHome] Processed posts:",
-                        processedPosts.length,
-                      );
-
                       // Get city name from coordinates using Google Maps Geocoding
                       const cityName = await getCityFromCoords(lat, lng);
 
@@ -691,10 +638,6 @@ export default function UserBlogHome() {
                     } finally {
                       setClusterLoading(false);
                     }
-                  } else {
-                    console.log(
-                      "[UserBlogHome] Cluster level is not 3, ignoring click",
-                    );
                   }
                 }}
                 onMarkerClick={async (lat, lng, posts) => {

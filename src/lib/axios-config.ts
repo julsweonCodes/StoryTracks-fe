@@ -16,10 +16,6 @@ export const setupAxiosInterceptor = () => {
       const token =
         typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-      console.log("[AXIOS Request] URL:", config.url);
-      console.log("[AXIOS Request] Method:", config.method);
-      console.log("[AXIOS Request] Token available:", !!token);
-
       if (token) {
         console.log("[AXIOS Request] Attaching JWT token");
         config.headers.Authorization = `Bearer ${token}`;
@@ -33,39 +29,9 @@ export const setupAxiosInterceptor = () => {
         // CRITICAL: Delete Content-Type header to let browser set it automatically
         // Browser will add: Content-Type: multipart/form-data; boundary=...
         delete config.headers["Content-Type"];
-        console.log(
-          "[AXIOS Request] FormData detected - Content-Type deleted, browser will set multipart/form-data",
-        );
       } else if (config.data && typeof config.data === "object") {
         // Set JSON Content-Type for object data
         config.headers["Content-Type"] = "application/json";
-      }
-
-      console.log(
-        "[AXIOS Request] Headers:",
-        Object.keys(config.headers).reduce((acc: any, key) => {
-          acc[key] = config.headers[key];
-          return acc;
-        }, {}),
-      );
-
-      if (config.data) {
-        if (config.data instanceof FormData) {
-          // Don't try to stringify FormData - it will show as {}
-          console.log(
-            "[AXIOS Request] Data: FormData with",
-            config.data.has("files") ? "files attached" : "unknown entries",
-          );
-        } else {
-          try {
-            const dataStr = JSON.stringify(config.data);
-            console.log("[AXIOS Request] Data:", dataStr.substring(0, 200));
-          } catch (err) {
-            console.log("[AXIOS Request] Data: [Unable to stringify]");
-          }
-        }
-      } else {
-        console.log("[AXIOS Request] Data: No body");
       }
 
       return config;

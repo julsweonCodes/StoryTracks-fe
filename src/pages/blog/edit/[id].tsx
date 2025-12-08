@@ -174,7 +174,6 @@ function EditPageContent({
   // Listen for save event from GeneratorHeader (edit mode)
   useEffect(() => {
     const handleSaveEvent = () => {
-      console.log("[EditPageContent] Save event received");
       setSaveRequested(true);
     };
 
@@ -299,7 +298,6 @@ function EditPageContent({
 
       // Upload new images
       if (newImages.length > 0) {
-        console.log("[EditBlogPost] Uploading new images...");
         const s3Paths = await uploadImagesToS3(
           newImages.map((img) => img.file!),
         );
@@ -347,14 +345,6 @@ function EditPageContent({
             thumbYn: thumbYn,
           };
 
-          // Log thumbnail status changes
-          console.log(
-            `[EditBlogPost] Image: ${imageData.imgFileName}`,
-            `| Original thumbYn: ${img.thumbYn}`,
-            `| Checkbox Active: ${img.active}`,
-            `| New thumbYn: ${imageData.thumbYn}`,
-          );
-
           return imageData;
         }),
         ...uploadedImages,
@@ -389,20 +379,6 @@ function EditPageContent({
         aiGenText: aiGenText,
         images: finalImages,
       };
-
-      console.log(
-        "[EditBlogPost] Payload to send:",
-        JSON.stringify(payload, null, 2),
-      );
-      console.log("[EditBlogPost] Images count:", finalImages.length);
-      console.log("[EditBlogPost] Thumbnail validation:", {
-        total: finalImages.length,
-        featured: thumbnailCount,
-        images: finalImages.map((img) => ({
-          fileName: img.imgFileName,
-          thumbYn: img.thumbYn,
-        })),
-      });
 
       updateBlogPost(payload);
     } catch (error) {

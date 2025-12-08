@@ -23,8 +23,6 @@ async function handleRequest(
     const searchParams = request.nextUrl.searchParams.toString();
     const targetUrl = `${BACKEND_URL}/${pathString}${searchParams ? `?${searchParams}` : ""}`;
 
-    console.log(`[Proxy] ${request.method} ${targetUrl}`);
-
     const headers = new Headers();
     request.headers.forEach((value, key) => {
       if (key.toLowerCase() !== "host") {
@@ -35,24 +33,12 @@ async function handleRequest(
     // Set Origin header to match allowed CORS origin
     headers.set("Origin", "https://story-tracks.vercel.app");
 
-    console.log(`[Proxy] Forwarding to backend...`);
-    console.log(
-      `[Proxy] Request headers:`,
-      Object.fromEntries(headers.entries()),
-    );
-
     const response = await fetch(targetUrl, {
       method: request.method,
       headers,
       body: request.body,
       duplex: "half",
     } as RequestInit);
-
-    console.log(`[Proxy] Backend responded: ${response.status}`);
-    console.log(
-      `[Proxy] Response headers:`,
-      Object.fromEntries(response.headers.entries()),
-    );
 
     // Log response body for debugging (only for errors)
     if (response.status >= 400) {

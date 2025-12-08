@@ -111,6 +111,36 @@ export default function Home() {
         // Handle wrapped or direct response
         const clusterData = data.data || data || [];
 
+        // If clusters are empty, trigger recompute and retry
+        if (!clusterData || clusterData.length === 0) {
+          console.log('[Clusters] No clusters found, triggering recompute...');
+          const recomputeResponse = await fetch('/api/backend/google/clusters/recompute');
+          
+          if (recomputeResponse.ok) {
+            console.log('[Clusters] Recompute triggered, retrying fetch in 2 seconds...');
+            // Wait for backend to process, then retry
+            setTimeout(async () => {
+              const retryResponse = await fetch(endpoint);
+              if (retryResponse.ok) {
+                const retryData = await retryResponse.json();
+                const retryClusterData = retryData.data || retryData || [];
+                
+                const mappedClusters = retryClusterData.map((c: any) => ({
+                  cluster_lat: c.cluster_lat || c.clusterLat || c.lat,
+                  cluster_long: c.cluster_long || c.clusterLong || c.lng,
+                  cluster_level: c.cluster_level || c.clusterLevel || c.level,
+                  image_count: c.image_count || c.imageCount || c.count || 0,
+                  thumb_img_path: c.thumb_img_path || c.thumbImgPath,
+                  ...c,
+                }));
+                
+                setClusters(mappedClusters);
+              }
+            }, 2000);
+          }
+          return;
+        }
+
         // Map cluster data - handle both camelCase and snake_case fields
         const mappedClusters = clusterData.map((c: any) => ({
           cluster_lat: c.cluster_lat || c.clusterLat || c.lat,
