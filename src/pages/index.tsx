@@ -461,24 +461,43 @@ export default function Home() {
               );
             }
 
-            return list.map((post, index) => (
-              <Card
-                key={index}
-                id={post.postId}
-                title={post.title}
-                description={post.des}
-                src={post.src}
-                rgstDtm={post.rgstDtm}
-                ogText={post.ogText}
-                userId={post.userId}
-                nickname={post.nickname}
-                profileImg={post.profileImg}
-                blogName={post.blogName}
-                isLiked={post.isLiked}
-                isFollowing={post.isFollowing}
-                onLoginRequired={() => setIsLoginModalOpen(true)}
-              />
-            ));
+            return (
+              <>
+                {selectedClusterPosts.length > 0 && (
+                  <div className="sticky top-0 z-10 bg-black-primary px-4 py-3 border-b border-gray-800">
+                    <button
+                      onClick={() => {
+                        setSelectedClusterPosts([]);
+                        setSelectedClusterInfo(null);
+                        setCurrentPage(0);
+                        setHasMorePages(true);
+                      }}
+                      className="w-full rounded-lg bg-gray-800 px-4 py-2 text-sm text-white-primary transition-all hover:bg-gray-700"
+                    >
+                      ← See All Posts
+                    </button>
+                  </div>
+                )}
+                {list.map((post, index) => (
+                  <Card
+                    key={index}
+                    id={post.postId}
+                    title={post.title}
+                    description={post.des}
+                    src={post.src}
+                    rgstDtm={post.rgstDtm}
+                    ogText={post.ogText}
+                    userId={post.userId}
+                    nickname={post.nickname}
+                    profileImg={post.profileImg}
+                    blogName={post.blogName}
+                    isLiked={post.isLiked}
+                    isFollowing={post.isFollowing}
+                    onLoginRequired={() => setIsLoginModalOpen(true)}
+                  />
+                ))}
+              </>
+            );
           })()}
           {(isLoadingMore || isLoadingInitialPosts) && (
             <div className="flex justify-center py-4">
