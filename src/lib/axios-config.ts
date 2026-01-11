@@ -34,6 +34,13 @@ export const setupAxiosInterceptor = () => {
         config.headers["Content-Type"] = "application/json";
       }
 
+      // Add idempotency-key header for POST requests
+      if (config.method && config.method.toUpperCase() === "POST") {
+        // Generate a simple idempotency key (UUID or timestamp-based)
+        const idempotencyKey = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        config.headers["idempotency-key"] = idempotencyKey;
+      }
+
       return config;
     },
     (error) => {
