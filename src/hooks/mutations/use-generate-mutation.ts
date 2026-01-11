@@ -26,7 +26,7 @@ const useGenerateMutation = (
     mutationKey: "generate",
     mutationFn: async (data: GenerateMutation) => {
       const response = await fetch(
-        `/api/backend/blog/generate`,
+        `/api/backend/ai/generate`,
         {
           method: "POST",
           headers: {

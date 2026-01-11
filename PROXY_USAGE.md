@@ -71,13 +71,6 @@ const response = await fetch('/api/backend/s3/upload/profile', {
 ```typescript
 // ✅ Correct - Query params are preserved
 const response = await axios.get('/api/backend/posts/feed?page=0&size=10');
-
-// ✅ Correct - Using URLSearchParams
-const params = new URLSearchParams({
-  latMin: '37.5',
-  latMax: '37.6',
-});
-const response = await fetch(`/api/backend/user-blog/1/posts/by-location?${params}`);
 ```
 
 ## Common Endpoints Migrated
@@ -88,7 +81,6 @@ const response = await fetch(`/api/backend/user-blog/1/posts/by-location?${param
 | `${NEXT_PUBLIC_BASE_URL}/users/login` | `/api/backend/users/login` |
 | `${NEXT_PUBLIC_BASE_URL}/users/register` | `/api/backend/users/register` |
 | `${NEXT_PUBLIC_BASE_URL}/posts/${id}` | `/api/backend/posts/${id}` |
-| `${NEXT_PUBLIC_BASE_URL}/blog/save` | `/api/backend/blog/save` |
 | `${NEXT_PUBLIC_BASE_URL}/s3/upload/profile` | `/api/backend/s3/upload/profile` |
 
 ## Authentication

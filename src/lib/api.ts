@@ -38,26 +38,6 @@ export interface UploadProfileResponse {
   url: string;
 }
 
-export interface BlogSaveRequest {
-  title: string;
-  ogText: string;
-  aiGenText: string;
-  imgSaveList: ImageSaveInfo[];
-  files: File[];
-}
-
-export interface ImageSaveInfo {
-  fileName: string;
-  geoLat: string;
-  geoLong: string;
-  imgDtm: string;
-  thumbYn: "Y" | "N";
-}
-
-export interface BlogSaveResponse {
-  postId: string;
-}
-
 export interface PostCreateRequest {
   title: string;
   ogText: string;
@@ -86,21 +66,6 @@ export interface LikeResponse {
 
 export interface FollowResponse {
   success: boolean;
-}
-
-export interface BlogGenerateRequest {
-  imgInfo: {
-    geoLat: string;
-    geoLong: string;
-    imgDtm: string;
-  };
-  ogText: string;
-}
-
-export interface BlogGenerateResponse {
-  genRes1: string;
-  genRes2: string;
-  genRes3: string;
 }
 
 // =============================================================================
@@ -203,34 +168,6 @@ export async function uploadProfileImage(req: UploadProfileRequest, currentUserI
 }
 
 /**
- * Save blog draft (idempotent)
- * operationId: "blogSave:<blogId or currentUserId>:<draftId>"
- */
-export async function saveBlogDraft(req: BlogSaveRequest, blogIdOrUserId: string, draftId?: string): Promise<BlogSaveResponse> {
-  const operationId = `blogSave:${blogIdOrUserId}:${draftId || ""}`;
-  const key = IdempotencyKeyManager.getOrCreateKey(operationId);
-  const formData = new FormData();
-  req.files.forEach((file) => formData.append("files", file));
-  formData.append("title", req.title);
-  formData.append("ogText", req.ogText);
-  formData.append("aiGenText", req.aiGenText);
-  formData.append("imgSaveList", JSON.stringify(req.imgSaveList));
-  try {
-    const response = await retry(() =>
-      apiClient.post<BlogSaveResponse>(
-        "/api/backend/blog/save",
-        formData,
-        { headers: { "Idempotency-Key": key } }
-      )
-    );
-    IdempotencyKeyManager.clearKey(operationId);
-    return response.data;
-  } catch (err) {
-    throw err;
-  }
-}
-
-/**
  * Create post (idempotent)
  * operationId: "postCreate:<draftId>"
  */
@@ -286,37 +223,6 @@ export async function followUser(targetUserId: number, currentUserId: string): P
       apiClient.post<FollowResponse>(
         `/api/backend/users/${targetUserId}/follow`,
         {},
-        { headers: { "Idempotency-Key": key } }
-      )
-    );
-    IdempotencyKeyManager.clearKey(operationId);
-    return response.data;
-  } catch (err) {
-    throw err;
-  }
-}
-
-/**
- * Blog generate - AI content generation (idempotent)
- * operationId: "blogGenerate:<currentUserId>:<requestHash>"
- *
- * @param req The generation request with image info and user text
- * @param currentUserId The current user's ID for operation tracking
- * @param requestId Optional unique ID for this specific generation request (e.g., draft ID or timestamp)
- */
-export async function blogGenerate(
-  req: BlogGenerateRequest,
-  currentUserId: string,
-  requestId?: string
-): Promise<BlogGenerateResponse> {
-  // Use requestId or create a hash from the request content for idempotency
-  const operationId = `blogGenerate:${currentUserId}:${requestId || ""}`;
-  const key = IdempotencyKeyManager.getOrCreateKey(operationId);
-  try {
-    const response = await retry(() =>
-      apiClient.post<BlogGenerateResponse>(
-        "/api/backend/blog/generate",
-        req,
         { headers: { "Idempotency-Key": key } }
       )
     );
