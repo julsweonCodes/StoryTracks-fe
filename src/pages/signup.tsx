@@ -198,7 +198,6 @@ export default function SignUpPage() {
         blogName: formData.blogName,
         bio: formData.bio || null,
       });
-      console.log("This is signup Request obj: ", jsonObj);
 
       const response = await fetch(
         `/api/backend/users/register`,
@@ -221,7 +220,6 @@ export default function SignUpPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log("Signup error response data:", errorData);
         const errorMessage =
           errorData.data?.message || errorData.message || "Sign up failed";
 

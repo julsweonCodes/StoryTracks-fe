@@ -47,10 +47,6 @@ export default function Header() {
   // Update from session when logged in
   useEffect(() => {
     if (isLoggedIn && session?.user) {
-      console.log("[HEADER] Session updated:", {
-        nickname: session.user.nickname,
-        profileImg: session.user.profileImg,
-      });
       const displayNickname = session.user.nickname || "User";
       setNickname(displayNickname);
       setProfileImg(session.user.profileImg || null);
@@ -63,7 +59,6 @@ export default function Header() {
         localStorage.setItem("userProfileImg", session.user.profileImg);
       }
     } else if (!isLoggedIn) {
-      console.log("[HEADER] Not logged in");
       setNickname("User");
       setProfileImg(null);
       setConfig(genConfig("User"));

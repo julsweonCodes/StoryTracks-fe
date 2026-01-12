@@ -38,12 +38,6 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
   const fetchClusters = useCallback(
     async (zoomLevel?: number) => {
       if (!options.enabled || options.userId <= 0) {
-        console.log(
-          "[useImageClusters] Skipping fetch: enabled=",
-          options.enabled,
-          "userId=",
-          options.userId,
-        );
         return;
       }
 
@@ -54,20 +48,10 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
         // Format: http://localhost:8080/api/v1/google/user-blog/{userId}/image-markers
         const endpoint = `/api/backend/google/user-blog/${options.userId}/image-markers`;
 
-        console.log("[useImageClusters] Fetching from:", endpoint);
-        console.log(
-          "[useImageClusters] Using API proxy endpoint:",
-          endpoint,
-        );
-        console.log("[useImageClusters] userId:", options.userId);
-
         // Fetch from backend - /image-markers endpoint handles all clustering
         const response = await axios.get(endpoint);
 
-        console.log("[useImageClusters] Response status:", response.status);
-
         const data = response.data;
-        console.log("[useImageClusters] Full response:", data);
 
         // Check if response indicates an error
         if (data.success === false) {
@@ -81,7 +65,6 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
         }
 
         const markerData = data.data || data || [];
-        console.log("[useImageClusters] Marker data:", markerData);
 
         // Map camelCase response to snake_case interface
         const mappedClusters = markerData.map((m: any) => ({
@@ -92,26 +75,12 @@ export const useImageClusters = (options: UseImageClustersOptions) => {
           thumb_img_path: m.thumbImgPath,
         }));
 
-        // Debug log
-        console.log(
-          "[useImageClusters] Fetched markers count:",
-          mappedClusters.length,
-        );
-        if (mappedClusters.length > 0) {
-          console.log("[useImageClusters] First marker:", mappedClusters[0]);
-        }
-
         // Validate marker structure
         const validatedClusters = mappedClusters.filter(
           (m: ImageCluster) =>
             m.cluster_lat !== undefined &&
             m.cluster_long !== undefined &&
             m.image_count !== undefined,
-        );
-
-        console.log(
-          "[useImageClusters] Validated markers count:",
-          validatedClusters.length,
         );
 
         setClusters(validatedClusters);

@@ -59,8 +59,6 @@ export const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
     return [];
   }
 
-  console.log(`[S3] Uploading ${files.length} image(s) to S3...`);
-
   const formData = new FormData();
   files.forEach((file) => {
     // Sanitize the filename before sending to backend
@@ -68,23 +66,8 @@ export const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
     const sanitizedFile = new File([file], sanitizedFileName, {
       type: file.type,
     });
-    console.log(
-      `[S3] Appending file: ${sanitizedFileName}, size: ${sanitizedFile.size}, type: ${sanitizedFile.type}`,
-    );
     formData.append("files", sanitizedFile);
   });
-
-  // Debug: Check FormData contents
-  console.log("[S3] FormData entries:");
-  for (const [key, value] of formData.entries()) {
-    if (value instanceof File) {
-      console.log(
-        `  ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`,
-      );
-    } else {
-      console.log(`  ${key}:`, value);
-    }
-  }
 
   try {
     const response = await axios.post<S3UploadResponse>(
@@ -97,8 +80,6 @@ export const uploadImagesToS3 = async (files: File[]): Promise<string[]> => {
         },
       },
     );
-
-    console.log("[S3] Upload successful, file names:", response.data.data);
 
     return response.data.data; // Returns array of S3 file names
   } catch (error: any) {
@@ -120,8 +101,6 @@ export const uploadProfileImageToS3 = async (file: File): Promise<string> => {
     throw new Error("No file provided");
   }
 
-  console.log("[S3] Uploading profile image to S3...");
-
   const formData = new FormData();
   const sanitizedFileName = sanitizeFileName(file.name);
   const sanitizedFile = new File([file], sanitizedFileName, {
@@ -136,7 +115,6 @@ export const uploadProfileImageToS3 = async (file: File): Promise<string> => {
     );
 
     const fileName = response.data.data;
-    console.log("[S3] Profile upload successful, file name:", fileName);
 
     return fileName;
   } catch (error) {
