@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import Avatar, { AvatarFullConfig, genConfig } from "react-nice-avatar";
 import { useSession } from "next-auth/react";
 import { markdownToPlainText } from "@/utils/markdown-to-plain-text";
-import { fetchPostsByGeoLocation } from "@/hooks/utils/geo-query";
 import {
   useImageClusters,
   type ImageCluster,
